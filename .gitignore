@@ -24,9 +24,16 @@
 *.lai
 *.la
 *.a
-*.lib
 
 # Executables
 *.exe
 *.out
 *.app
+*.iobj
+*.ipdb
+*.pdb
+*.aps
+*.log
+*.tlog
+*.user
+*.filters

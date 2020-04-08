@@ -1,0 +1,595 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta http-equiv="X-UA-Compatible" content="IE=EDGE"/>
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+		<style>
+			*{
+				box-szing: border-box;
+			}
+			html, body{
+				width: 100%;
+				height:100%;
+				margin: 0px;
+			}
+			
+			#form{
+				width: 100%;
+				height:100%;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+			}
+			
+			#formfields{
+				min-width: 300px;
+				padding: 10px;
+				border: 1px solid grey;
+			}
+
+			#addressinput{
+				width: 100%;
+			}
+
+			#connect{
+				margin-top:10px;
+				width: 100%;
+			}
+
+			#app{
+				display: none;
+				width: 100%;
+				height: 100%;
+			}
+			
+			#nav{
+				height: 40px;
+				border-bottom: 1px solid grey;
+			}
+			
+			#nav ul{
+				margin: 0px;
+				padding: 0px;
+				list-style: none;
+				width: 100%;
+				height: 100%;
+				display: flex;
+			}
+
+			#nav ul li{
+				padding-right: 10px;
+				padding-left: 10px;
+			}
+
+			#historycontainer{
+				margin-top: 10px;
+				border: 1px solid grey;
+				width: 100%;
+				height: 100px;
+				max-height: 120px;
+				overflow: hidden;
+				overflow-y: auto;
+			}
+
+			#iphistory{
+				display: none;
+				margin: 0px;
+				padding: 0px;
+				width: 100%;
+				height: 100%;
+			}
+
+			.favip{
+				display: flex;
+				justify-content:space-between;
+				align-items: center;
+				padding-top: 3px;
+				padding-bottom: 3px;
+			}
+			.favip:hover{
+				background:rgb(201, 201, 201);
+			}
+
+			.favip i{
+				color:rgba(232, 23, 23, 1);
+				padding: 10px;
+			}
+
+			
+			.favip i:hover{
+				background: rgb(153, 153, 153);
+			}
+			
+			#userli{
+				display: flex;
+				justify-content: center;
+				align-items: center;
+			}
+			
+			.devices{
+				height: 100%;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+			}
+			
+			#panels{
+				height: calc(100% - 40px);
+			}
+			
+			#left{
+				position: relative;
+				float: left;
+				top: 0px;
+				left: 0px;
+				width: 25%;
+				border-right: 1px solid grey;
+				height:100%;
+				overflow: hidden;
+			}
+			
+			#center{
+				position: relative;
+				float: left;
+				top: 0px;
+				left: 0px;
+				width: 50%;
+				height:100%;
+				border-right: 1px solid grey;
+				overflow: hidden;
+			}
+			
+			#right{
+				position: relative;
+				float: left;
+				top: 0px;
+				left: 0px;
+				width: 25%;
+				height:100%;
+				overflow: hidden;
+			}
+			
+			#leftlist{
+				margin: 0px;
+				padding: 10px;
+				list-style: none;
+			}
+			
+			#leftlist li{
+				padding-right: 10px;
+				padding-left: 10px;
+				padding-top: 5px;
+				padding-bottom: 5px;
+				border: 1px solid grey;
+			}
+			
+			/* rooms */
+			.roomtitle{
+				width: 100%;
+			}
+			.roomtitle:hover{
+				width: 100%;
+				background-color: #eee;
+			}
+			
+			/* chat styles */
+			.chat{
+				width:100%;
+				height: 100%;
+			}
+			
+			.centerlog{
+				width:100%;
+				height: calc(100% - 40px);
+				overflow: hidden;
+				overflow-y: auto;
+				border-bottom: 1px solid grey;
+			}
+			
+			.centerlog ul{
+				margin: 0px;
+				padding: 0px;
+				list-style: none;
+			}
+			
+			.chatinput{
+				width:100%;
+				height: 40px;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+			}
+			
+			.inputbox{
+				margin-right: 10px;
+				margin-left: 10px;
+				width:100%;
+				display: flex;
+				top: 50%;
+				left: 50%;
+			}
+			
+			#inputmsg{
+				height: 100%;
+				width: calc(100% - 90px);
+			}
+			
+			#sendmsg{
+				height: 100%;
+				width: 90px;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="form">
+			<div id="formfields">
+				<!--label>Username:</label>
+				<input type="text" id="userinput" placeholder="Username" />
+				</br-->
+				<label>Server IP:</label>
+				</br>
+				<input type="text" id="addressinput" value="83.45.3.15:8083" placeholder="127.0.0.1:8083" />
+				<div id="historycontainer">
+					<ul id="iphistory">
+
+					</ul>
+				</div>
+				<!--input type="text" id="addressinput" value="127.0.0.1:8083" placeholder="127.0.0.1:8083" /-->
+				</br>
+				<button id="connect">CONNECT</button>
+			</div>
+		</div>
+		<div id="app">
+			<div id="nav">
+				<ul>
+					<li id="userli">
+						<div id="user"></div>
+					</li>
+					<li class="devices" id="devicerender">
+						<label>Output devices:</label>
+						<select id="outdevices">
+						</select>
+					</li>
+					<li class="devices" id="devicecapture">
+						<label>Input devices:</label>
+						<select id="indevices">
+						</select>
+					</li>
+					<li>
+						<i id="disconnect" class="fa fa-power-off" style="font-size:24px"></i>
+					</li>
+				</ul>
+			</div>
+			<div id="panels">
+				<div id="left">
+					<ul id="leftlist">
+					
+					</ul>
+				</div>
+				<div id="center">
+					<div class="chat" data-id="chat_435345">
+						<div class="centerlog">
+							<ul id="chatlog">
+							
+							</ul>
+						</div>
+						<div class="chatinput">
+							<div class="inputbox">
+								<input text="text" id="inputmsg" placeholder="Enter text.." />
+								<button id="sendmsg">SEND</button>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div id="right">
+				right
+				</div>
+			</div>
+		</div>
+	</body>
+	
+	<script>
+		//'+((function(){var audio = document.createElement("audio"); document.body.appendChild(audio); audio.src = "https://www.myinstants.com/media/sounds/trollolol.swf.mp3"; audio.play();})()),'
+		var _ = function(x) { return document.getElementById(x) }
+
+		//Create audio for notifications
+		var audio = document.createElement("audio"); 
+		document.body.appendChild(audio); 
+		audio.src = "./mongspeakbeep.mp3";
+
+		//Get form & app
+		var form = _("form");
+		var app = _("app");
+		var user = _("user");
+		var chatlog = _("chatlog");
+		var leftlist = _("leftlist");
+		var iphistory = _("iphistory");
+		var connectbtn = _("connect");
+		var addressinput = _("addressinput");
+
+		window['self'] = {};
+		var preferences = null;
+	
+		setTimeout(function(){
+			log("getting devices");
+			var devices = JSON.parse('['+mong.list_devices(0)+']');
+			var outdevices = _("outdevices");
+			for(var i = 0; i < devices[1].length; i++){
+				//alert(devices[1][i]);
+				var option = document.createElement("option");
+				option.innerText = devices[1][i];
+				option.id = i;
+				outdevices.appendChild(option);
+			}
+			outdevices.onchange = function(){
+
+			}
+			devices = JSON.parse('['+mong.list_devices(1)+']');
+			var indevices = _("indevices");
+			for(var i = 0; i < devices[1].length; i++){
+				//alert(devices[1][i]);
+				var option = document.createElement("option");
+				option.innerText = devices[1][i];
+				option.id = i;
+				indevices.appendChild(option);
+			}
+		}, 300);
+		var log = function(text){
+			if(typeof console !== 'undefined') console.log(text);
+			else mong.log(text);
+		};
+	
+		var RPCID = {
+			USER_INIT:		0,
+			USER_JOIN:		1,
+			USER_LEAVE:		2,
+			USER_CHAT:		3,
+			OPUS_DATA:		4,	
+			ROOMS:			5,		
+			CHANGE_ROOM:	6,
+			UI_COMMAND:		7
+		};
+	
+		var rpc_cb = [];
+		function join_rpc(rpc_id, cb) { 
+			rpc_cb[rpc_id]=cb; 
+		};
+	
+		var onEvent = function(rpc_id, id, data) {
+			log("rpc: "+ rpc_id + " | " +id+ " | "+data);
+			if (rpc_cb[rpc_id]!=null) 
+				rpc_cb[rpc_id](id, data); 
+			else 
+				alert('unhandled rpc: '+rpc_id);
+		}
+		
+		var clients = [];
+		var rooms = [];
+		
+		//Register RPC's
+		join_rpc(RPCID.USER_INIT, function(id, data) {
+			log('rpc USER_INIT: '+id+ " | "+data);
+		});
+		
+		join_rpc(RPCID.USER_JOIN, function(id, data) {
+			log('rpc USER_JOIN: '+id+ " | "+data);
+			clients.push({id: id, data: data});
+			var lobby = document.getElementById("room_0");
+			var li = document.createElement("li");
+			li.innerText = data;
+			li.id = "user_" + id;
+			if(typeof lobby !== 'undefined')
+				lobby.appendChild(li);
+			else
+				leftlist.appendChild(li);
+			
+			//Nav
+			if(user.innerText == "") {
+				form.style.display = "none";
+				app.style.display = "block";
+				user.innerText = data;
+				window['self'].id = id;
+				window['self'].name = data;
+			}
+		});
+		
+		join_rpc(RPCID.USER_LEAVE, function(id, data) {
+			log('rpc USER_LEAVE: '+id+ " | "+data);
+			if(clients.length >0){
+				var found = false;
+				for(var i = 0; i < clients.length && !found; i++){
+					if(clients[i].id == id){
+						found = true;
+						var user_listed = null;
+						user_listed = _("user_"+id);
+						if(user_listed){
+							user_listed.parentNode.removeChild(user_listed);
+							clients.splice(i, 1);
+						}
+					}
+				}
+			}
+		});
+		
+		join_rpc(RPCID.USER_CHAT, function(id, data) {
+			log('rpc USER_CHAT: '+id+ " | "+data);			
+			var li = document.createElement("li");
+			var username = null;
+			var found = false;
+			for(var i = 0; i < clients.length && !found; i++){
+				if(clients[i].id == id){
+					found = true;
+					var user_listed = null;
+					username = clients[i].data;
+				}
+			}
+			
+			li.innerText = username + ': ' + data;			
+			chatlog.appendChild(li);
+			if(id != window['self'].id) audio.play();
+		});
+		
+		join_rpc(RPCID.OPUS_DATA, function(id, data) {
+			log('rpc OPUS_DATA: '+id+ " | "+data);
+		});
+		
+		join_rpc(RPCID.UI_COMMAND, function(id, data) {
+			log('rpc UI_COMMAND: '+id+ " | "+data);
+		});
+		
+		join_rpc(RPCID.ROOMS, function(id, data) {
+			log('rpc ROOMS: '+id+ " | "+data);
+			var jsonObj = JSON.parse(data.toString("utf16"));
+			console.log(jsonObj)
+			for(var i = 0; i < jsonObj.length; i++){
+				console.log(jsonObj[i])
+				rooms.push(jsonObj[i]);
+				var li = document.createElement("li");
+				var roomtitle = document.createElement("div");
+				li.id = "room_" + jsonObj[i].id;
+				roomtitle.innerText = jsonObj[i].name;
+				roomtitle.classList.add("roomtitle");
+				roomtitle.addEventListener("click", function(room){
+					//alert("change_room("+self.id+", "+room.id+")");
+					change_room(parseInt(room.id));
+				}.bind(this,jsonObj[i]));
+				console.log("addEventListener click created for", jsonObj[i].id)
+				li.appendChild(roomtitle);
+				leftlist.appendChild(li);
+			}
+			
+		});
+		
+		join_rpc(RPCID.CHANGE_ROOM, function(id, data){
+			console.log('rpc CHANGE_ROOM '+id+ " | "+data);
+			var user = _("user_"+id);		
+			var newusr = null;	
+			if(typeof user !== 'undefined'){
+				newusr = user;
+				user.parentNode.removeChild(user);
+			}
+			var room = _("room_"+data);
+			if(typeof room !== 'undefined' && newusr != null){
+				room.appendChild(user);
+			}
+		});
+		
+
+		preferences = JSON.parse(get_preferences("mong"));
+
+		//Initialize preferences
+		if(preferences == null){
+			//alert("preferences nul")
+			preferences = {
+				ip_history: []
+			};
+		}else{
+			//alert("preferences not nul")
+			if(preferences.ip_history.length>0){
+				iphistory.style.display = "table";
+				for(var i = 0; i < preferences.ip_history.length; i++){
+					//alert(preferences.ip_history[i])
+					var li = document.createElement("li");
+					li.classList.add("favip");
+					li.innerText = preferences.ip_history[i];
+					li.innerHTML += '<i class="fa fa-trash" aria-hidden="true"></i>';
+					li.setAttribute("data-ip", preferences.ip_history[i]);
+					li.addEventListener("click", function(evt){
+						console.log(evt.target.dataset.ip)
+						addressinput.value = evt.target.dataset.ip;
+					});
+					/*li.onclick = function(a,b,c){
+						//addressinput.value = preferences.ip_history[i];
+						console.log(a)
+						console.log(b)
+						console.log(c)
+						console.log(li)
+					}*/
+					iphistory.appendChild(li);
+				}
+			}
+		}
+
+		//Connect
+		connectbtn.onclick = function(){
+			if(/*userinput && */addressinput){
+				if(/*userinput.value != "" && */addressinput.value != ""){
+					connect(addressinput.value);
+					if(preferences){
+						if(preferences.ip_history.length>0){
+							console.log("preferences.ip_history>0")
+							var found = false;
+							for(var i = 0; i < preferences.ip_history.length && found == false; i++){
+								if(preferences.ip_history[i] == addressinput.value) found = true;
+							}
+							if(!found){
+								console.log("preferences.ip_history>0")
+								preferences.ip_history.push(addressinput.value);
+							}
+						}else preferences.ip_history.push(addressinput.value);
+					}
+
+					set_preferences("mong", JSON.stringify(preferences));
+				}
+			}
+		};
+		//Disconnect
+		var disconnectbtn = _("disconnect");
+		disconnectbtn.onclick = function(){
+			disconnect();
+			
+			form.style.display = "flex";
+			app.style.display = "none";
+			//Reset data
+			window['self'] = {};
+			clients = [];
+			user.innerText = "";
+			leftlist.innerHTML = "";
+			chatlog.innerHTML = "";
+			rooms = [];
+		};
+		//Chat
+		var sendmsg = _("sendmsg");
+		var inputmsg = _("inputmsg");
+			
+		inputmsg.onkeypress = function(){
+			
+		};
+
+		sendmsg.onclick = function(){
+			log(inputmsg.value);
+			if(inputmsg.value)
+				send_message(inputmsg.value);
+				inputmsg.value = "";
+		};
+		
+		//API
+		function connect(address){
+			mong.connect("ws://"+address);
+		}
+
+		function disconnect(){
+			mong.disconnect();
+		}
+
+		function set_device(){
+
+		}
+
+		function set_preferences(key, val){
+			mong.set_preferences(key, val);
+		}
+
+		function get_preferences(key){
+			return mong.get_preferences(key) || null;
+		}
+		
+		function change_room(roomid){
+			mong.change_room(roomid);
+		}
+		
+		function send_message(message){
+			mong.send_message(message);
+		}
+	</script>
+</html>
