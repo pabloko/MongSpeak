@@ -36,11 +36,53 @@
 				width: 100%;
 			}
 
-			#app{
-				display: none;
-				width: 100%;
-				height: 100%;
-			}
+            #formsettings {
+                position:absolute;
+                top: 10px;
+                right: 10px;
+            }
+
+            #disconnect {
+                margin-right: 10px;
+            }
+
+            #disconnect, .settings {
+                font-size: 20px;
+            }
+
+            .iconcentered {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+
+            #settingspanel {
+                display: none;
+                width: 100%;
+                height: 100%;
+                position: absolute;
+                background-color: white;
+                z-index: 1;
+            }
+
+            #closesetting {
+                position: absolute;
+                top: 0px;
+                right: 0px;
+                background: none;
+                padding: 10px;
+                border: none;
+            }
+
+            #closesetting:hover {
+                background: rgb(201, 201, 201);
+            }
+
+            #app {
+                display: none;
+                width: 100%;
+                height: 100%;
+            }
 			
 			#nav{
 				height: 40px;
@@ -54,6 +96,8 @@
 				width: 100%;
 				height: 100%;
 				display: flex;
+                justify-content: space-between;
+                align-items: center;
 			}
 
 			#nav ul li{
@@ -106,13 +150,6 @@
 				align-items: center;
 			}
 			
-			.devices{
-				height: 100%;
-				display: flex;
-				justify-content: center;
-				align-items: center;
-			}
-			
 			#panels{
 				height: calc(100% - 40px);
 			}
@@ -133,19 +170,9 @@
 				float: left;
 				top: 0px;
 				left: 0px;
-				width: 50%;
+				width: 75%;
 				height:100%;
 				border-right: 1px solid grey;
-				overflow: hidden;
-			}
-			
-			#right{
-				position: relative;
-				float: left;
-				top: 0px;
-				left: 0px;
-				width: 25%;
-				height:100%;
 				overflow: hidden;
 			}
 			
@@ -209,12 +236,12 @@
 				left: 50%;
 			}
 			
-			#inputmsg{
+			.inputmsg{
 				height: 100%;
-				width: calc(100% - 90px);
+				width: 100%;
 			}
 			
-			#sendmsg{
+			.sendmsg{
 				height: 100%;
 				width: 90px;
 			}
@@ -224,75 +251,70 @@
 			}
 		</style>
 	</head>
-	<body>
-		<div id="form">
-			<div id="formfields">
-				<!--label>Username:</label>
-				<input type="text" id="userinput" placeholder="Username" />
-				</br-->
-				<label>Server IP:</label>
-				</br>
-				<input type="text" id="addressinput" value="83.45.3.15:8083" placeholder="127.0.0.1:8083" />
-				<div id="historycontainer">
-					<ul id="iphistory">
-
-					</ul>
-				</div>
-				<!--input type="text" id="addressinput" value="127.0.0.1:8083" placeholder="127.0.0.1:8083" /-->
-				</br>
-				<button id="connect">CONNECT</button>
-			</div>
-		</div>
-		<div id="app">
-			<div id="nav">
-				<ul>
-					<li id="userli">
-						<div id="user"></div>
-					</li>
-					<li class="devices" id="devicerender">
-						<label>Output devices:</label>
-						<select id="outdevices" onchange="mong.set_device(0, this.selectedIndex)"></select>
-					</li>
-					<li class="devices" id="devicecapture">
-						<label>Input devices:</label>
-						<select id="indevices" onchange="mong.set_device(1, this.selectedIndex)"></select>
-					</li>
-					<li>
-						<i id="disconnect" class="fa fa-power-off" style="font-size:24px"></i>
-					</li>
-				</ul>
-			</div>
-			<div id="panels">
-				<div id="left">
-					<ul id="leftlist">
-					
-					</ul>
-				</div>
-				<div id="center">
-					<div class="chat" data-id="chat_435345">
-						<div class="centerlog">
-							<ul id="chatlog">
-							
-							</ul>
-						</div>
-						<div class="chatinput">
-							<div class="inputbox">
-								<input text="text" id="inputmsg" placeholder="Enter text.." />
-								<button id="sendmsg">SEND</button>
-							</div>
-						</div>
-					</div>
-				</div>
-				<div id="right">
-				right
-				</div>
-			</div>
-		</div>
-	</body>
+    <body>
+        <div id="settingspanel">
+            <li class="devices" id="devicerender">
+                <label>Output devices:</label>
+                <select id="outdevices" onchange="mong.set_device(0, this.selectedIndex)"></select>
+            </li>
+            <li class="devices" id="devicecapture">
+                <label>Input devices:</label>
+                <select id="indevices" onchange="mong.set_device(1, this.selectedIndex)"></select>
+            </li>
+            <button id="closesetting"><i class="fa fa-times" aria-hidden="true"></i></button>
+        </div>
+        <div id="form">
+            <div id="formfields">
+                <i id="formsettings" class="settings fa fa-cog"></i>
+                <!--label>Username:</label>
+            <input type="text" id="userinput" placeholder="Username" />
+            </br-->
+                <label>Server IP:</label>
+                </br>
+                <input type="text" id="addressinput" value="83.45.3.15:8083" placeholder="127.0.0.1:8083" />
+                <div id="historycontainer">
+                    <ul id="iphistory"></ul>
+                </div>
+                <!--input type="text" id="addressinput" value="127.0.0.1:8083" placeholder="127.0.0.1:8083" /-->
+                </br>
+                <button id="connect">CONNECT</button>
+            </div>
+        </div>
+        <div id="app">
+            <div id="nav">
+                <ul>
+                    <li id="userli">
+                        <div id="user"></div>
+                    </li>
+                    <li class="iconcentered">
+                        <i id="disconnect" class="fa fa-power-off"></i>
+                        <i id="appsettings" class="settings fa fa-cog"></i>
+                    </li>
+                </ul>
+            </div>
+            <div id="panels">
+                <div id="left">
+                    <ul id="leftlist"></ul>
+                </div>
+                <div id="center">
+                </div>
+            </div>
+        </div>
+    </body>
 	
 	<script>
+
+        /*
+            el tema d chats con respecto al canal
+            settings div con lo de los input out devices, que tbn este en el connect
+            en sv que strimee bien donde esta la peña (xej si te conectas que diga la info de donde esta lapeña si esta fuera del lobby)
+            el vk key del chat alpresionar enter y que haga autofocus 
+            
+        */
+
+
 		//'+((function(){var audio = document.createElement("audio"); document.body.appendChild(audio); audio.src = "https://www.myinstants.com/media/sounds/trollolol.swf.mp3"; audio.play();})()),'
-		var _ = function(x) { return document.getElementById(x) }
+        var _ = function (x) { return document.getElementById(x) || document.getElementsByClassName(x) }
 
 		//Create audio for notifications
 		var audio = document.createElement("audio"); 
@@ -308,6 +330,10 @@
 		var iphistory = _("iphistory");
 		var connectbtn = _("connect");
 		var addressinput = _("addressinput");
+		var settings = _("settings");
+		var settingspanel = _("settingspanel");
+		var closesetting = _("closesetting");
+		var center = _("center");
 
 		window['self'] = {};
 		var preferences = null;
@@ -391,6 +417,7 @@
 				app.style.display = "block";
 				user.innerText = data;
 				window['self'].id = id;
+				window['self'].room = 0;
 				window['self'].name = data;
 			}
 		});
@@ -413,8 +440,9 @@
 			}
 		});
 		
-		join_rpc(RPCID.USER_CHAT, function(id, data) {
-			log('rpc USER_CHAT: '+id+ " | "+data);			
+		join_rpc(RPCID.USER_CHAT, function (id, data) {
+		    log('rpc USER_CHAT: ' + id + " | " + data);
+		    console.log('rpc USER_CHAT: ' + id + " | " + data);
 			var li = document.createElement("li");
 			var username = null;
 			var found = false;
@@ -426,9 +454,13 @@
 				}
 			}
 			
-			li.innerText = username + ': ' + data;			
-			chatlog.appendChild(li);
-			if(id != window['self'].id) audio.play();
+			li.innerText = username + ': ' + data;
+			var currentchat = document.getElementById("chatul_" + window['self']['room']);
+			currentchat.appendChild(li);
+			if (id != window['self'].id) audio.play();
+
+			var chatcontainer = _("chatcontainer");
+			chatcontainer.scrollTop = chatcontainer.scrollHeight + 200;
 		});
 		
 		join_rpc(RPCID.OPUS_DATA, function(id, data) {
@@ -440,6 +472,7 @@
 		});
 		
 		join_rpc(RPCID.ROOMS, function(id, data) {
+		    var lobby = true;
 			log('rpc ROOMS: '+id+ " | "+data);
 			var jsonObj = JSON.parse(data.toString("utf16"));
 			console.log(jsonObj)
@@ -453,11 +486,65 @@
 				roomtitle.classList.add("roomtitle");
 				roomtitle.addEventListener("click", function(room){
 					//alert("change_room("+self.id+", "+room.id+")");
-					change_room(parseInt(room.id));
+				    change_room(parseInt(room.id));
+				    window['self']['room'] = room.id;
 				}.bind(this,jsonObj[i]));
 				console.log("addEventListener click created for", jsonObj[i].id)
 				li.appendChild(roomtitle);
 				leftlist.appendChild(li);
+
+			    //Create chats
+				var divchat = document.createElement("div");
+				divchat.classList.add("chat");
+				divchat.id = "chat_"+jsonObj[i].id;
+
+				if(lobby){
+				    divchat.style.display = "block";
+				    lobby = false;
+				}else 
+				    divchat.style.display = "none";
+
+				var chatcontainer = document.createElement("div");
+				chatcontainer.id = "chatcontainer";
+				chatcontainer.classList.add("centerlog");
+
+				var ulchat = document.createElement("ul");
+				ulchat.id = "chatul_" + jsonObj[i].id;
+
+				var chatinput = document.createElement("div");
+				chatinput.classList.add("chatinput");
+
+				var inputbox = document.createElement("div");
+				inputbox.classList.add("inputbox");
+
+				var input = document.createElement("input");
+				input.setAttribute("type", "text");
+				input.setAttribute("placeholder", "Enter text..");
+				input.classList.add("inputmsg");
+				input.setAttribute("data-chat", jsonObj[i].id);
+				input['chatcontainer'] = chatcontainer;
+
+				input.addEventListener("keypress",  function (e) {
+				    if (e.keyCode == 13) {
+				        if (e.target.value) {
+				            send_message(e.target.value);
+				        }
+				        e.target.value = "";
+
+				        var chatcontainer = e.target['chatcontainer'];
+				        var isScrolledToBottom = chatcontainer.scrollHeight - chatcontainer.clientHeight <= chatcontainer.scrollTop + 1;
+				        if (isScrolledToBottom)
+				            chatcontainer.scrollTop = chatcontainer.scrollHeight - chatcontainer.clientHeight;
+				        chatcontainer.scrollTop = chatcontainer.scrollHeight + 200;
+				    }
+				});
+
+				chatcontainer.appendChild(ulchat);
+				divchat.appendChild(chatcontainer);
+				divchat.appendChild(chatinput);
+				chatinput.appendChild(inputbox);
+				inputbox.appendChild(input);
+				center.appendChild(divchat);
 			}
 			
 		});
@@ -473,6 +560,12 @@
 			var room = _("room_"+data);
 			if(typeof room !== 'undefined' && newusr != null){
 				room.appendChild(user);
+			}
+			var chats = _("chat");
+			console.log(chats);
+			for (var i = 0; i < chats.length; i++) {
+			    if (chats[i].id == "chat_" + data) chats[i].style.display = "block";
+                else chats[i].style.display = "none";
 			}
 		});
 		
@@ -500,16 +593,25 @@
 						console.log(evt.target.dataset.ip)
 						addressinput.value = evt.target.dataset.ip;
 					});
-					/*li.onclick = function(a,b,c){
-						//addressinput.value = preferences.ip_history[i];
-						console.log(a)
-						console.log(b)
-						console.log(c)
-						console.log(li)
-					}*/
 					iphistory.appendChild(li);
 				}
 			}
+		}
+
+        //Settings
+		closesetting.onclick = function () {
+		    if (settingspanel.style.display == "flex")
+		        settingspanel.style.display = "none";
+		}
+
+		for (var i = 0; i < settings.length; i++) {
+		    settings[i].onclick = function () {
+		        if (settingspanel.style.display == "none"
+                 || settingspanel.style.display == "")
+		            settingspanel.style.display = "flex";
+		        else
+		            settingspanel.style.display = "none";
+		    }
 		}
 
 		//Connect
@@ -550,20 +652,6 @@
 			chatlog.innerHTML = "";
 			rooms = [];
 		};
-		//Chat
-		var sendmsg = _("sendmsg");
-		var inputmsg = _("inputmsg");
-			
-		inputmsg.onkeypress = function(){
-			
-		};
-
-		sendmsg.onclick = function(){
-			log(inputmsg.value);
-			if(inputmsg.value)
-				send_message(inputmsg.value);
-				inputmsg.value = "";
-		};
 		
 		//API
 		function connect(address){
@@ -590,7 +678,7 @@
 			mong.change_room(roomid);
 		}
 		
-		function send_message(message){
+		function send_message(message) {
 			mong.send_message(message);
 		}
 	</script>

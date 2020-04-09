@@ -128,7 +128,7 @@ join_rpc(RPCID.USER_CHAT,(d, ws)=>{
 	pkthead.writeUInt16LE(ws.id,1)
 	var message = Buffer.concat([pkthead,d])
 	wss.clients.forEach((client) => {
-		if (/*client !== ws &&*/ client.readyState === 1) {
+		if (/*client !== ws &&*/ client.readyState === 1 && client.room_id == ws['room_id']) {
 			client.send(message);
 		}
 	});
