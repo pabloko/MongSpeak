@@ -51,6 +51,7 @@ public:
 	void create(HWND hWndParent, HINSTANCE hInstance, UINT id, bool showScrollbars);
 	void CloseThread();
 	void Close();
+	void GoMem(wchar_t* data);
 	void Go(const char* ws);
 	void Forward();
 	void Back();

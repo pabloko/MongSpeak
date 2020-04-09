@@ -37,3 +37,13 @@
 *.tlog
 *.user
 *.filters
+*.db
+*.ipch
+*.opendb
+*.suo
+.vs/
+
+bin/
+obj/
+Debug/
+Release/

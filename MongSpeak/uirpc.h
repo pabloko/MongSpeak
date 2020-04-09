@@ -36,9 +36,9 @@ std::wstring wstring_format(const std::wstring fmt_str, ...) {
 	}
 	return std::wstring(formatted.get());
 }
-#ifndef UIRPC_INCLUDED
-#define UIRPC_INCLUDED 1
+
 using namespace std;
+
 enum RPCID {
 	USER_IDENT,
 	USER_JOIN,
@@ -53,33 +53,10 @@ enum RPCID {
 	UI_COMMAND
 };
 
-
 //uiRPC
 //UNSAFE ILLEGAL RPC SYSTEM: architecture relies on unsafe union and illegal access to its members :S
 //also rpc handler are hackish and not thread-safe, and string conversion is pure shit for window$ only.
-/*typedef  void(rpc_handler_t)(vector<uint8_t>*pv);
-rpc_handler_t* pRPCFn[512];
 
-bool rpc_check_size(vector<uint8_t>*vt, int s) {
-	return (vt->size() < s);
-}
-
-void rpc_join(uint8_t id, void* fn) {
-	pRPCFn[id] = (rpc_handler_t*)fn;
-}
-
-int rpc_process(vector<uint8_t>* vt) {
-	if (rpc_check_size(vt, 1)) return -1;
-	uint8_t id = vt->at(0);
-	if (pRPCFn[id] != NULL) {
-		rpc_handler_t* rpc = pRPCFn[id];
-		vt->erase(vt->begin());
-		rpc(vt);
-		return 1;
-	}
-	return 0;
-}
-*/
 #define rpc_type_header(type)\
 extern void rpc_write_##type(vector<uint8_t>* vt, type ob, int pos); \
 extern void rpc_read_##type(vector<uint8_t>* vt, type* out, int pos);
@@ -123,23 +100,6 @@ rpc_type_init(double)
 rpc_type_init(int64_t)
 rpc_type_init(uint64_t)
 
-
-/*rpc_type_header(bool)
-rpc_type_header(char)
-rpc_type_header(byte)
-rpc_type_header(uint8_t)
-rpc_type_header(short)
-rpc_type_header(uint16_t)
-rpc_type_header(int)
-rpc_type_header(uint32_t)
-rpc_type_header(long)
-rpc_type_header(ulong_t)
-rpc_type_header(float)
-rpc_type_header(double)
-rpc_type_header(int64_t)
-rpc_type_header(uint64_t)*/
-
-
 int rpc_read_string(vector<uint8_t>* vt, wchar_t* out, int pos, int len = NULL) {
 	if (len == NULL) {
 		len = 0;
@@ -173,5 +133,4 @@ void rpc_write_string(vector<uint8_t>* vt, const wchar_t* in, int pos = -1, int 
 	delete[] wid;
 }
 
-#endif
 

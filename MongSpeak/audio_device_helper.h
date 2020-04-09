@@ -9,8 +9,7 @@ HRESULT get_default_device(IMMDevice **ppMMDevice, EDataFlow pDevMode) {
 	ReleaseIUnknown release_pMMDeviceEnumerator(pMMDeviceEnumerator);
 	hr = pMMDeviceEnumerator->GetDefaultAudioEndpoint(pDevMode, eConsole, ppMMDevice);
 	if (FAILED(hr)) return hr;
-	//pMMDeviceEnumerator->Release();
-	return S_OK;
+	return hr;
 }
 
 //Retrive a list of audio output devices
@@ -43,16 +42,10 @@ HRESULT list_devices(EDataFlow pDevMode, wstring* res) {
 		if (FAILED(hr)) return hr;
 		PropVariantClearCleanup release_pv(&pv);
 		if (VT_LPWSTR != pv.vt) return E_UNEXPECTED;
-		//wprintf(L"	Device %d: %s\n", i + 1, pv.pwszVal);
 		res->append(wstring_format(L", \"%s\"", pv.pwszVal));
-		//PropVariantClear(&pv);
-		//pPropertyStore->Release();
-		//pMMDevice->Release();
 	}
-	//pMMDeviceCollection->Release();
-	//pMMDeviceEnumerator->Release();
 	res->append(L"]");
-	return S_OK;
+	return hr;
 }
 
 //Retrive output device by its id
@@ -63,7 +56,6 @@ HRESULT get_specific_device(UINT32 iDevice, IMMDevice **ppMMDevice, EDataFlow pD
 	hr = CoCreateInstance(__uuidof(MMDeviceEnumerator), NULL, CLSCTX_ALL, __uuidof(IMMDeviceEnumerator), (void**)&pMMDeviceEnumerator);
 	if (FAILED(hr)) return hr;
 	ReleaseIUnknown release_pMMDeviceEnumerator(pMMDeviceEnumerator);
-
 	IMMDeviceCollection *pMMDeviceCollection;
 	hr = pMMDeviceEnumerator->EnumAudioEndpoints(pDevMode, DEVICE_STATE_ACTIVE, &pMMDeviceCollection);
 	if (FAILED(hr)) return hr;
@@ -75,7 +67,5 @@ HRESULT get_specific_device(UINT32 iDevice, IMMDevice **ppMMDevice, EDataFlow pD
 	hr = pMMDeviceCollection->Item(iDevice, ppMMDevice);
 	if (FAILED(hr)) return hr;
 	if (NULL == *ppMMDevice) return HRESULT_FROM_WIN32(ERROR_NOT_FOUND);
-	//pMMDeviceCollection->Release();
-	//pMMDeviceEnumerator->Release();
-	return S_OK;
+	return hr;
 }

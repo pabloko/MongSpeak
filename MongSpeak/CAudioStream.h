@@ -26,12 +26,8 @@ public:
 			return;
 		int samples = opus_encode_float(pOpus, (const float*)data, len, szOpusBuffer, sizeof(szOpusBuffer));
 		if (samples < 1) return;
-		string pv(&szOpusBuffer[0], &szOpusBuffer[samples]);
-		///pVecBuffer.push_back(pv);
-		/*if (g_mix != NULL)
-			g_mix->GetSession(0)->Decode(&pv); //todo:remove*/
 		if (g_network) 
-			g_network->Send(RPCID::OPUS_DATA, &pv);
+			g_network->Send(RPCID::OPUS_DATA, (char*)szOpusBuffer, samples);
 	};
 	//vector<string> pVecBuffer;
 private:

@@ -6,7 +6,6 @@ public:
 	~PropVariantClearCleanup() {
 		PropVariantClear(m_p);
 	}
-
 private:
 	PROPVARIANT * m_p;
 };
@@ -18,7 +17,6 @@ public:
 		if (m_p != NULL)
 			speex_resampler_destroy(m_p);
 	}
-
 private:
 	SpeexResamplerState * m_p;
 };
@@ -29,7 +27,6 @@ public:
 		if (m_p != NULL)
 		m_p->Release();
 	}
-
 private:
 	IUnknown * m_p;
 };
@@ -64,7 +61,6 @@ public:
 		m_p->Stop();
 		m_p->Release();
 	}
-
 private:
 	IAudioClient * m_p;
 };
@@ -100,7 +96,6 @@ public:
 	~CoTaskMemFreeRelease() {
 		CoTaskMemFree(m_p);
 	}
-
 private:
 	PVOID m_p;
 };
@@ -111,7 +106,6 @@ public:
 	~HandleRelease() {
 		CloseHandle(m_p);
 	}
-
 private:
 	HANDLE m_p;
 };

@@ -146,6 +146,42 @@ char *BSTRToLPSTR(BSTR bStr, LPSTR lpstr)
 	return lpstr;
 }
 
+void WebForm::GoMem(wchar_t* data) {
+	if (data == NULL || ibrowser == NULL)
+		return;
+	/*IHTMLDocument2* doc = GetDoc();
+	SAFEARRAY *psaStrings = SafeArrayCreateVector(VT_VARIANT, 0, 1);
+	VARIANT *param;
+	HRESULT hr = SafeArrayAccessData(psaStrings, (LPVOID*)&param);
+	param->vt = VT_BSTR;
+	param->bstrVal = SysAllocString(data);
+	hr = SafeArrayUnaccessData(psaStrings);
+	hr = doc->write(psaStrings);
+	//doc->close();
+	SafeArrayDestroy(psaStrings);
+	doc->Release();*/
+	IDispatch *dispatch = 0;
+	ibrowser->get_Document(&dispatch);
+	if (dispatch == NULL)
+		return;
+	IPersistStreamInit *psi;
+	dispatch->QueryInterface(IID_IPersistStreamInit, (void**)&psi);
+	dispatch->Release();
+	HGLOBAL hMem = ::GlobalAlloc(GPTR, wcslen(data) * sizeof(wchar_t));
+	::GlobalLock(hMem);
+	::CopyMemory(hMem, (LPCTSTR)data, wcslen(data) * sizeof(wchar_t));
+	IStream* stream = NULL;
+	HRESULT hr = ::CreateStreamOnHGlobal(hMem, FALSE, &stream);
+	if (SUCCEEDED(hr))
+	{
+		psi->Load(stream);
+		stream->Release();
+	}
+	::GlobalUnlock(hMem);
+	::GlobalFree(hMem);
+	SysFreeString(data);
+}
+
 void WebForm::Go(const char *url)
 {
 	if (url == NULL || ibrowser == NULL) {
@@ -202,7 +238,6 @@ IHTMLDocument2 *WebForm::GetDoc()
 	IHTMLDocument2 *doc;
 	dispatch->QueryInterface(IID_IHTMLDocument2, (void**)&doc);
 	dispatch->Release();
-	
 	return doc;
 }
 

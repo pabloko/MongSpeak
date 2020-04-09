@@ -5,7 +5,7 @@
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 		<style>
 			*{
-				box-szing: border-box;
+				box-sizing: border-box;
 			}
 			html, body{
 				width: 100%;
@@ -218,6 +218,10 @@
 				height: 100%;
 				width: 90px;
 			}
+			
+			select {
+				font-size:10px;
+			}
 		</style>
 	</head>
 	<body>
@@ -247,13 +251,11 @@
 					</li>
 					<li class="devices" id="devicerender">
 						<label>Output devices:</label>
-						<select id="outdevices">
-						</select>
+						<select id="outdevices" onchange="mong.set_device(0, this.selectedIndex)"></select>
 					</li>
 					<li class="devices" id="devicecapture">
 						<label>Input devices:</label>
-						<select id="indevices">
-						</select>
+						<select id="indevices" onchange="mong.set_device(1, this.selectedIndex)"></select>
 					</li>
 					<li>
 						<i id="disconnect" class="fa fa-power-off" style="font-size:24px"></i>
@@ -321,9 +323,9 @@
 				option.id = i;
 				outdevices.appendChild(option);
 			}
-			outdevices.onchange = function(){
+			/*outdevices.onchange = function(){
 
-			}
+			}*/
 			devices = JSON.parse('['+mong.list_devices(1)+']');
 			var indevices = _("indevices");
 			for(var i = 0; i < devices[1].length; i++){

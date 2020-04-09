@@ -61,15 +61,20 @@ public:
 					Send(RPCID::USER_JOIN, (char*)name, wcslen(name)*2);
 				}
 				bConnected = TRUE;
+				try {
 				//RX
-				gWS->poll(0);
-				gWS->dispatchBinary(&DispatchBinary);
+					for (int c = 0; c < 10; c++) {
+						gWS->poll(0);
+						gWS->dispatchBinary(&DispatchBinary);
+					}
 				//TX
-				while (pVecBuffer.size() > 0) {
-					nBytesWritten += pVecBuffer.at(0).length();
-					gWS->sendBinary((const std::string&)pVecBuffer.at(0));
-					pVecBuffer.erase(pVecBuffer.begin(), pVecBuffer.begin() + 1);
+					while (pVecBuffer.size() > 0) {
+						nBytesWritten += pVecBuffer.at(0).length();
+						gWS->sendBinary((const std::string&)pVecBuffer.at(0));
+						pVecBuffer.erase(pVecBuffer.begin(), pVecBuffer.begin() + 1);
+					}
 				}
+				catch (...) {}
 				//HEARTBEAT
 				if (lHeartBeatTick + 1000 < GetTickCount()) {
 					lHeartBeatTick = GetTickCount();
