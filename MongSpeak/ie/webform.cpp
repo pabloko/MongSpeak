@@ -180,6 +180,7 @@ void WebForm::GoMem(wchar_t* data) {
 	::GlobalUnlock(hMem);
 	::GlobalFree(hMem);
 	SysFreeString(data);
+	psi->Release();
 }
 
 void WebForm::Go(const char *url)
@@ -229,6 +230,7 @@ void WebForm::Refresh(bool clearCache)
 IHTMLDocument2 *WebForm::GetDoc()
 {
 	IDispatch *dispatch = 0;
+	if (ibrowser == nullptr) return NULL;
 	ibrowser->get_Document(&dispatch);
 	
 	if (dispatch == NULL) {
@@ -256,7 +258,6 @@ void WebForm::RunJSFunction(std::string cmd)
 			VARIANT v;
 			VariantInit(&v);
 			win->execScript(bstrCmd, NULL, &v);
-
 			VariantClear(&v);
 			SysFreeString(bstrCmd);
 			win->Release();
@@ -635,4 +636,60 @@ void WebForm::SinkScriptErrorEvents(IDispatch* pperr) {
 	win->put_onerror(pv);
 	win->Release();
 	doc->Release();
+}
+
+HRESULT WebForm::DequeueCallToEvent() {
+	
+	IHTMLDocument2 *doc = GetDoc();
+	if (doc == NULL) 
+		return NULL;
+	IHTMLWindow2 *win = NULL;
+	doc->get_parentWindow(&win);
+	doc->Release();
+	if (win == NULL) 
+		return NULL;
+	IDispatchEx *winEx;
+	win->QueryInterface(&winEx);
+	win->Release();
+	if (winEx == NULL) 
+		return NULL;
+	while (vec_rpc_id.size() > 0) {
+		DISPID dispid;
+		BSTR idname = SysAllocString(L"onEvent");
+		HRESULT hr = winEx->GetDispID(idname, fdexNameEnsure, &dispid);
+		SysFreeString(idname);
+		if (FAILED(hr))
+			continue;
+		DISPID namedArgs[] = { DISPID_PROPERTYPUT,DISPID_PROPERTYPUT,DISPID_PROPERTYPUT };
+		DISPPARAMS params;
+		BSTR custObj = SysAllocString(vec_message[0].c_str());
+		params.rgvarg = new VARIANT[3];
+		params.rgvarg[0].bstrVal = custObj;
+		params.rgvarg[0].vt = VT_BSTR;
+		params.rgvarg[1].intVal = vec_pkt_id[0];
+		params.rgvarg[1].vt = VT_I4;
+		params.rgvarg[2].intVal = vec_rpc_id[0];
+		params.rgvarg[2].vt = VT_I4;
+		params.rgdispidNamedArgs = namedArgs;
+		params.cArgs = 3;
+		params.cNamedArgs = 3;
+		hr = winEx->InvokeEx(dispid, LOCALE_USER_DEFAULT, DISPATCH_METHOD, &params, NULL, NULL, NULL);
+		SysFreeString(custObj);
+		delete[] params.rgvarg;
+
+		vec_rpc_id.erase(vec_rpc_id.begin());
+		vec_pkt_id.erase(vec_pkt_id.begin());
+		vec_message.erase(vec_message.begin());
+		if (FAILED(hr)) 
+			continue;
+	}
+	winEx->Release();
+	return S_OK;
+}
+
+HRESULT WebForm::QueueCallToEvent(short rpcid, short id, wchar_t* str) {
+	vec_rpc_id.push_back(rpcid);
+	vec_pkt_id.push_back(id);
+	vec_message.push_back(std::wstring(str));
+	return S_OK;
 }

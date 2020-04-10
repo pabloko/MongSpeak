@@ -29,7 +29,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	g_preferences = new CPreferences();
 	g_jsObject = new JSObject();
 	ReleaseIUnknown release_g_jsObject(g_jsObject);
-	g_jsObject->AddMethod(L"alert", mm_alert);
 	g_jsObject->AddMethod(L"log", mm_log);
 	g_jsObject->AddMethod(L"send_message", mm_send_message);
 	g_jsObject->AddMethod(L"list_devices", mm_list_devices);
@@ -82,11 +81,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 				g_webWindow->webForm->RunJSFunctionW(g_jsStack.at(0).c_str());
 				g_jsStack.erase(g_jsStack.begin(), g_jsStack.begin() + 1);
 			}
+			g_webWindow->webForm->DequeueCallToEvent();
 		} catch (...) {}
 		//if (!g_webWindow->webForm->TranslateAccelerator(&msg, NULL, NULL))
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
-		
 	}
 	g_mix->SetDeviceOut(NULL);
 	g_stream->SetDeviceIn(NULL);

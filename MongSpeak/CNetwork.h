@@ -2,6 +2,7 @@
 extern CAudioSessionMixer* g_mix;
 extern HW_PROFILE_INFOA hwProfileInfo;
 extern vector<wstring> g_jsStack;
+extern WebWindow* g_webWindow;
 
 using namespace easywsclient;
 
@@ -108,15 +109,17 @@ public:
 		rpc_read_short((vector<uint8_t>*)&message, &sessid, 1);
 		switch (message.at(0)) {
 		case RPCID::USER_JOIN: {
-			if (g_network->mID == 0)
+			if (g_network->mID == NULL)
 				g_network->mID = sessid;
 		} break;
-		case RPCID::USER_CHAT: {
+		/*case RPCID::USER_CHAT: {
 			
-		} break;
+		} break;*/
 		case RPCID::CHANGE_ROOM: {
 			SHORT room = 0;
 			if (message.size() != 5) return;
+			if (g_network->mID == sessid)
+				g_mix->ClearSessions();
 			rpc_read_short((vector<uint8_t>*)&message, &room, 3);
 			g_jsStack.push_back(wstring_format(L"onEvent(%d, %d, %d);", RPCID::CHANGE_ROOM, sessid, room));
 			return;
@@ -130,7 +133,8 @@ public:
 		wchar_t* rest = new wchar_t[((message.size() - 3) / 2) + 1];
 		memcpy(rest, message.data() + 3, (message.size() - 3));
 		rest[(message.size() - 3) / 2] = '\0';
-		g_jsStack.push_back(wstring_format(L"onEvent(%d, %d, '%s');", message.at(0), sessid, rest));
+		//g_jsStack.push_back(wstring_format(L"onEvent(%d, %d, '%s');", message.at(0), sessid, rest));
+		g_webWindow->webForm->QueueCallToEvent(message.at(0), sessid, rest);
 		delete[] rest;
 	}
 	void ConnectServer(const char* url) {
