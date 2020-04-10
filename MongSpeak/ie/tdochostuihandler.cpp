@@ -3,12 +3,21 @@
 HRESULT STDMETHODCALLTYPE TDocHostUIHandler::ShowContextMenu(DWORD dwID,
 	POINT *ppt, IUnknown *pcmdtReserved, IDispatch *pdispReserved)
 {
-	return S_OK;
+	//return S_OK; //TODO: manejar el context menu desde js
+	return E_NOTIMPL;
 }
 
 HRESULT STDMETHODCALLTYPE TDocHostUIHandler::GetHostInfo(DOCHOSTUIINFO *pInfo)
 {
-	pInfo->dwFlags = pInfo->dwFlags | DOCHOSTUIFLAG_DISABLE_HELP_MENU | DOCHOSTUIFLAG_NO3DBORDER | DOCHOSTUIFLAG_SCROLL_NO | DOCHOSTUIFLAG_NO3DOUTERBORDER;
+	pInfo->dwFlags = pInfo->dwFlags | 
+		DOCHOSTUIFLAG_DISABLE_HELP_MENU | 
+		DOCHOSTUIFLAG_NO3DBORDER | 
+		DOCHOSTUIFLAG_SCROLL_NO | 
+		DOCHOSTUIFLAG_NO3DOUTERBORDER | 
+		DOCHOSTUIFLAG_DPI_AWARE | 
+		DOCHOSTUIFLAG_USE_WINDOWLESS_SELECTCONTROL |
+		DOCHOSTUIFLAG_OVERRIDEBEHAVIORFACTORY |
+		DOCHOSTUIFLAG_NOTHEME;
 	// Called at initialization of the browser object UI. We can set various
 	// features of the browser object here.
 	// We can do disable the 3D border (DOCHOSTUIFLAG_NO3DOUTERBORDER) and
@@ -64,7 +73,7 @@ HRESULT STDMETHODCALLTYPE TDocHostUIHandler::ResizeBorder(LPCRECT prcBorder,
 HRESULT STDMETHODCALLTYPE TDocHostUIHandler::TranslateAccelerator(LPMSG lpMsg,
 	const GUID *pguidCmdGroup, DWORD nCmdID)
 {
-	return S_FALSE;
+	return E_NOTIMPL;
 }
 
 HRESULT STDMETHODCALLTYPE TDocHostUIHandler::GetOptionKeyPath(LPOLESTR *pchKey,

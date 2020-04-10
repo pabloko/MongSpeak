@@ -1,0 +1,183 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Archivos de origen">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Archivos de encabezado">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Archivos de recursos">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="IE">
+      <UniqueIdentifier>{c06c187e-05fb-42f5-9743-824e4bbb430d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Archivos de encabezado\CAudio">
+      <UniqueIdentifier>{72bdb38a-ab4b-4540-bf0a-efaf557017f1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Archivos de encabezado\JavaScript">
+      <UniqueIdentifier>{46b24bcf-6f3f-4b71-9304-e825671c40fa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Archivos de encabezado\Util">
+      <UniqueIdentifier>{499b4bc0-f4b9-45f4-837a-e7c8bdccfd03}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UI">
+      <UniqueIdentifier>{5776a6dd-5ff6-4501-8f8b-76163dd9306f}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="MongSpeak.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="ie\jsobject.h">
+      <Filter>IE</Filter>
+    </ClInclude>
+    <ClInclude Include="ie\tdispatch.h">
+      <Filter>IE</Filter>
+    </ClInclude>
+    <ClInclude Include="ie\tdochostshowui.h">
+      <Filter>IE</Filter>
+    </ClInclude>
+    <ClInclude Include="ie\tdochostuihandler.h">
+      <Filter>IE</Filter>
+    </ClInclude>
+    <ClInclude Include="ie\toleclientsite.h">
+      <Filter>IE</Filter>
+    </ClInclude>
+    <ClInclude Include="ie\toleinplaceframe.h">
+      <Filter>IE</Filter>
+    </ClInclude>
+    <ClInclude Include="ie\toleinplacesite.h">
+      <Filter>IE</Filter>
+    </ClInclude>
+    <ClInclude Include="ie\urlcode.h">
+      <Filter>IE</Filter>
+    </ClInclude>
+    <ClInclude Include="ie\webform.h">
+      <Filter>IE</Filter>
+    </ClInclude>
+    <ClInclude Include="ie\webformdispatchhandler.h">
+      <Filter>IE</Filter>
+    </ClInclude>
+    <ClInclude Include="ie\webformdispatchimpl.h">
+      <Filter>IE</Filter>
+    </ClInclude>
+    <ClInclude Include="ie\webwindow.h">
+      <Filter>IE</Filter>
+    </ClInclude>
+    <ClInclude Include="CNetwork.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="cleanup.h">
+      <Filter>Archivos de encabezado\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="uirpc.h">
+      <Filter>Archivos de encabezado\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="CAudioDevice.h">
+      <Filter>Archivos de encabezado\CAudio</Filter>
+    </ClInclude>
+    <ClInclude Include="CAudioQueue.h">
+      <Filter>Archivos de encabezado\CAudio</Filter>
+    </ClInclude>
+    <ClInclude Include="CAudioSession.h">
+      <Filter>Archivos de encabezado\CAudio</Filter>
+    </ClInclude>
+    <ClInclude Include="CAudioSessionMixer.h">
+      <Filter>Archivos de encabezado\CAudio</Filter>
+    </ClInclude>
+    <ClInclude Include="CAudioStream.h">
+      <Filter>Archivos de encabezado\CAudio</Filter>
+    </ClInclude>
+    <ClInclude Include="pcm.h">
+      <Filter>Archivos de encabezado\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="javascript_external.h">
+      <Filter>Archivos de encabezado\JavaScript</Filter>
+    </ClInclude>
+    <ClInclude Include="audio_device_helper.h">
+      <Filter>Archivos de encabezado\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="statics.h">
+      <Filter>Archivos de encabezado\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="WinReg.h">
+      <Filter>Archivos de encabezado\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="CPreferences.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="MongSpeak.cpp">
+      <Filter>Archivos de origen</Filter>
+    </ClCompile>
+    <ClCompile Include="ie\jsobject.cpp">
+      <Filter>IE</Filter>
+    </ClCompile>
+    <ClCompile Include="ie\tdispatch.cpp">
+      <Filter>IE</Filter>
+    </ClCompile>
+    <ClCompile Include="ie\tdochostshowui.cpp">
+      <Filter>IE</Filter>
+    </ClCompile>
+    <ClCompile Include="ie\tdochostuihandler.cpp">
+      <Filter>IE</Filter>
+    </ClCompile>
+    <ClCompile Include="ie\toleclientsite.cpp">
+      <Filter>IE</Filter>
+    </ClCompile>
+    <ClCompile Include="ie\toleinplaceframe.cpp">
+      <Filter>IE</Filter>
+    </ClCompile>
+    <ClCompile Include="ie\toleinplacesite.cpp">
+      <Filter>IE</Filter>
+    </ClCompile>
+    <ClCompile Include="ie\urlcode.cpp">
+      <Filter>IE</Filter>
+    </ClCompile>
+    <ClCompile Include="ie\webform.cpp">
+      <Filter>IE</Filter>
+    </ClCompile>
+    <ClCompile Include="ie\webformdispatchhandler.cpp">
+      <Filter>IE</Filter>
+    </ClCompile>
+    <ClCompile Include="ie\webformdispatchimpl.cpp">
+      <Filter>IE</Filter>
+    </ClCompile>
+    <ClCompile Include="ie\webwindow.cpp">
+      <Filter>IE</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="MongSpeak.rc">
+      <Filter>Archivos de recursos</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="small.ico">
+      <Filter>Archivos de recursos</Filter>
+    </Image>
+    <Image Include="MongSpeak.ico">
+      <Filter>Archivos de recursos</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="test.html">
+      <Filter>UI</Filter>
+    </None>
+  </ItemGroup>
+</Project>

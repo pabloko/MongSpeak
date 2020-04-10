@@ -35,8 +35,6 @@
 *.aps
 *.log
 *.tlog
-*.user
-*.filters
 *.db
 *.ipch
 *.opendb
@@ -47,4 +45,4 @@ bin/
 obj/
 Debug/
 Release/
-server/node_modules/
+Server/node_modules/

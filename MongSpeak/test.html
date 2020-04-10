@@ -63,8 +63,14 @@
                 position: absolute;
                 background-color: white;
                 z-index: 1;
+				flex-direction:column;
+				padding:40px;
             }
-
+			
+			select {
+				width:100%;
+			}
+			
             #closesetting {
                 position: absolute;
                 top: 0px;
@@ -159,7 +165,7 @@
 				float: left;
 				top: 0px;
 				left: 0px;
-				width: 25%;
+				width: 40%;
 				border-right: 1px solid grey;
 				height:100%;
 				overflow: hidden;
@@ -170,7 +176,7 @@
 				float: left;
 				top: 0px;
 				left: 0px;
-				width: 75%;
+				width: 60%;
 				height:100%;
 				border-right: 1px solid grey;
 				overflow: hidden;
@@ -246,21 +252,33 @@
 				width: 90px;
 			}
 			
-			select {
-				font-size:10px;
-			}
 		</style>
 	</head>
     <body>
         <div id="settingspanel">
-            <li class="devices" id="devicerender">
-                <label>Output devices:</label>
-                <select id="outdevices" onchange="mong.set_device(0, this.selectedIndex)"></select>
-            </li>
-            <li class="devices" id="devicecapture">
-                <label>Input devices:</label>
-                <select id="indevices" onchange="mong.set_device(1, this.selectedIndex)"></select>
-            </li>
+			<div>
+				<fieldset class="devices" id="devicecapture">
+					<legend>Input device</legend>
+					<select id="indevices" onchange="mong.set_device(1, this.selectedIndex)"></select>
+				</fieldset>
+			</div>
+			<br/>
+			<div>
+				<fieldset class="devices" id="devicerender">
+					<legend>Output device</legend>
+					<select id="outdevices" onchange="mong.set_device(0, this.selectedIndex)"></select>
+				</fieldset>
+			</div>
+			<br/>
+			<div>
+				<fieldset class="talkconfig" id="devicetalk">
+					<legend>Talk</legend>
+					<input type="radio" /> Push-to-Talk <button>VK_F3</button><br/>
+					<input type="radio" /> Always On<br/>
+					<input type="radio" /> Level<br/><input type="range" min=0 max=100 value=15 style="width:100%;" />
+				</fieldset>
+			</div>
+			<br/>
             <button id="closesetting"><i class="fa fa-times" aria-hidden="true"></i></button>
         </div>
         <div id="form">
@@ -319,8 +337,8 @@
 		//Create audio for notifications
 		var audio = document.createElement("audio"); 
 		document.body.appendChild(audio); 
-		audio.src = "./mongspeakbeep.mp3";
-
+		audio.src = "data:audio/mp3;base64,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";
+		audio.volume = .3;
 		//Get form & app
 		var form = _("form");
 		var app = _("app");
@@ -561,6 +579,7 @@
 			if(typeof room !== 'undefined' && newusr != null){
 				room.appendChild(user);
 			}
+			if (window['self'].id != id) return;
 			var chats = _("chat");
 			console.log(chats);
 			for (var i = 0; i < chats.length; i++) {

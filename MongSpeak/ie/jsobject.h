@@ -8,12 +8,12 @@
 
 class JSObject : public IDispatch {
 private:
-	std::map<std::wstring, /*DISPID*/ void*> idMap;
+	std::map<std::wstring, void*> idMap;
 	long ref;
 	char szGenericMehod[124];
 public:
 	JSObject();
-	void AddMethod(std::wstring, /*DISPID*/ void*);
+	void AddMethod(std::wstring, void*);
 
 	// IUnknown
 	virtual HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void **ppv);
