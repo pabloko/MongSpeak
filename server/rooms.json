@@ -2,21 +2,25 @@
     {
         "id": "0",
         "name": "Lobby",
-        "max": "999"
+        "max": "999",
+		"users":[]
     },
     {
         "id": "1",
         "name": "Gulag",
-        "max": "100"
+        "max": "100",
+		"users":[]
     },
     {
         "id": "2",
         "name": "CS:GO",
-        "max": "5"
+        "max": "5",
+		"users":[]
     },
     {
         "id": "3",
         "name": "AFK",
-        "max": "999"
+        "max": "999",
+		"users":[]
     }
 ]

@@ -217,6 +217,7 @@
 				overflow: hidden;
 				overflow-y: auto;
 				border-bottom: 1px solid grey;
+                padding: 10px;
 			}
 			
 			.centerlog ul{
@@ -224,8 +225,12 @@
 				padding: 0px;
 				list-style: none;
 			}
-			
-			.chatinput{
+            
+            .centerlog ul li{
+              margin-bottom: 5px;
+            }
+            
+            .chatinput{
 				width:100%;
 				height: 40px;
 				display: flex;
@@ -322,15 +327,6 @@
 	
 	<script>
 
-        /*
-            el tema d chats con respecto al canal
-            settings div con lo de los input out devices, que tbn este en el connect
-            en sv que strimee bien donde esta la peña (xej si te conectas que diga la info de donde esta lapeña si esta fuera del lobby)
-            el vk key del chat alpresionar enter y que haga autofocus 
-            
-        */
-
-
 		//'+((function(){var audio = document.createElement("audio"); document.body.appendChild(audio); audio.src = "https://www.myinstants.com/media/sounds/trollolol.swf.mp3"; audio.play();})()),'
         var _ = function (x) { return document.getElementById(x) || document.getElementsByClassName(x) }
 
@@ -417,8 +413,9 @@
 			log('rpc USER_INIT: '+id+ " | "+data);
 		});
 		
-		join_rpc(RPCID.USER_JOIN, function(id, data) {
-			log('rpc USER_JOIN: '+id+ " | "+data);
+		join_rpc(RPCID.USER_JOIN, function (id, data) {
+		    log('rpc USER_JOIN: ' + id + " | " + data);
+		    console.log('rpc USER_JOIN: ' + id + " | " + data);
 			clients.push({id: id, data: data});
 			var lobby = document.getElementById("room_0");
 			var li = document.createElement("li");
@@ -472,7 +469,7 @@
 				}
 			}
 			
-			li.innerText = username + ': ' + data;
+			li.innerHTML = "<b>"+username + "</b>: " + data;
 			var currentchat = document.getElementById("chatul_" + window['self']['room']);
 			currentchat.appendChild(li);
 			if (id != window['self'].id) audio.play();
@@ -668,8 +665,14 @@
 			clients = [];
 			user.innerText = "";
 			leftlist.innerHTML = "";
-			chatlog.innerHTML = "";
+            //Clean rooms
 			rooms = [];
+            //clean chats
+			var chats = _("chat");
+			console.log(chats);
+			for (var i = 0; i < chats.length; i++) {
+			    chats[i].parentNode.removeChild(chats[i]);
+			}
 		};
 		
 		//API

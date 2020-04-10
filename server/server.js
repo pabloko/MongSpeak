@@ -97,13 +97,21 @@ join_rpc(RPCID.USER_JOIN,(d, ws)=>{
 	wss.clients.forEach((client) => {
 		if (client !== ws && client.readyState === 1) {
 			
-			if (client.name && client.id) {
+			if (client.name && client.id && client.room_id) {
 				var pkthead2 = Buffer.alloc(3+client.name.length);
 				pkthead2.writeUInt8(RPCID.USER_JOIN,0)
 				pkthead2.writeUInt16LE(client.id,1)
 				pkthead2.write(client.name,3)
 				ws.send(pkthead2) //stream the remote client to new client
 				client.send(pkthead) //stream to the remote client the new client
+				
+				if (client.room_id != 0) {
+					var pktroom = Buffer.alloc(5);
+					pktroom.writeUInt8(RPCID.CHANGE_ROOM,0)
+					pktroom.writeUInt16LE(client.id,1)
+					pktroom.writeUInt16LE(client.room_id,3)
+					ws.send(pktroom) //Stream the room of some client not in lobby
+				}
 			}
 			
 		}
