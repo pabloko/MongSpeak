@@ -3,7 +3,8 @@
 HRESULT STDMETHODCALLTYPE TDocHostUIHandler::ShowContextMenu(DWORD dwID,
 	POINT *ppt, IUnknown *pcmdtReserved, IDispatch *pdispReserved)
 {
-	//return S_OK; //TODO: manejar el context menu desde js
+	if (dwID == 0)
+		return S_OK;
 	return E_NOTIMPL;
 }
 
@@ -18,15 +19,6 @@ HRESULT STDMETHODCALLTYPE TDocHostUIHandler::GetHostInfo(DOCHOSTUIINFO *pInfo)
 		DOCHOSTUIFLAG_USE_WINDOWLESS_SELECTCONTROL |
 		DOCHOSTUIFLAG_OVERRIDEBEHAVIORFACTORY |
 		DOCHOSTUIFLAG_NOTHEME;
-	// Called at initialization of the browser object UI. We can set various
-	// features of the browser object here.
-	// We can do disable the 3D border (DOCHOSTUIFLAG_NO3DOUTERBORDER) and
-	// other things like hide the scroll bar (DOCHOSTUIFLAG_SCROLL_NO), display
-	// picture display (DOCHOSTUIFLAG_NOPICS), disable any script running when
-	// the page is loaded (DOCHOSTUIFLAG_DISABLE_SCRIPT_INACTIVE), open a site
-	// in a new browser window when the user clicks on some link
-	// (DOCHOSTUIFLAG_OPENNEWWIN), and lots of other things. See the MSDN docs
-	// on the DOCHOSTUIINFO struct passed to us.
 	
 	return S_OK;
 }

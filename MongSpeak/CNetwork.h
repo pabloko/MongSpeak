@@ -132,8 +132,9 @@ public:
 		}
 		wchar_t* rest = new wchar_t[((message.size() - 3) / 2) + 1];
 		memcpy(rest, message.data() + 3, (message.size() - 3));
-		rest[(message.size() - 3) / 2] = '\0';
+		rest[(message.size() - 3) / 2] = L'\0';
 		//g_jsStack.push_back(wstring_format(L"onEvent(%d, %d, '%s');", message.at(0), sessid, rest));
+		//wprintf(L"%d %d %s\n", message.at(0), sessid, rest);
 		g_webWindow->webForm->QueueCallToEvent(message.at(0), sessid, rest);
 		delete[] rest;
 	}

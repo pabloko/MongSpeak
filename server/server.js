@@ -97,7 +97,7 @@ join_rpc(RPCID.USER_JOIN,(d, ws)=>{
 	wss.clients.forEach((client) => {
 		if (client !== ws && client.readyState === 1) {
 			
-			if (client.name && client.id && client.room_id) {
+			if (client.name && client.id && client.room_id !== null) {
 				var pkthead2 = Buffer.alloc(3+client.name.length);
 				pkthead2.writeUInt8(RPCID.USER_JOIN,0)
 				pkthead2.writeUInt16LE(client.id,1)
