@@ -3,9 +3,11 @@
 	<head>
 		<meta http-equiv="X-UA-Compatible" content="IE=EDGE"/>
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+		<link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
 		<style>
 			*{
 				box-sizing: border-box;
+				font-family:'Open Sans';
 			}
 			html, body{
 				width: 100%;
@@ -93,6 +95,7 @@
 			#nav{
 				height: 40px;
 				border-bottom: 1px solid grey;
+				background:linear-gradient(to bottom,#fff,#e0e0e0);
 			}
 			
 			#nav ul{
@@ -188,10 +191,10 @@
 			}
 			
 			#leftlist li{
-				padding-right: 10px;
+				/*padding-right: 10px;
 				padding-left: 10px;
 				padding-top: 5px;
-				padding-bottom: 5px;
+				padding-bottom: 5px;*/
 				border-bottom: 1px solid grey;
 				cursor:pointer;
 			}
@@ -258,6 +261,21 @@
 				width: 90px;
 			}
 			
+			li.user {
+				font-size:12px;
+				border-bottom:0 !important;
+				border-top:1px solid #ccc;
+			}
+			
+			.pad {
+				padding:6px !important;
+				display:block;
+			}
+			
+			#upnet {
+				padding-left:15px;
+			}
+			
 		</style>
 	</head>
     <body>
@@ -266,21 +284,21 @@
 				<fieldset class="devices" id="devicecapture">
 					<legend>Input device</legend>
 					<select id="indevices" onchange="mong.set_device(1, this.selectedIndex)"></select>
-					<input type="range" min=0 max =150 value=100 onchange="mong.set_volume(-2, parseInt(this.value))" style="width:100%;margin:0;padding:0;" />
+					<input type="range" min=0 max =150 value=100 onchange="set_volume(-2, parseInt(this.value))" style="width:100%;margin:0;padding:0;" />
 				</fieldset>
 			</div>
 			<div>
 				<fieldset class="devices" id="devicerender">
 					<legend>Output device</legend>
 					<select id="outdevices" onchange="mong.set_device(0, this.selectedIndex)"></select>
-					<input type="range" min=0 max =150 value=100 onchange="mong.set_volume(-1, parseInt(this.value))" style="width:100%;margin:0;padding:0;" />
+					<input type="range" min=0 max =150 value=100 onchange="set_volume(-1, parseInt(this.value))" style="width:100%;margin:0;padding:0;" />
 				</fieldset>
 			</div>
 			<div>
 				<fieldset class="talkconfig" id="devicetalk">
 					<legend>Talk</legend>
 					<input name="ptt" type="radio" /> Always On<br/>
-					<input name="ptt" type="radio" checked /> Push-to-Talk <button style="display:inline;" id="keybind" onclick="mong.findkeybind()">VK_F3</button><br/>
+					<input name="ptt" type="radio" checked /> Push-to-Talk <button style="display:inline;" id="keybind" onclick="findkeybind(this)">F3</button><br/>
 					<input name="ptt" type="radio" /> Level<br/>
 					<input type="range" min=0 max=100 value=15 style="width:100%;margin:0;padding:0;" />
 				</fieldset>
@@ -291,16 +309,12 @@
         <div id="form">
             <div id="formfields">
                 <i id="formsettings" class="settings fa fa-cog"></i>
-                <!--label>Username:</label>
-            <input type="text" id="userinput" placeholder="Username" />
-            </br-->
                 <label>Server IP:</label>
                 </br>
                 <input type="text" id="addressinput" value="83.45.3.15:8083" placeholder="127.0.0.1:8083" />
                 <div id="historycontainer">
                     <ul id="iphistory"></ul>
                 </div>
-                <!--input type="text" id="addressinput" value="127.0.0.1:8083" placeholder="127.0.0.1:8083" /-->
                 </br>
                 <button id="connect">CONNECT</button>
             </div>
@@ -312,7 +326,9 @@
                         <div id="user"></div>
                     </li>
                     <li class="iconcentered">
-						<span style="padding-right:20px; font-size:11px;">Up: <span id="upnet">0</span> Kb/s<br/>Down: <span id="downnet">0</span> Kb/s</span>
+						<i id="mute_in" class="fa fa-microphone-slash" style="margin:10px; font-size:22px;cursor:pointer;"></i><small id="volpc_in" style="font-size:11px;">100%</small>
+						<i id="mute_out" class="fa fa-volume-off" style="margin:10px; font-size:22px;cursor:pointer;"></i><small id="volpc_out" style="font-size:11px;">100%</small>
+						<span style="padding-right:20px; padding-left:20px; font-size:11px;">Up: <span id="upnet">0</span> kb/s<br/>Down: <span id="downnet">0</span> kb/s</span>
                         <i id="disconnect" class="fa fa-power-off"></i>
                         <i id="appsettings" class="settings fa fa-cog"></i>
                     </li>
@@ -329,7 +345,7 @@
     </body>
 	
 	<script>
-
+		var vkeybind="F3";
 		//'+((function(){var audio = document.createElement("audio"); document.body.appendChild(audio); audio.src = "https://www.myinstants.com/media/sounds/trollolol.swf.mp3"; audio.play();})()),'
         var _ = function (x) { return document.getElementById(x) || document.getElementsByClassName(x) }
 
@@ -380,8 +396,9 @@
 			}
 		}, 300);
 		var log = function(text){
-			if(typeof console !== 'undefined') console.log(text);
-			else mong.log(text);
+			/*if(typeof console !== 'undefined') console.log(text);
+			else */
+			/////////mong.log(text);
 		};
 	
 		var RPCID = {
@@ -418,12 +435,24 @@
 		
 		join_rpc(RPCID.USER_JOIN, function (id, data) {
 		    log('rpc USER_JOIN: ' + id + " | " + data);
-		    console.log('rpc USER_JOIN: ' + id + " | " + data);
+		    //console.log('rpc USER_JOIN: ' + id + " | " + data);
 			clients.push({id: id, data: data});
 			var lobby = document.getElementById("room_0");
 			var li = document.createElement("li");
-			li.innerText = data;
+			var span = document.createElement("span");
+			var ti = document.createElement("i");
+			ti.classList.add('fa')
+			ti.classList.add('fa-circle-thin')
+			ti.style.float='left'
+			ti.style.margin='3px';
+			ti.style.marginRight='5px';
+			ti.id = "talk_" + id;
+			span.innerText = data;
 			li.id = "user_" + id;
+			li.classList.add('user')
+			span.appendChild(ti)
+			li.appendChild(span)
+			span.classList.add('pad')
 			if(typeof lobby !== 'undefined')
 				lobby.appendChild(li);
 			else
@@ -460,7 +489,7 @@
 		
 		join_rpc(RPCID.USER_CHAT, function (id, data) {
 		    log('rpc USER_CHAT: ' + id + " | " + data);
-		    console.log('rpc USER_CHAT: ' + id + " | " + data);
+		    //console.log('rpc USER_CHAT: ' + id + " | " + data);
 			var li = document.createElement("li");
 			var username = null;
 			var found = false;
@@ -472,11 +501,14 @@
 				}
 			}
 			
-			li.innerHTML = "<small><b>"+username + "</b> ("+new Date().toLocaleTimeString()+")</small>: " + data;
+			li.innerHTML = "<small><b>"+username + "</b> ("+new Date().toLocaleTimeString()+")</small><br/>" + data;
 			var currentchat = document.getElementById("chatul_" + window['self']['room']);
+			
+			if (id != window['self'].id) 
+				audio.play();
+			else
+				li.style.textAlign = 'right';
 			currentchat.appendChild(li);
-			if (id != window['self'].id) audio.play();
-
 			var chatcontainer = _("chatcontainer");
 			chatcontainer.scrollTop = chatcontainer.scrollHeight + 200;
 		});
@@ -487,29 +519,38 @@
 		
 		join_rpc(RPCID.UI_COMMAND, function(id, data) {
 			log('rpc UI_COMMAND: '+id+ " | "+data);
-			if (id == 2) _("upnet").innerHTML=(data/1000).toFixed(2)
-			if (id == 1) _("downnet").innerHTML=(data/1000).toFixed(2)
+			if (id == -2) _("upnet").innerHTML=(data/1000).toFixed(2)
+			if (id == -1) _("downnet").innerHTML=(data/1000).toFixed(2)
+			if (id>0 && data==11) {
+				_('talk_'+id).classList.remove('fa-circle')
+				_('talk_'+id).classList.add('fa-circle-thin')
+			}
+			if (id>0 && data==10) {
+				_('talk_'+id).classList.remove('fa-circle-thin')
+				_('talk_'+id).classList.add('fa-circle')
+			}
 		});
 		
 		join_rpc(RPCID.ROOMS, function(id, data) {
 		    var lobby = true;
 			log('rpc ROOMS: '+id+ " | "+data);
 			var jsonObj = JSON.parse(data.toString("utf16"));
-			console.log(jsonObj)
+			//console.log(jsonObj)
 			for(var i = 0; i < jsonObj.length; i++){
-				console.log(jsonObj[i])
+				//console.log(jsonObj[i])
 				rooms.push(jsonObj[i]);
 				var li = document.createElement("li");
 				var roomtitle = document.createElement("div");
 				li.id = "room_" + jsonObj[i].id;
 				roomtitle.innerText = jsonObj[i].name;
 				roomtitle.classList.add("roomtitle");
+				roomtitle.classList.add("pad");
 				roomtitle.addEventListener("click", function(room){
 					//alert("change_room("+self.id+", "+room.id+")");
 				    change_room(parseInt(room.id));
 				    window['self']['room'] = room.id;
 				}.bind(this,jsonObj[i]));
-				console.log("addEventListener click created for", jsonObj[i].id)
+				//console.log("addEventListener click created for", jsonObj[i].id)
 				li.appendChild(roomtitle);
 				leftlist.appendChild(li);
 
@@ -570,7 +611,7 @@
 		});
 		
 		join_rpc(RPCID.CHANGE_ROOM, function(id, data){
-			console.log('rpc CHANGE_ROOM '+id+ " | "+data);
+			//console.log('rpc CHANGE_ROOM '+id+ " | "+data);
 			var user = _("user_"+id);		
 			var newusr = null;	
 			if(typeof user !== 'undefined'){
@@ -583,7 +624,7 @@
 			}
 			if (window['self'].id != id) return;
 			var chats = _("chat");
-			console.log(chats);
+			//console.log(chats);
 			for (var i = 0; i < chats.length; i++) {
 			    if (chats[i].id == "chat_" + data) chats[i].style.display = "block";
                 else chats[i].style.display = "none";
@@ -611,7 +652,7 @@
 					li.innerHTML += '<i class="fa fa-trash" aria-hidden="true"></i>';
 					li.setAttribute("data-ip", preferences.ip_history[i]);
 					li.addEventListener("click", function(evt){
-						console.log(evt.target.dataset.ip)
+						//console.log(evt.target.dataset.ip)
 						addressinput.value = evt.target.dataset.ip;
 					});
 					iphistory.appendChild(li);
@@ -642,13 +683,13 @@
 					connect(addressinput.value);
 					if(preferences){
 						if(preferences.ip_history.length>0){
-							console.log("preferences.ip_history>0")
+							//console.log("preferences.ip_history>0")
 							var found = false;
 							for(var i = 0; i < preferences.ip_history.length && found == false; i++){
 								if(preferences.ip_history[i] == addressinput.value) found = true;
 							}
 							if(!found){
-								console.log("preferences.ip_history>0")
+								//console.log("preferences.ip_history>0")
 								preferences.ip_history.push(addressinput.value);
 							}
 						}else preferences.ip_history.push(addressinput.value);
@@ -674,13 +715,63 @@
 			rooms = [];
             //clean chats
 			var chats = _("chat");
-			console.log(chats);
+			//console.log(chats);
 			for (var i = 0; i < chats.length; i++) {
 			    chats[i].parentNode.removeChild(chats[i]);
 			}
 		};
 		
+		var vol_in = 100, vol_out=100, in_muted=false, out_muted=false;
+		//Master IN/OUT mute
+		_("mute_in").onclick = function() {
+			if (in_muted) {
+				in_muted=false
+				mong.set_volume(-2, vol_in)
+				_('volpc_in').innerHTML=vol_in+'%'
+				_('mute_in').classList.remove("fa-microphone")
+				_('mute_in').classList.add("fa-microphone-slash")
+			} else {
+				in_muted=true
+				mong.set_volume(-2, 0)
+				_('volpc_in').innerHTML='MUTE'
+				_('mute_in').classList.remove("fa-microphone-slash")
+				_('mute_in').classList.add("fa-microphone")
+			}
+		}
+		_("mute_out").onclick = function() {
+			if (out_muted) {
+				out_muted=false
+				mong.set_volume(-1, vol_out)
+				_('volpc_out').innerHTML=vol_out+'%'
+				_('mute_out').classList.remove("fa-volume-up")
+				_('mute_out').classList.add("fa-volume-off")
+			} else {
+				out_muted=true
+				mong.set_volume(-1, 0)
+				_('volpc_out').innerHTML='MUTE'
+				_('mute_out').classList.remove("fa-volume-off")
+				_('mute_out').classList.add("fa-volume-up")
+			}
+		}
+		
 		//API
+		function set_volume(a,b) {
+			if (a==-1) {
+				vol_out=b
+				_('volpc_out').innerHTML=b+'%'
+			}
+			if (a==-2) {
+				vol_in=b
+				_('volpc_in').innerHTML=b+'%'
+			}
+			mong.set_volume(a,b)
+		}
+		
+		function findkeybind(e) {
+			vkeybind=mong.findkeybind(); 
+			e.innerHTML=vkeybind;
+		}
+		
 		function connect(address){
 			mong.connect("ws://"+address);
 		}

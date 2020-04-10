@@ -24,3 +24,10 @@ float mix_pcm_sample_float(float aa, float bb) {
 	m -= 0.5f;
 	return m;
 }
+
+void vu_meter_float(float *buffer, float* volume, int count) {
+	float K = 0, suml = 0, sumr = 0;
+	for (int i = 0; i < count * OPUS_CHANNELS; i += OPUS_CHANNELS)
+		suml += pow(buffer[i + 0], 2), sumr += pow(buffer[i + 1], 2);
+	volume[0] = (sqrt(suml / count)), volume[1] = (sqrt(sumr / count));
+}

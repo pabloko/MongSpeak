@@ -49,7 +49,6 @@ public:
 	}
 	void DoTask(int count, char* data, WAVEFORMATEX* wf) {
 		ZeroMemory(data, count * wf->nBlockAlign);
-		if (fVol == 0.0f) return;
 		float* flBuffer = (float*)data;
 		map<WORD, CAudioSession*>::iterator it = pVecSessions.begin();
 		while (it != pVecSessions.end()) {
@@ -58,20 +57,22 @@ public:
 			int len = sess->pBuffer.length() / wf->nBlockAlign;
 			if (len > count) len = count;
 			if (len > 0) {
-				for (int i = 0; i < len * wf->nChannels; i++) {
-					if (it == pVecSessions.begin())
-						flBuffer[i] = pBuf[i];
-					else
-						flBuffer[i] = mix_pcm_sample_float(flBuffer[i], pBuf[i]);
-				}
+				if (fVol != 0.0f)
+					for (int i = 0; i < len * wf->nChannels; i++) {
+						if (it == pVecSessions.begin())
+							flBuffer[i] = pBuf[i];
+						else
+							flBuffer[i] = mix_pcm_sample_float(flBuffer[i], pBuf[i]);
+					}
 				sess->pBuffer.erase(sess->pBuffer.begin(), sess->pBuffer.begin() + (len * wf->nBlockAlign));
 			}
 			it++;
 		}
 		float* pData = (float*)data;
-		if (fVol != 1.0f)
-			for (int i = 0; i < count * OPUS_CHANNELS; i++)
-				pData[i] = pData[i] * fVol;
+		if (fVol != 0.0f)
+			if (fVol != 1.0f)
+				for (int i = 0; i < count * OPUS_CHANNELS; i++)
+					pData[i] = pData[i] * fVol;
 	}
 private:
 	map<WORD, CAudioSession*> pVecSessions;

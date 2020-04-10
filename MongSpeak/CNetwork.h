@@ -78,8 +78,8 @@ public:
 				if (lHeartBeatTick + 1000 < GetTickCount()) {
 					lHeartBeatTick = GetTickCount();
 					//todo: add hb packet
-					g_jsStack.push_back(wstring_format(L"onEvent(%d, %d, %d);", RPCID::UI_COMMAND, 1, nBytesReaded));
-					g_jsStack.push_back(wstring_format(L"onEvent(%d, %d, %d);", RPCID::UI_COMMAND, 2, nBytesWritten));
+					g_jsStack.push_back(wstring_format(L"onEvent(%d, %d, %d);", RPCID::UI_COMMAND, -1, nBytesReaded));
+					g_jsStack.push_back(wstring_format(L"onEvent(%d, %d, %d);", RPCID::UI_COMMAND, -2, nBytesWritten));
 					nBytesReaded = 0; nBytesWritten = 0;
 				}
 			}
@@ -121,6 +121,16 @@ public:
 			rpc_read_short((vector<uint8_t>*)&message, &room, 3);
 			g_jsStack.push_back(wstring_format(L"onEvent(%d, %d, %d);", RPCID::CHANGE_ROOM, sessid, room));
 			return;
+		} break;
+		case RPCID::UI_COMMAND: {
+			if (message.size() == 5) {
+				SHORT cmd = 0;
+				if (g_network->mID == sessid)
+					g_mix->ClearSessions();
+				rpc_read_short((vector<uint8_t>*)&message, &cmd, 3);
+				g_jsStack.push_back(wstring_format(L"onEvent(%d, %d, %d);", RPCID::UI_COMMAND, sessid, cmd));
+				return;
+			}
 		} break;
 		case RPCID::OPUS_DATA: {
 			if (g_mix != NULL) 

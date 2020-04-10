@@ -39,6 +39,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	g_jsObject->AddMethod(L"set_preferences", mm_set_preferences);
 	g_jsObject->AddMethod(L"get_preferences", mm_get_preferences);
 	g_jsObject->AddMethod(L"set_volume", mm_set_vol);
+	g_jsObject->AddMethod(L"set_inputmethod", mm_set_inputmethod);
+	g_jsObject->AddMethod(L"findkeybind", mm_findkeybind);
 	g_jsObject->AddRef();
 	WebformDispatchImpl* webformDispatchImpl = new WebformDispatchImpl(g_jsObject);
 	ReleaseDelete release_webformDispatchImpl(webformDispatchImpl);
