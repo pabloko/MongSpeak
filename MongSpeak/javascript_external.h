@@ -2,11 +2,6 @@
 
 extern CNetwork* g_network;
 
-void mm_alert(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pExcepInfo, UINT* puArgErr) {
-	pVarResult->vt = VT_BSTR;
-	pVarResult->bstrVal = _com_util::ConvertStringToBSTR("AYYY LMAO");
-}
-
 void mm_log(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pExcepInfo, UINT* puArgErr) {
 	if (pDispParams->cArgs > 0) {
 		if (pDispParams->rgvarg[0].vt == VT_BSTR) {
@@ -61,10 +56,10 @@ void mm_send_message(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pE
 void mm_set_device(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pExcepInfo, UINT* puArgErr) {
 	if (pDispParams->cArgs == 2) {
 		HRESULT hr = S_OK;
-		if (/*pDispParams->rgvarg[0].vt == VT_I4 && pDispParams->rgvarg[1].vt == VT_I4*/true) {
+		if (pDispParams->rgvarg[0].vt == VT_I4 && pDispParams->rgvarg[1].vt == VT_I4) {
 			EDataFlow flow = (EDataFlow)pDispParams->rgvarg[1].intVal;
 			UINT32 deviceIndex = pDispParams->rgvarg[0].intVal;
-			wprintf(L"change audio device %d->%d\n", flow, deviceIndex);
+			//wprintf(L"change audio device %d->%d\n", flow, deviceIndex);
 			if (flow == EDataFlow::eCapture) {
 				g_stream->SetDeviceIn(NULL);
 				delete g_audio_in;
@@ -83,7 +78,7 @@ void mm_set_device(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pExc
 				delete g_audio_out;
 				g_dev_out->Release();
 				if (deviceIndex == 0)
-					hr = get_default_device(&g_dev_in, flow);
+					hr = get_default_device(&g_dev_out, flow);
 				else
 					hr = get_specific_device(deviceIndex - 1, &g_dev_out, flow);
 				if (FAILED(hr))

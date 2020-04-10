@@ -184,7 +184,7 @@
 			
 			#leftlist{
 				margin: 0px;
-				padding: 10px;
+				padding: 0px;
 				list-style: none;
 			}
 			
@@ -193,7 +193,8 @@
 				padding-left: 10px;
 				padding-top: 5px;
 				padding-bottom: 5px;
-				border: 1px solid grey;
+				border-bottom: 1px solid grey;
+				cursor:hand;
 			}
 			
 			/* rooms */
@@ -278,9 +279,10 @@
 			<div>
 				<fieldset class="talkconfig" id="devicetalk">
 					<legend>Talk</legend>
-					<input type="radio" /> Push-to-Talk <button>VK_F3</button><br/>
-					<input type="radio" /> Always On<br/>
-					<input type="radio" /> Level<br/><input type="range" min=0 max=100 value=15 style="width:100%;" />
+					<input name="ptt" type="radio" /> Push-to-Talk <button style="display:inline;">VK_F3</button><br/>
+					<input name="ptt" type="radio" /> Always On<br/>
+					<input name="ptt" type="radio" /> Level<br/>
+					<input type="range" min=0 max=100 value=15 style="width:100%;" />
 				</fieldset>
 			</div>
 			<br/>

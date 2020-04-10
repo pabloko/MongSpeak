@@ -12,6 +12,7 @@
 #include "tdochostuihandler.h"
 #include "tdochostshowui.h"
 #include "tdispatch.h"
+#include <vector>
 
 class WebformDispatchHandler;
 
@@ -41,7 +42,9 @@ private:
 
 	WebformDispatchHandler *dispatchHandler;
 
-	
+	std::vector<short> vec_rpc_id;
+	std::vector<short> vec_pkt_id;
+	std::vector<std::wstring> vec_message;
 public:
 	IHTMLDocument2 *GetDoc();
 	HWND hWnd;
@@ -59,6 +62,8 @@ public:
 	void RunJSFunction(std::string cmd);
 	void RunJSFunctionW(std::wstring cmd);
 	void AddCustomObject(IDispatch *custObj, std::string name);
+	HRESULT QueueCallToEvent(short rpcid, short id, wchar_t* str);
+	HRESULT DequeueCallToEvent();
 	static LRESULT CALLBACK WebformWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 	LRESULT InstanceWndProc(UINT msg, WPARAM wParam, LPARAM lParam);
 	void setupOle();
