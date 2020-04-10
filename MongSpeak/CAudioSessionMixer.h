@@ -67,11 +67,11 @@ public:
 				sess->pBuffer.erase(sess->pBuffer.begin(), sess->pBuffer.begin() + (len * wf->nBlockAlign));
 			}
 			it++;
-			float* pData = (float*)data;
-			if (fVol != 1.0f) 
-				for (int i = 0; i < count * OPUS_CHANNELS; i++)
-					pData[i] = pData[0] * fVol;
 		}
+		float* pData = (float*)data;
+		if (fVol != 1.0f)
+			for (int i = 0; i < count * OPUS_CHANNELS; i++)
+				pData[i] = pData[i] * fVol;
 	}
 private:
 	map<WORD, CAudioSession*> pVecSessions;

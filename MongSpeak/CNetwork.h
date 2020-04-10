@@ -39,8 +39,6 @@ public:
 				if (gWS != NULL) {
 					if (Status() > WebSocket::CLOSED)
 						gWS->close();
-					if (gWS != NULL)
-						delete gWS;
 					gWS = NULL;
 					/*if (szServerUrl)
 						delete[] szServerUrl;*/

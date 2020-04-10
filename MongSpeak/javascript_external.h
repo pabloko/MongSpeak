@@ -107,11 +107,10 @@ void mm_get_preferences(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO*
 }
 
 void mm_set_vol(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pExcepInfo, UINT* puArgErr) {
-	if (pDispParams->cArgs == 2 && pDispParams->rgvarg[1].vt == VT_I4 && pDispParams->rgvarg[0].vt == VT_R4) {
-
+	if (pDispParams->cArgs == 2 && pDispParams->rgvarg[1].vt == VT_I4 && pDispParams->rgvarg[0].vt == VT_I4) {
 		short client = pDispParams->rgvarg[1].intVal;
-		float vol = pDispParams->rgvarg[0].fltVal;
-
+		float vol = pDispParams->rgvarg[0].intVal / 100.0f;
+		//wprintf(L"new vol on %d %f\n", client, vol);
 		switch (client) {
 		case -1: {
 			g_mix->SetVol(vol);

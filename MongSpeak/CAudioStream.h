@@ -34,7 +34,7 @@ public:
 
 		if (fVol != 1.0f) 
 			for (int i = 0; i < len * OPUS_CHANNELS; i++)
-				pData[i] = pData[0] * fVol;
+				pData[i] = pData[i] * fVol;
 		
 		int samples = opus_encode_float(pOpus, (const float*)data, len, szOpusBuffer, sizeof(szOpusBuffer));
 		if (samples < 1) return;

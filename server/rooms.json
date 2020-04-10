@@ -7,19 +7,31 @@
     },
     {
         "id": "1",
-        "name": "Gulag",
+        "name": "Room #1",
         "max": "100",
 		"users":[]
     },
     {
         "id": "2",
-        "name": "CS:GO",
+        "name": "Room #2",
         "max": "5",
 		"users":[]
     },
     {
         "id": "3",
-        "name": "AFK",
+        "name": "Room #3",
+        "max": "999",
+		"users":[]
+    },
+    {
+        "id": "4",
+        "name": "Room #4",
+        "max": "999",
+		"users":[]
+    },
+    {
+        "id": "5",
+        "name": "Room #5",
         "max": "999",
 		"users":[]
     }

@@ -436,6 +436,9 @@ LRESULT CALLBACK WebForm::WebformWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPA
 LRESULT WebForm::InstanceWndProc(UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	switch (msg) {
+		case WM_KEYDOWN:
+			wprintf(L"AA");
+		break;
 		case WM_CREATE: {
 			CREATESTRUCT *cs = (CREATESTRUCT*)lParam;
 
@@ -499,7 +502,7 @@ void WebForm::create(HWND hWndParent, HINSTANCE hInstance, UINT id, bool showScr
 
 	hWnd = CreateWindow(
 		WEBFORM_CLASS,
-		_T("http://amsspecialist.com"),
+		_T("IE_PABLOKO"),
 		WS_CHILD | WS_CLIPSIBLINGS | WS_VISIBLE,
 		0, 0, 100, 100, hWndParent, (HMENU)(LONG_PTR)id, hInstance, (LPVOID)this);
 }
@@ -586,6 +589,7 @@ HRESULT STDMETHODCALLTYPE WebForm::GetWindowContext(IOleInPlaceFrame **ppFrame,
 	LPOLEINPLACEFRAMEINFO info)
 {
 	*ppFrame = static_cast<IOleInPlaceFrame*>(this);
+	//*ppDoc = static_cast<IOleInPlaceUIWindow*>(this);
 	AddRef();
 	*ppDoc = NULL;
 	info->fMDIApp = FALSE;

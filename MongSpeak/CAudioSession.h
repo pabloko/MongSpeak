@@ -22,7 +22,7 @@ public:
 				if (fVol == 0.0f)
 					flTempBuf[i] = 0.0f;
 				else
-					flTempBuf[i] = flTempBuf[0] * fVol;
+					flTempBuf[i] = flTempBuf[i] * fVol;
 		pBuffer.append(&((char*)flTempBuf)[0], &((char*)flTempBuf)[samples * OPUS_CHANNELS * sizeof(float)]);
 	}
 	string pBuffer;

@@ -178,7 +178,6 @@
 				left: 0px;
 				width: 60%;
 				height:100%;
-				border-right: 1px solid grey;
 				overflow: hidden;
 			}
 			
@@ -194,7 +193,7 @@
 				padding-top: 5px;
 				padding-bottom: 5px;
 				border-bottom: 1px solid grey;
-				cursor:hand;
+				cursor:pointer;
 			}
 			
 			/* rooms */
@@ -251,6 +250,7 @@
 			.inputmsg{
 				height: 100%;
 				width: 100%;
+				border:0;
 			}
 			
 			.sendmsg{
@@ -266,23 +266,23 @@
 				<fieldset class="devices" id="devicecapture">
 					<legend>Input device</legend>
 					<select id="indevices" onchange="mong.set_device(1, this.selectedIndex)"></select>
+					<input type="range" min=0 max =150 value=100 onchange="mong.set_volume(-2, parseInt(this.value))" style="width:100%;margin:0;padding:0;" />
 				</fieldset>
 			</div>
-			<br/>
 			<div>
 				<fieldset class="devices" id="devicerender">
 					<legend>Output device</legend>
 					<select id="outdevices" onchange="mong.set_device(0, this.selectedIndex)"></select>
+					<input type="range" min=0 max =150 value=100 onchange="mong.set_volume(-1, parseInt(this.value))" style="width:100%;margin:0;padding:0;" />
 				</fieldset>
 			</div>
-			<br/>
 			<div>
 				<fieldset class="talkconfig" id="devicetalk">
 					<legend>Talk</legend>
-					<input name="ptt" type="radio" /> Push-to-Talk <button style="display:inline;">VK_F3</button><br/>
 					<input name="ptt" type="radio" /> Always On<br/>
+					<input name="ptt" type="radio" checked /> Push-to-Talk <button style="display:inline;" id="keybind" onclick="mong.findkeybind()">VK_F3</button><br/>
 					<input name="ptt" type="radio" /> Level<br/>
-					<input type="range" min=0 max=100 value=15 style="width:100%;" />
+					<input type="range" min=0 max=100 value=15 style="width:100%;margin:0;padding:0;" />
 				</fieldset>
 			</div>
 			<br/>
@@ -312,6 +312,7 @@
                         <div id="user"></div>
                     </li>
                     <li class="iconcentered">
+						<span style="padding-right:20px; font-size:11px;">Up: <span id="upnet">0</span> Kb/s<br/>Down: <span id="downnet">0</span> Kb/s</span>
                         <i id="disconnect" class="fa fa-power-off"></i>
                         <i id="appsettings" class="settings fa fa-cog"></i>
                     </li>
@@ -471,7 +472,7 @@
 				}
 			}
 			
-			li.innerHTML = "<b>"+username + "</b>: " + data;
+			li.innerHTML = "<small><b>"+username + "</b> ("+new Date().toLocaleTimeString()+")</small>: " + data;
 			var currentchat = document.getElementById("chatul_" + window['self']['room']);
 			currentchat.appendChild(li);
 			if (id != window['self'].id) audio.play();
@@ -486,6 +487,8 @@
 		
 		join_rpc(RPCID.UI_COMMAND, function(id, data) {
 			log('rpc UI_COMMAND: '+id+ " | "+data);
+			if (id == 2) _("upnet").innerHTML=(data/1000).toFixed(2)
+			if (id == 1) _("downnet").innerHTML=(data/1000).toFixed(2)
 		});
 		
 		join_rpc(RPCID.ROOMS, function(id, data) {
