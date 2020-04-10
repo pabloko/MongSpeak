@@ -105,3 +105,23 @@ void mm_get_preferences(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO*
 		} else pVarResult->vt = VT_NULL;
 	}
 }
+
+void mm_set_vol(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pExcepInfo, UINT* puArgErr) {
+	if (pDispParams->cArgs == 2 && pDispParams->rgvarg[1].vt == VT_I4 && pDispParams->rgvarg[0].vt == VT_R4) {
+
+		short client = pDispParams->rgvarg[1].intVal;
+		float vol = pDispParams->rgvarg[0].fltVal;
+
+		switch (client) {
+		case -1: {
+			g_mix->SetVol(vol);
+		} break;
+		case -2: {
+			g_stream->SetVol(vol);
+		} break;
+		default: {
+			g_mix->GetSession(client)->SetVol(vol);
+		} break;
+		}
+	}
+}

@@ -2,11 +2,16 @@
 
 class CAudioSessionMixer : CAudioQueue {
 public:
-	CAudioSessionMixer() {}
+	CAudioSessionMixer() {
+		fVol = 1.0f;
+	}
 	~CAudioSessionMixer() {
 		ClearSessions();
 		if (pDeviceOut != NULL)
 			pDeviceOut->SetAudioQueue(NULL);
+	}
+	void SetVol(float vol) {
+		fVol = vol;
 	}
 	void SetDeviceOut(CAudioDevice* dev) {
 		if (pDeviceOut != NULL && dev == NULL)
@@ -44,6 +49,7 @@ public:
 	}
 	void DoTask(int count, char* data, WAVEFORMATEX* wf) {
 		ZeroMemory(data, count * wf->nBlockAlign);
+		if (fVol == 0.0f) return;
 		float* flBuffer = (float*)data;
 		map<WORD, CAudioSession*>::iterator it = pVecSessions.begin();
 		while (it != pVecSessions.end()) {
@@ -61,9 +67,14 @@ public:
 				sess->pBuffer.erase(sess->pBuffer.begin(), sess->pBuffer.begin() + (len * wf->nBlockAlign));
 			}
 			it++;
+			float* pData = (float*)data;
+			if (fVol != 1.0f) 
+				for (int i = 0; i < count * OPUS_CHANNELS; i++)
+					pData[i] = pData[0] * fVol;
 		}
 	}
 private:
 	map<WORD, CAudioSession*> pVecSessions;
 	CAudioDevice* pDeviceOut;
+	float fVol;
 };

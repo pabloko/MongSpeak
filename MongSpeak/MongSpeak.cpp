@@ -38,6 +38,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	g_jsObject->AddMethod(L"set_device", mm_set_device);
 	g_jsObject->AddMethod(L"set_preferences", mm_set_preferences);
 	g_jsObject->AddMethod(L"get_preferences", mm_get_preferences);
+	g_jsObject->AddMethod(L"set_vol", mm_set_vol);
 	g_jsObject->AddRef();
 	WebformDispatchImpl* webformDispatchImpl = new WebformDispatchImpl(g_jsObject);
 	ReleaseDelete release_webformDispatchImpl(webformDispatchImpl);
