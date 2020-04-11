@@ -3,10 +3,12 @@
 	<head>
 		<meta http-equiv="X-UA-Compatible" content="IE=EDGE"/>
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+        <link href="https://fonts.googleapis.com/css2?family=Ubuntu&display=swap" rel="stylesheet">
 		<style>
-			*{
-				box-sizing: border-box;
-			}
+            * {
+                box-sizing: border-box;
+                font-family: 'Ubuntu', sans-serif;
+            }
 			html, body{
 				width: 100%;
 				height:100%;
@@ -65,11 +67,16 @@
                 z-index: 1;
 				flex-direction:column;
 				padding:40px;
+                overflow: hidden;
             }
-			
-			select {
-				width:100%;
-			}
+
+            #settingsscroll {
+                overflow-y: auto;
+            }
+
+            select {
+                width: 100%;
+            }
 			
             #closesetting {
                 position: absolute;
@@ -149,12 +156,26 @@
 			.favip i:hover{
 				background: rgb(153, 153, 153);
 			}
-			
-			#userli{
-				display: flex;
-				justify-content: center;
-				align-items: center;
-			}
+
+            .userroom {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+            
+            .userroom i {
+                color: grey;
+            }
+            
+            .userroom i:active {
+                color: darkred;
+            }
+                
+            #userli {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
 			
 			#panels{
 				height: calc(100% - 40px);
@@ -262,30 +283,39 @@
 	</head>
     <body>
         <div id="settingspanel">
-			<div>
-				<fieldset class="devices" id="devicecapture">
-					<legend>Input device</legend>
-					<select id="indevices" onchange="mong.set_device(1, this.selectedIndex)"></select>
-				</fieldset>
-			</div>
-			<br/>
-			<div>
-				<fieldset class="devices" id="devicerender">
-					<legend>Output device</legend>
-					<select id="outdevices" onchange="mong.set_device(0, this.selectedIndex)"></select>
-				</fieldset>
-			</div>
-			<br/>
-			<div>
-				<fieldset class="talkconfig" id="devicetalk">
-					<legend>Talk</legend>
-					<input name="ptt" type="radio" /> Push-to-Talk <button style="display:inline;">VK_F3</button><br/>
-					<input name="ptt" type="radio" /> Always On<br/>
-					<input name="ptt" type="radio" /> Level<br/>
-					<input type="range" min=0 max=100 value=15 style="width:100%;" />
-				</fieldset>
-			</div>
-			<br/>
+            <div id="settingsscroll">
+                <div>
+                    <fieldset class="devices" id="devicecapture">
+                        <legend>Input device</legend>
+                        <select id="indevices" onchange="mong.set_device(1, this.selectedIndex)"></select>
+                    </fieldset>
+                </div>
+                <br />
+                <div>
+                    <fieldset class="devices" id="devicerender">
+                        <legend>Output device</legend>
+                        <select id="outdevices" onchange="mong.set_device(0, this.selectedIndex)"></select>
+                    </fieldset>
+                </div>
+                <br />
+                <div>
+                    <fieldset class="talkconfig" id="devicetalk">
+                        <legend>Talk</legend>
+                        <input name="ptt" type="radio" /> Push-to-Talk <button style="display:inline;">VK_F3</button><br />
+                        <input name="ptt" type="radio" /> Always On<br />
+                        <input name="ptt" type="radio" /> Level<br />
+                        <input type="range" min=0 max=100 value=15 style="width:100%;" />
+                    </fieldset>
+                </div>
+                </br>
+                <div>
+                    <fieldset class="volumeconfig" id="generalvol">
+                        <legend>Volume</legend>
+                        <input type="range" id="volgeneral" min=0 max=150 value=50 style="width:100%;" />
+                    </fieldset>
+                </div>
+                <br />
+            </div>
             <button id="closesetting"><i class="fa fa-times" aria-hidden="true"></i></button>
         </div>
         <div id="form">
@@ -350,6 +380,7 @@
 		var settingspanel = _("settingspanel");
 		var closesetting = _("closesetting");
 		var center = _("center");
+		var volgeneral = _("volgeneral");
 
 		window['self'] = {};
 		var preferences = null;
@@ -421,8 +452,19 @@
 			clients.push({id: id, data: data});
 			var lobby = document.getElementById("room_0");
 			var li = document.createElement("li");
-			li.innerText = data;
+			li.classList.add("userroom");
 			li.id = "user_" + id;
+
+			var span = document.createElement("span");
+			span.innerText = data;
+			li.appendChild(span);
+
+			var icon = document.createElement("i");
+			icon.classList.add("fa");
+			icon.classList.add("fa-microphone-slash");
+			icon.setAttribute("aria-hidden", "true");
+			li.appendChild(icon);
+
 			if(typeof lobby !== 'undefined')
 				lobby.appendChild(li);
 			else
@@ -614,6 +656,10 @@
 					iphistory.appendChild(li);
 				}
 			}
+            
+			if (preferences.general_volume) {
+			    volgeneral.value = preferences.general_volume;
+			}
 		}
 
         //Settings
@@ -630,6 +676,12 @@
 		        else
 		            settingspanel.style.display = "none";
 		    }
+		}
+
+		volgeneral.onchange = function () {
+		    console.log("volgeneral: " + volgeneral.value);
+		    preferences.general_volume = volgeneral.value;
+		    set_preferences(JSON.stringify(preferences));
 		}
 
 		//Connect
