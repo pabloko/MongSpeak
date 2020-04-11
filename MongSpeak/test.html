@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="en">
 	<head>
 		<meta charset="UTF-8">
@@ -552,6 +552,7 @@
         - Add voice notifications
         - Make nav elements fixed width
         - Left panel/settings scrollable
+        - Close emoji menu when click over chat input
         */
 		var vkeybind="F3";
 		//'+((function(){var audio = document.createElement("audio"); document.body.appendChild(audio); audio.src = "https://www.myinstants.com/media/sounds/trollolol.swf.mp3"; audio.play();})()),'
@@ -915,14 +916,32 @@
 				iphistory.style.display = "table";
 				for(var i = 0; i < preferences.ip_history.length; i++){
 					//alert(preferences.ip_history[i])
-					var li = document.createElement("li");
-					li.classList.add("favip");
+				    var li = document.createElement("li");
+				    li.classList.add("favip");
+				    li.id = "ip_" + i;
 					li.innerText = preferences.ip_history[i];
-					li.innerHTML += '<i class="fa fa-trash" aria-hidden="true"></i>';
+					var icontrash = document.createElement("i");
+					icontrash.classList.add("fa");
+					icontrash.classList.add("fa-trash");
+					icontrash.setAttribute("aria-hidden", "true");
+					icontrash.setAttribute("data-ip", preferences.ip_history[i]);
+					icontrash.setAttribute("data-id", "ip_" + i);
+					icontrash.setAttribute("data-idx", i);
+					icontrash.addEventListener("click", function (evt) {
+					    var ipli = _(evt.target.dataset.id);
+					    if (ipli) {
+					        preferences.ip_history.splice(evt.target.dataset.idx, 1);
+					        set_preferences(JSON.stringify(preferences));
+					        console.log(preferences.ip_history)
+					        ipli.parentNode.removeChild(ipli);
+					    }
+					});
+					li.appendChild(icontrash);
 					li.setAttribute("data-ip", preferences.ip_history[i]);
 					li.addEventListener("click", function(evt){
-						//console.log(evt.target.dataset.ip)
-						addressinput.value = evt.target.dataset.ip;
+					    //console.log(evt.target.dataset.ip)
+					    if (evt.target.dataset.ip)
+						    addressinput.value = evt.target.dataset.ip;
 					});
 					iphistory.appendChild(li);
 				}
