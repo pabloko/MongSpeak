@@ -334,6 +334,10 @@
 				background-size: 70%;
 			}
 			
+			.emoji {
+				width:25px;
+			}
+			
 		</style>
 	</head>
     <body>
@@ -407,6 +411,8 @@
         </div>
 		
     </body>
+	<script src="https://twemoji.maxcdn.com/v/latest/twemoji.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/2.0.8/purify.min.js"></script>
 	<script>
 
         /*  
@@ -593,7 +599,7 @@
 				}
 			}
 			
-			li.innerHTML = "<small><b>"+username + "</b> ("+new Date().toLocaleTimeString()+")</small><br/>" + data;
+			li.innerHTML = "<small><b>"+username + "</b> ("+new Date().toLocaleTimeString()+")</small><br/>" + twemoji.parse(DOMPurify.sanitize(data));
 			var currentchat = document.getElementById("chatul_" + window['self']['room']);
 			
 			if (id != window['self'].id) 
@@ -635,6 +641,12 @@
 				_('tiout_'+id).style.display='none'
 			}
 		});
+		
+		//HEARTBEAT
+		setInterval(function() {
+			mong.send_uicommand(in_muted?12:13)
+			mong.send_uicommand(out_muted?14:15)
+		},10000)
 		
 		join_rpc(RPCID.ROOMS, function(id, data) {
 		    var lobby = true;
