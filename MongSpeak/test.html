@@ -31,14 +31,21 @@
 				background:linear-gradient(to bottom,#fff,#e0e0e0);
 			}
 
-			#addressinput{
-				width: 100%;
-			}
+            #addressinput {
+                width: 100%;
+                border: 1px solid #777;
+            }
 
-			#connect{
-				margin-top:10px;
-				width: 100%;
-			}
+            .selectsettings {
+               border: none;
+               border: 1px solid grey;
+            }
+
+            #connect {
+                margin-top: 10px;
+                width: 100%;
+                border: 1px solid #777;
+            }
 
             #formsettings {
                 position:absolute;
@@ -138,6 +145,7 @@
 				width: 100%;
 				height: 100%;
 				background:#fff;
+                font-size: 13px;
 			}
 
 			.favip{
@@ -330,30 +338,37 @@
 	</head>
     <body>
         <div id="settingspanel">
-			<div>
-				<fieldset class="devices" id="devicecapture">
-					<legend>Input device</legend>
-					<select id="indevices" onchange="mong.set_device(1, this.selectedIndex)"></select>
-					<input type="range" min=0 max =150 value=100 onchange="set_volume(-2, parseInt(this.value))" style="width:100%;margin:0;padding:0;" />
-				</fieldset>
-			</div>
-			<div>
-				<fieldset class="devices" id="devicerender">
-					<legend>Output device</legend>
-					<select id="outdevices" onchange="mong.set_device(0, this.selectedIndex)"></select>
-					<input type="range" min=0 max =150 value=100 onchange="set_volume(-1, parseInt(this.value))" style="width:100%;margin:0;padding:0;" />
-				</fieldset>
-			</div>
-			<div>
-				<fieldset class="talkconfig" id="devicetalk">
-					<legend>Talk</legend>
-					<input name="ptt" type="radio" /> Always On<br/>
-					<input name="ptt" type="radio" checked /> Push-to-Talk <button style="display:inline;" id="keybind" onclick="findkeybind(this)">F3</button><br/>
-					<input name="ptt" type="radio" /> Level<br/>
-					<input type="range" min=0 max=100 value=15 style="width:100%;margin:0;padding:0;" />
-				</fieldset>
-			</div>
-			<br/>
+            <div>
+                <fieldset class="devices" id="devicecapture">
+                    <legend>Input device</legend>
+                    <select class="selectsettings" id="indevices" onchange="mong.set_device(1, this.selectedIndex)"></select>
+                    <input type="range" min=0 max=150 value=100 onchange="set_volume(-2, parseInt(this.value))" style="width:100%;margin:0;padding:0;" />
+                </fieldset>
+            </div>
+            <div>
+                <fieldset class="devices" id="devicerender">
+                    <legend>Output device</legend>
+                    <select class="selectsettings" id="outdevices" onchange="mong.set_device(0, this.selectedIndex)"></select>
+                    <input type="range" min=0 max=150 value=100 onchange="set_volume(-1, parseInt(this.value))" style="width:100%;margin:0;padding:0;" />
+                </fieldset>
+            </div>
+            <div>
+                <fieldset class="talkconfig" id="devicetalk">
+                    <legend>Talk</legend>
+                    <input name="ptt" type="radio" /> Always On<br />
+                    <input name="ptt" type="radio" checked /> Push-to-Talk <button style="display:inline;" id="keybind" onclick="findkeybind(this)">F3</button><br />
+                    <input name="ptt" type="radio" /> Level<br />
+                    <input type="range" min=0 max=100 value=15 onchange="set_volume(0, parseInt(this.value))" style="width:100%;margin:0;padding:0;" />
+                </fieldset>
+            </div>
+            <br />
+            <div>
+                <fieldset class="volumeconfig" id="generalvolume">
+                    <legend>Volume</legend>
+                    <input type="range" min=0 max=150 value=50 style="width:100%;margin:0;padding:0;" />
+                </fieldset>
+            </div>
+            <br />
             <button id="closesetting" style="cursor:pointer;"><i class="fa fa-times" aria-hidden="true"></i></button>
         </div>
         <div id="form">
@@ -361,11 +376,10 @@
                 <i id="formsettings" class="settings fa fa-cog" style="cursor:pointer;"></i>
                 <label>Server IP:</label>
                 </br>
-                <input type="text" id="addressinput" value="83.45.3.15:8083" placeholder="127.0.0.1:8083" />
+                <input type="text" id="addressinput" value="mong-speak.herokuapp.com" placeholder="127.0.0.1:8083" />
                 <div id="historycontainer">
                     <ul id="iphistory"></ul>
                 </div>
-                </br>
                 <button id="connect">CONNECT</button>
             </div>
         </div>
@@ -484,6 +498,7 @@
 		
 		join_rpc(RPCID.USER_JOIN, function (id, data) {
 		    log('rpc USER_JOIN: ' + id + " | " + data);
+		    //mong.say("Usuario conectado");
 		    //console.log('rpc USER_JOIN: ' + id + " | " + data);
 			clients.push({id: id, data: data});
 			var lobby = document.getElementById("room_0");
@@ -519,7 +534,8 @@
 		});
 		
 		join_rpc(RPCID.USER_LEAVE, function(id, data) {
-			log('rpc USER_LEAVE: '+id+ " | "+data);
+		    log('rpc USER_LEAVE: ' + id + " | " + data);
+		    //mong.say("Usuario ha salido");
 			if(clients.length >0){
 				var found = false;
 				for(var i = 0; i < clients.length && !found; i++){
@@ -595,9 +611,11 @@
 				roomtitle.classList.add("roomtitle");
 				roomtitle.classList.add("pad");
 				roomtitle.addEventListener("click", function(room){
-					//alert("change_room("+self.id+", "+room.id+")");
-				    change_room(parseInt(room.id));
-				    window['self']['room'] = room.id;
+				    //alert("change_room("+self.id+", "+room.id+")");
+				    if (window['self']['room'] != room.id) {
+				        change_room(parseInt(room.id)); 
+				        window['self']['room'] = room.id;
+				    }
 				}.bind(this,jsonObj[i]));
 				//console.log("addEventListener click created for", jsonObj[i].id)
 				li.appendChild(roomtitle);
@@ -660,7 +678,8 @@
 		});
 		
 		join_rpc(RPCID.CHANGE_ROOM, function(id, data){
-			//console.log('rpc CHANGE_ROOM '+id+ " | "+data);
+		    //console.log('rpc CHANGE_ROOM '+id+ " | "+data);
+		    //mong.say("Usuario ha avandonado la sala");
 			var user = _("user_"+id);		
 			var newusr = null;	
 			if(typeof user !== 'undefined'){
