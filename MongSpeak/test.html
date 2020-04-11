@@ -68,9 +68,11 @@
                 height: 50%;
                 background-color: white;
                 border: 1px solid #ccc;
+				border-left:0;
                 overflow: hidden;
                 overflow-y: scroll;
             }
+			
 
             ul.emoji-list * {
                 -webkit-user-select: none;
@@ -88,12 +90,13 @@
             }
 
             .emoji-list img.emoji {
-                cursor: pointer;
-                height: .7em;
-                width: .7em;
-                margin: 0 .05em 0 .1em;
-                vertical-align: -0.1em;
-            }
+				cursor: pointer;
+				height: 1.35em;
+				width: 1.35em;
+				margin: 0 .05em 0 .1em;
+				vertical-align: -0.1em;
+			}
+
 
             .selectsettings {
                 border: none;
@@ -398,6 +401,53 @@
 				width:25px;
 			}
 			
+			.typing {
+				display: inline;
+				float: right;
+				margin: 3px;
+			}
+
+			.typing .typing-dot {
+			  float: left;
+			  width: 6px;
+			  height: 6px;
+			  border-radius: 50%;
+			  margin: 2px;
+			  background: #444;
+			  animation-name: show;
+			  animation-duration: 1.2s;
+			  animation-iteration-count: infinite;
+			  animation-timing-function: ease-in-out;
+			}
+			.typing .typing-dot:nth-child(2) {
+			  animation-delay: 0.3s;
+			}
+			.typing .typing-dot:nth-child(3) {
+			  animation-delay: 0.6s;
+			}
+
+			@keyframes bounce {
+			  0% {
+				transform: translateY(0px);
+			  }
+			  50% {
+				transform: translateY(2px);
+			  }
+			  100% {
+				transform: translateY(0px);
+			  }
+			}
+			@keyframes show {
+			  0% {
+				opacity: 0;
+			  }
+			  50% {
+				opacity: 1;
+			  }
+			  100% {
+				opacity: 0;
+			  }
+			}
 		</style>
 	</head>
     <body>
@@ -603,6 +653,10 @@
 			var ti = document.createElement("i");
 			var tiain = document.createElement("i");
 			var tiout = document.createElement("i");
+			var ty = document.createElement("div");
+			ty.innerHTML='<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>'
+			ty.id = 'typing_'+id
+			ty.classList.add('typing')
 			ti.classList.add('fa')
 			ti.classList.add('fa-circle-thin')
 			tiain.classList.add('fa')
@@ -624,9 +678,10 @@
 			span.innerText = data;
 			li.id = "user_" + id;
 			li.classList.add('user')
-			span.appendChild(ti)
+			span.appendChild(ty)
 			span.appendChild(tiout)
 			span.appendChild(tiain)
+			span.appendChild(ti)
 			li.appendChild(span)
 			span.classList.add('pad')
 			if(typeof lobby !== 'undefined')
@@ -1043,5 +1098,21 @@
 		function send_message(message) {
 			mong.send_message(message);
 		}
+		
+		var typers=[]
+		function send_typing(id) {
+			if (typers[id]) return;
+			typers.push(id);
+			if (id == window['self'].id)
+				mong.send_uicommand(20)
+			_('typing_'+id).style.display='inline-block'
+		}
+		
+		function cancel_typing(id) {
+			typers.slice(typers.indexOf(id))
+			_('typing_'+id).style.display='none'
+		}
+		
+		
 	</script>
 </html>
