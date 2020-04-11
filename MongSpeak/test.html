@@ -401,7 +401,7 @@
 			}
 			
 			.typing {
-				display: inline;
+				display: none;
 				float: right;
 				margin: 3px;
 			}
@@ -740,6 +740,13 @@
 				audio.play();
 			else
 				li.style.textAlign = 'right';
+				
+			if (typers[id]) {
+				clearTimeout(typers[id])
+				_('typing_'+id).style.display='none'
+				delete typers[id]
+			}
+			
 			currentchat.appendChild(li);
 			var chatcontainer = _("chatcontainer");
 			chatcontainer.scrollTop = chatcontainer.scrollHeight + 200;
@@ -773,6 +780,10 @@
 			}
 			if (id>0 && data==15) { //out muted
 				_('tiout_'+id).style.display='none'
+			}
+			
+			if (id>0 && data==20) { //out muted
+				send_typing(id)
 			}
 		});
 		
@@ -832,8 +843,9 @@
 				inputbox.classList.add("inputbox");
 
 				var input = document.createElement("input");
+				input.onkeypress = typer_update;
 				input.setAttribute("type", "text");
-				input.setAttribute("placeholder", "Enter text..");
+				input.setAttribute("placeholder", "Enter a message...");
 				input.classList.add("inputmsg");
 				input.setAttribute("data-chat", jsonObj[i].id);
 				input['chatcontainer'] = chatcontainer;
@@ -1117,20 +1129,25 @@
 			mong.send_message(message);
 		}
 		
-		var typers=[]
+		var nibbletyping=false;
+		var typers={}
 		function send_typing(id) {
-			if (typers[id]) return;
-			typers.push(id);
-			if (id == window['self'].id)
+			if (typers[id])
+				clearTimer(typers[id])
+			_('typing_'+id).style.display='inline'
+			typers[id] = setTimeout(function() {
+				_('typing_'+id).style.display='none'
+				delete typers[id]
+			},2000)
+		}
+		
+		function typer_update() {
+			if (!nibbletyping) {
+				nibbletyping=true;
+				setTimeout(function() { nibbletyping=false; },2000)
 				mong.send_uicommand(20)
-			_('typing_'+id).style.display='inline-block'
+			}
 		}
-		
-		function cancel_typing(id) {
-			typers.slice(typers.indexOf(id))
-			_('typing_'+id).style.display='none'
-		}
-		
 		
 	</script>
 </html>
