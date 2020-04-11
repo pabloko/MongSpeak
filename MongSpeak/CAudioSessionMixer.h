@@ -2,11 +2,16 @@
 
 class CAudioSessionMixer : CAudioQueue {
 public:
-	CAudioSessionMixer() {}
+	CAudioSessionMixer() {
+		fVol = 1.0f;
+	}
 	~CAudioSessionMixer() {
 		ClearSessions();
 		if (pDeviceOut != NULL)
 			pDeviceOut->SetAudioQueue(NULL);
+	}
+	void SetVol(float vol) {
+		fVol = vol;
 	}
 	void SetDeviceOut(CAudioDevice* dev) {
 		if (pDeviceOut != NULL && dev == NULL)
@@ -52,18 +57,25 @@ public:
 			int len = sess->pBuffer.length() / wf->nBlockAlign;
 			if (len > count) len = count;
 			if (len > 0) {
-				for (int i = 0; i < len * wf->nChannels; i++) {
-					if (it == pVecSessions.begin())
-						flBuffer[i] = pBuf[i];
-					else
-						flBuffer[i] = mix_pcm_sample_float(flBuffer[i], pBuf[i]);
-				}
+				if (fVol != 0.0f)
+					for (int i = 0; i < len * wf->nChannels; i++) {
+						if (it == pVecSessions.begin())
+							flBuffer[i] = pBuf[i];
+						else
+							flBuffer[i] = mix_pcm_sample_float(flBuffer[i], pBuf[i]);
+					}
 				sess->pBuffer.erase(sess->pBuffer.begin(), sess->pBuffer.begin() + (len * wf->nBlockAlign));
 			}
 			it++;
 		}
+		float* pData = (float*)data;
+		if (fVol != 0.0f)
+			if (fVol != 1.0f)
+				for (int i = 0; i < count * OPUS_CHANNELS; i++)
+					pData[i] = pData[i] * fVol;
 	}
 private:
 	map<WORD, CAudioSession*> pVecSessions;
 	CAudioDevice* pDeviceOut;
+	float fVol;
 };

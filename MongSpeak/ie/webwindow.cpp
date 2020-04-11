@@ -86,7 +86,6 @@ LRESULT WebWindow::InstanceWndProc(UINT msg, WPARAM wParam, LPARAM lParam)
 	switch (msg) {
 	case WM_CREATE: {
 		webForm->create(hWndWebWindow, hInstWebWindow, 103, showScrollbars);
-
 		break;
 	}
 	case WM_SIZE:
