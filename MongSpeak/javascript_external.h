@@ -1,5 +1,5 @@
 #pragma once
-
+#include <sapi.h>
 extern CNetwork* g_network;
 
 void mm_log(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pExcepInfo, UINT* puArgErr) {
@@ -220,4 +220,26 @@ void mm_findkeybind(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pEx
 	GetKeyNameTextA(vk, keyext, sizeof(keyext));
 	pVarResult->vt = VT_BSTR;
 	pVarResult->bstrVal = _com_util::ConvertStringToBSTR(keyext);
+}
+
+DWORD WINAPI tts(void* pv) {
+	const wchar_t* str = (const wchar_t*)pv;
+	ISpVoice* pVoice = NULL;
+	HRESULT hr = S_OK;
+	if (FAILED(::CoInitialize(NULL)))
+		return FALSE;
+	hr = CoCreateInstance(CLSID_SpVoice, NULL, CLSCTX_ALL, IID_ISpVoice, (void **)&pVoice);
+	if (SUCCEEDED(hr)) {
+		hr = pVoice->SetRate(3);
+		hr = pVoice->Speak(str, 0, NULL);
+		pVoice->Release();
+		pVoice = NULL;
+	}
+	CoUninitialize();
+	return hr;
+}
+
+void mm_say(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pExcepInfo, UINT* puArgErr) {
+	if (pDispParams->cArgs == 1 && pDispParams->rgvarg[0].vt == VT_BSTR)
+		CreateThread(NULL, NULL, tts, pDispParams->rgvarg[0].bstrVal, NULL, NULL);
 }
