@@ -490,8 +490,22 @@
 			var li = document.createElement("li");
 			var span = document.createElement("span");
 			var ti = document.createElement("i");
+			var tiain = document.createElement("i");
+			var tiout = document.createElement("i");
 			ti.classList.add('fa')
 			ti.classList.add('fa-circle-thin')
+			tiain.classList.add('fa')
+			tiout.classList.add('fa')
+			tiain.classList.add('fa-microphone-slash')
+			tiout.classList.add('fa-volume-off')
+			tiain.style.display='none'
+			tiout.style.display='none'
+			tiain.style.float='right'
+			tiout.style.float='right'
+			tiain.style.margin='3px'
+			tiout.style.margin='3px'
+			tiain.id='tiain_'+id
+			tiout.id='tiout_'+id
 			ti.style.float='left'
 			ti.style.margin='3px';
 			ti.style.marginRight='5px';
@@ -500,6 +514,8 @@
 			li.id = "user_" + id;
 			li.classList.add('user')
 			span.appendChild(ti)
+			span.appendChild(tiout)
+			span.appendChild(tiain)
 			li.appendChild(span)
 			span.classList.add('pad')
 			if(typeof lobby !== 'undefined')
@@ -577,6 +593,19 @@
 			if (id>0 && data==10) {
 				_('talk_'+id).classList.remove('fa-circle-thin')
 				_('talk_'+id).classList.add('fa-circle')
+			}
+			
+			if (id>0 && data==12) { //in muted
+				_('tiain_'+id).style.display='inherit'
+			}
+			if (id>0 && data==13) { //in on
+				_('tiain_'+id).style.display='none'
+			}
+			if (id>0 && data==14) { //out on
+				_('tiout_'+id).style.display='inherit'
+			}
+			if (id>0 && data==15) { //out muted
+				_('tiout_'+id).style.display='none'
 			}
 		});
 		
@@ -786,12 +815,14 @@
 			if (in_muted) {
 				in_muted=false
 				mong.set_volume(-2, vol_in)
+				mong.send_uicommand(13)
 				_('volpc_in').innerHTML=vol_in+'%'
 				_('mute_in').classList.remove("fa-microphone")
 				_('mute_in').classList.add("fa-microphone-slash")
 			} else {
 				in_muted=true
 				mong.set_volume(-2, 0)
+				mong.send_uicommand(12)
 				_('volpc_in').innerHTML='MUTE'
 				_('mute_in').classList.remove("fa-microphone-slash")
 				_('mute_in').classList.add("fa-microphone")
@@ -801,12 +832,14 @@
 			if (out_muted) {
 				out_muted=false
 				mong.set_volume(-1, vol_out)
+				mong.send_uicommand(15)
 				_('volpc_out').innerHTML=vol_out+'%'
 				_('mute_out').classList.remove("fa-volume-up")
 				_('mute_out').classList.add("fa-volume-off")
 			} else {
 				out_muted=true
 				mong.set_volume(-1, 0)
+				mong.send_uicommand(14)
 				_('volpc_out').innerHTML='MUTE'
 				_('mute_out').classList.remove("fa-volume-off")
 				_('mute_out').classList.add("fa-volume-up")

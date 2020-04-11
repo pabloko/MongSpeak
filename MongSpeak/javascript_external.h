@@ -243,3 +243,11 @@ void mm_say(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pExcepInfo,
 	if (pDispParams->cArgs == 1 && pDispParams->rgvarg[0].vt == VT_BSTR)
 		CreateThread(NULL, NULL, tts, pDispParams->rgvarg[0].bstrVal, NULL, NULL);
 }
+
+void mm_send_uicommand(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pExcepInfo, UINT* puArgErr) {
+	if (pDispParams->cArgs == 1 && pDispParams->rgvarg[0].vt == VT_I4) {
+		vector<uint8_t> pv;
+		rpc_write_short(&pv, pDispParams->rgvarg[0].intVal);
+		g_network->Send(RPCID::UI_COMMAND, &pv);
+	}
+}
