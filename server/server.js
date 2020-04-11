@@ -146,13 +146,12 @@ join_rpc(RPCID.USER_CHAT,(d, ws)=>{
 join_rpc(RPCID.UI_COMMAND,(d, ws)=>{
 	if (!ws['guid']) {ws.close(); return;}
 	if (d.length<2) return;
-	console.log(ws.id,d)
 	var pkthead = Buffer.alloc(3);
 	pkthead.writeUInt8(RPCID.UI_COMMAND,0)
 	pkthead.writeUInt16LE(ws.id,1)
 	var message = Buffer.concat([pkthead,d])
 	wss.clients.forEach((client) => {
-		if (/*client !== ws &&*/ client.readyState === 1 && client.room_id == ws['room_id']) {
+		if (/*client !== ws &&*/ client.readyState === 1 /*&& client.room_id == ws['room_id']*/) {
 			client.send(message);
 		}
 	});

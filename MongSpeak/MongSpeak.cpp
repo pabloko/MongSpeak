@@ -42,6 +42,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	g_jsObject->AddMethod(L"set_inputmethod", mm_set_inputmethod);
 	g_jsObject->AddMethod(L"findkeybind", mm_findkeybind);
 	g_jsObject->AddMethod(L"say", mm_say);
+	g_jsObject->AddMethod(L"send_uicommand", mm_send_uicommand);
 	g_jsObject->AddRef();
 	WebformDispatchImpl* webformDispatchImpl = new WebformDispatchImpl(g_jsObject);
 	ReleaseDelete release_webformDispatchImpl(webformDispatchImpl);
