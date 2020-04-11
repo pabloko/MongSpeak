@@ -1,5 +1,5 @@
 var fs = require('fs');
-const PORT = 8083;
+const PORT = process.env.PORT || 80;
 
 //var privateKey = fs.readFileSync( '../ssl.key' );
 //var certificate = fs.readFileSync( '../ssl.fullchain.cer' );

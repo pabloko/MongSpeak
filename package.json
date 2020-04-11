@@ -12,5 +12,8 @@
     "start": "node server/server.js"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "engines": {
+    "node": "12.16.1"
+  }
 }
