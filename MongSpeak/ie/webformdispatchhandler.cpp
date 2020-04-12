@@ -1,14 +1,14 @@
 #include "webformdispatchhandler.h"
 
-void WebformDispatchHandler::BeforeNavigate(std::string url, bool *cancel)
+void WebformDispatchHandler::BeforeNavigate(std::wstring url, bool *cancel)
 {
 	*cancel = false;
 }
 
-void WebformDispatchHandler::DocumentComplete(std::string url)
+void WebformDispatchHandler::DocumentComplete(std::wstring url)
 {
 }
 
-void WebformDispatchHandler::NavigateComplete(std::string url, WebForm *webForm)
+void WebformDispatchHandler::NavigateComplete(std::wstring url, WebForm *webForm)
 {
 }

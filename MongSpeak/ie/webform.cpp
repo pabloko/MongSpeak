@@ -595,23 +595,10 @@ HRESULT STDMETHODCALLTYPE WebForm::Invoke(DISPID dispIdMember, REFIID riid,
 	switch (dispIdMember) { // DWebBrowserEvents2
 		case DISPID_BEFORENAVIGATE2: {
 			BSTR bstrUrl = pDispParams->rgvarg[5].pvarVal->bstrVal;
-			char *lpstrUrl = NULL;
-
-			lpstrUrl = BSTRToLPSTR(bstrUrl, lpstrUrl);
-			if (lpstrUrl == NULL) {
-				break;
-			}
-
-			std::string url = lpstrUrl;
-			delete [] lpstrUrl;
-
 			bool cancel = false;
-
-			dispatchHandler->BeforeNavigate(url, &cancel);
-
+			dispatchHandler->BeforeNavigate(bstrUrl, &cancel);
 			// Set Cancel parameter to TRUE to cancel the current event
 			*(((*pDispParams).rgvarg)[0].pboolVal) = cancel ? TRUE : FALSE;
-
 			break;
 		}
 		case DISPID_DOCUMENTCOMPLETE:
@@ -619,18 +606,7 @@ HRESULT STDMETHODCALLTYPE WebForm::Invoke(DISPID dispIdMember, REFIID riid,
 			break;
 		case DISPID_NAVIGATECOMPLETE2: {
 			BSTR bstrUrl = pDispParams->rgvarg[0].pvarVal->bstrVal;
-			char *lpstrUrl = NULL;
-
-			lpstrUrl = BSTRToLPSTR(bstrUrl, lpstrUrl);
-			if (lpstrUrl == NULL) {
-				break;
-			}
-
-			std::string url = lpstrUrl;
-			delete [] lpstrUrl;
-
-			dispatchHandler->NavigateComplete(url, this);
-
+			dispatchHandler->NavigateComplete(bstrUrl, this);
 			break;
 		}
 		case DISPID_AMBIENT_DLCONTROL:
@@ -760,7 +736,7 @@ HRESULT WebForm::DequeueCallToEvent() {
 		params.cNamedArgs = 3;
 		hr = winEx->InvokeEx(dispid, LOCALE_USER_DEFAULT, DISPATCH_METHOD, &params, NULL, NULL, NULL);
 		//SysFreeString(custObj);
-		delete[] params.rgvarg;
+		//delete[] params.rgvarg;
 
 		vec_rpc_id.erase(vec_rpc_id.begin());
 		vec_pkt_id.erase(vec_pkt_id.begin());

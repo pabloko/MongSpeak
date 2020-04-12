@@ -7,9 +7,9 @@ class WebForm;
 
 class WebformDispatchHandler {
 public:
-	virtual void BeforeNavigate(std::string url, bool *cancel);
-	virtual void DocumentComplete(std::string url);
-	virtual void NavigateComplete(std::string url, WebForm *webForm);
+	virtual void BeforeNavigate(std::wstring url, bool *cancel);
+	virtual void DocumentComplete(std::wstring url);
+	virtual void NavigateComplete(std::wstring url, WebForm *webForm);
 };
 
 #endif
