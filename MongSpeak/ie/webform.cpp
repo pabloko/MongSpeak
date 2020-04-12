@@ -319,11 +319,16 @@ public:
 
 	virtual HRESULT STDMETHODCALLTYPE PreHandleEvent(DISPID inEvtDispId, IHTMLEventObj *pIEventObj) {
 		if (inEvtDispId == DISPID_KEYPRESS) {
+			IHTMLElement* ele = NULL;
+			if (FAILED(pIEventObj->get_srcElement(&ele))) return S_FALSE;
 			VARIANT_BOOL bControl = 0;
+			if (FAILED(ele->get_isTextEdit(&bControl))) return S_FALSE;
+			if (!bControl) return S_FALSE;
+			bControl = 0;
 			if (FAILED(pIEventObj->get_ctrlKey(&bControl))) return S_FALSE;
 			if (bControl) {
 				long keycode = 0;
-				pIEventObj->get_keyCode(&keycode);
+				if (FAILED(pIEventObj->get_keyCode(&keycode))) return S_FALSE;
 				if (keycode == 3)
 					m_webform->GetBrowser()->ExecWB(OLECMDID_COPY, OLECMDEXECOPT_DONTPROMPTUSER, NULL, NULL);
 				if (keycode == 22)
@@ -409,26 +414,17 @@ void WebForm::AddCustomObject(IDispatch *custObj, std::string name)
 	}
 
 	IHTMLEditServices* m_pServices = NULL;;
-
-	if (m_pServices != (IHTMLEditServices *)NULL)
-		m_pServices->Release();
-
 	IServiceProvider *pTemp;
 	TIHTMLEditDesigner* cdes = new TIHTMLEditDesigner(this);
 	if (doc == (IHTMLDocument2 *)NULL)
 		return;
-
 	doc->QueryInterface(IID_IServiceProvider, (void **)&pTemp);
-
 	if (pTemp != (IServiceProvider *)NULL)
 	{
-		pTemp->QueryService(SID_SHTMLEditServices, IID_IHTMLEditServices,
-			(void **)&m_pServices);
-
+		pTemp->QueryService(SID_SHTMLEditServices, IID_IHTMLEditServices, (void **)&m_pServices);
 		if (m_pServices != (IHTMLEditServices *)NULL)
 		{
 			m_pServices->AddDesigner(cdes);
-			return;
 		}
 	}
 	doc->Release();
