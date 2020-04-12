@@ -11,12 +11,23 @@ public:
 	CNetwork() {
 		lHeartBeatTick = GetTickCount();
 		bRequestDisconnect = FALSE;
+		szUserName = new wchar_t[50];
+		DWORD siz = 50;
+		GetComputerName(szUserName, &siz);
 		hTask = CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)CNetwork::NetworkThread, this, NULL, NULL);
 	}
 	~CNetwork() {
 		TerminateThread(hTask, 0);
 		Disconnect();
 		hTask = NULL;
+		delete[] szUserName;
+	}
+	void SetUserName(wchar_t* name) {
+		if (wcslen(name) == 0 || wcslen(name) >= 50) return;
+		swprintf_s(szUserName, 50, L"%s", name);
+	}
+	wchar_t* GetUserName() {
+		return szUserName;
 	}
 	DWORD NetworkLoop() {
 		Sleep(1000);
@@ -53,11 +64,7 @@ public:
 					//todo: newly connected socket
 					string ident(&hwProfileInfo.szHwProfileGuid[1]);
 					Send(RPCID::USER_IDENT, &ident);
-					
-					DWORD siz = 30;
-					wchar_t name[30];
-					GetComputerName(name, &siz);
-					Send(RPCID::USER_JOIN, (char*)name, wcslen(name)*2);
+					Send(RPCID::USER_JOIN, (char*)szUserName, wcslen(szUserName)*2);
 				}
 				bConnected = TRUE;
 				try {
@@ -138,13 +145,15 @@ public:
 			return;
 		} break;
 		}
-		wchar_t* rest = new wchar_t[((message.size() - 3) / 2) + 1];
+		/*wchar_t* rest = new wchar_t[((message.size() - 3) / 2) + 1];
 		memcpy(rest, message.data() + 3, (message.size() - 3));
-		rest[(message.size() - 3) / 2] = L'\0';
+		rest[(message.size() - 3) / 2] = L'\0'; */
 		//g_jsStack.push_back(wstring_format(L"onEvent(%d, %d, '%s');", message.at(0), sessid, rest));
-		//wprintf(L"%d %d %s\n", message.at(0), sessid, rest);
-		g_webWindow->webForm->QueueCallToEvent(message.at(0), sessid, rest);
-		delete[] rest;
+		vector<uint8_t> msg(message);
+		wchar_t* rest = (wchar_t*)&msg.data()[3]; rest[(msg.size()-3)/2] = L'\0';
+		//wprintf(L"%d %d %s\n", message2.at(0), sessid, rest);
+		g_webWindow->webForm->QueueCallToEvent(msg.at(0), sessid, rest);
+		//delete[] rest;
 	}
 	void ConnectServer(const char* url) {
 		//Disconnect();
@@ -191,4 +200,5 @@ private:
 	LONG lHeartBeatTick;
 	BOOL bRequestDisconnect;
 	char* szServerUrl;
+	wchar_t* szUserName;
 };

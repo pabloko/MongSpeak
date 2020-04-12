@@ -259,3 +259,11 @@ void mm_is_iconic(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pExce
 	else
 		pVarResult->intVal = 0;
 }
+
+void mm_set_username(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pExcepInfo, UINT* puArgErr) {
+	if (pDispParams->cArgs == 1 && pDispParams->rgvarg[0].vt == VT_BSTR) {
+		g_network->SetUserName(pDispParams->rgvarg[0].bstrVal);
+	}
+	pVarResult->vt = VT_BSTR;
+	pVarResult->bstrVal = SysAllocString(g_network->GetUserName());
+}

@@ -87,24 +87,23 @@ join_rpc(RPCID.USER_JOIN,(d, ws)=>{
 		return;
 	}
 	if (ws.name) return;
-	var name = d.toString('utf8');
-	ws['name']=name;
-	var pkthead = Buffer.alloc(3+name.length);
+	//var name = d.toString('ucs2');
+	ws['name']=d;
+	var pkthead = Buffer.alloc(3);
 	pkthead.writeUInt8(RPCID.USER_JOIN,0)
 	pkthead.writeUInt16LE(ws.id,1)
-	pkthead.write(name,3)
-	ws.send(pkthead) //stream the new client to own client
+	var message = Buffer.concat([pkthead,d])
+	ws.send(message) //stream the new client to own client
 	
 	wss.clients.forEach((client) => {
 		if (client !== ws && client.readyState === 1) {
 			
 			if (client.name && client.id && client.room_id !== null) {
-				var pkthead2 = Buffer.alloc(3+client.name.length);
+				var pkthead2 = Buffer.alloc(3);
 				pkthead2.writeUInt8(RPCID.USER_JOIN,0)
 				pkthead2.writeUInt16LE(client.id,1)
-				pkthead2.write(client.name,3)
-				ws.send(pkthead2) //stream the remote client to new client
-				client.send(pkthead) //stream to the remote client the new client
+				ws.send(Buffer.concat([pkthead2,client.name])) //stream the remote client to new client
+				client.send(message) //stream to the remote client the new client
 				
 				if (client.room_id != 0) {
 					var pktroom = Buffer.alloc(5);

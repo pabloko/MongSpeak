@@ -15,7 +15,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 	HRESULT hr = S_OK;
-	//ConsoleDebugger dbg;	
+	///ConsoleDebugger dbg;	
 	SetProcessDPIAware();
 	if (GetCurrentHwProfileA(&hwProfileInfo) != NULL)
 		hwProfileInfo.szHwProfileGuid[strlen(&hwProfileInfo.szHwProfileGuid[1])] = '\0';
@@ -44,6 +44,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	g_jsObject->AddMethod(L"say", mm_say);
 	g_jsObject->AddMethod(L"send_uicommand", mm_send_uicommand);
 	g_jsObject->AddMethod(L"is_iconic", mm_is_iconic);
+	g_jsObject->AddMethod(L"set_username", mm_set_username);
 	g_jsObject->AddRef();
 	WebformDispatchImpl* webformDispatchImpl = new WebformDispatchImpl(g_jsObject);
 	ReleaseDelete release_webformDispatchImpl(webformDispatchImpl);

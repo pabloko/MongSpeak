@@ -31,7 +31,7 @@
 				background:linear-gradient(to bottom,#fff,#e0e0e0);
 			}
 
-            #addressinput {
+            #addressinput, #usernameinpt {
                 width: 100%;
                 border: 1px solid #777;
             }
@@ -214,8 +214,8 @@
 				display: flex;
 				justify-content:space-between;
 				align-items: center;
-				padding-top: 3px;
-				padding-bottom: 3px;
+				padding-top: 1px;
+				padding-bottom: 1px;
 			}
 			.favip:hover{
 				background:rgb(201, 201, 201);
@@ -486,6 +486,10 @@
         <div id="form">
             <div id="formfields">
                 <i id="formsettings" class="settings fa fa-cog" style="cursor:pointer;"></i>
+                <label>Username:</label>
+                </br>
+                <input type="text" id="usernameinpt" value="" placeholder="" />
+                </br>
                 <label>Server IP:</label>
                 </br>
                 <input type="text" id="addressinput" value="mong-speak.herokuapp.com" placeholder="127.0.0.1:8083" />
@@ -580,7 +584,7 @@
 
 		window['self'] = {};
 		var preferences = null;
-	
+
 		setTimeout(function(){
 			log("getting devices");
 			var devices = JSON.parse('['+mong.list_devices(0)+']');
@@ -920,16 +924,16 @@
 		});
 		
 
+        //Obtengo json de regedit
 		preferences = JSON.parse(get_preferences("mong"));
 
 		//Initialize preferences
-		if(preferences == null){
-			//alert("preferences nul")
-			preferences = {
-				ip_history: []
-			};
-		}else{
-			//alert("preferences not nul")
+		if(preferences != null){
+		    //alert("preferences not nul")
+		    if (preferences.username !== null) {
+		        _("usernameinpt").value = set_username(preferences.username);
+		    }
+
 			if(preferences.ip_history.length>0){
 				iphistory.style.display = "table";
 				for(var i = 0; i < preferences.ip_history.length; i++){
@@ -1020,7 +1024,9 @@
 		//Connect
 		connectbtn.onclick = function(){
 			if(/*userinput && */addressinput){
-				if(/*userinput.value != "" && */addressinput.value != ""){
+			    if (/*userinput.value != "" && */addressinput.value != "") {
+			        preferences.username = set_username(_("usernameinpt").value);
+			        set_preferences("mong", JSON.stringify(preferences));
 					connect(addressinput.value);
 					if(preferences){
 						if(preferences.ip_history.length>0){
@@ -1035,8 +1041,7 @@
 							}
 						}else preferences.ip_history.push(addressinput.value);
 					}
-
-					set_preferences("mong", JSON.stringify(preferences));
+					
 				}
 			}
 		};
@@ -1147,6 +1152,10 @@
 
 		function is_iconic() {
 		    return mong.is_iconic();
+		}
+
+		function set_username(username) {
+		    return mong.set_username(username);
 		}
 		
 		var nibbletyping=false;
