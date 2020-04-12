@@ -321,21 +321,20 @@ public:
 		if (inEvtDispId == DISPID_KEYPRESS) {
 			IHTMLElement* ele = NULL;
 			if (FAILED(pIEventObj->get_srcElement(&ele))) return S_FALSE;
+			VARIANT_BOOL bIsEdit = 0;
+			if (FAILED(ele->get_isTextEdit(&bIsEdit))) return S_FALSE;
 			VARIANT_BOOL bControl = 0;
-			if (FAILED(ele->get_isTextEdit(&bControl))) return S_FALSE;
-			if (!bControl) return S_FALSE;
-			bControl = 0;
 			if (FAILED(pIEventObj->get_ctrlKey(&bControl))) return S_FALSE;
 			if (bControl) {
 				long keycode = 0;
 				if (FAILED(pIEventObj->get_keyCode(&keycode))) return S_FALSE;
 				if (keycode == 3)
 					m_webform->GetBrowser()->ExecWB(OLECMDID_COPY, OLECMDEXECOPT_DONTPROMPTUSER, NULL, NULL);
-				if (keycode == 22)
+				if (keycode == 22 && bIsEdit)
 					m_webform->GetBrowser()->ExecWB(OLECMDID_PASTE, OLECMDEXECOPT_DONTPROMPTUSER, NULL, NULL);
-				if (keycode == 24)
+				if (keycode == 24 && bIsEdit)
 					m_webform->GetBrowser()->ExecWB(OLECMDID_CUT, OLECMDEXECOPT_DONTPROMPTUSER, NULL, NULL);
-				if (keycode == 1)
+				if (keycode == 1 && bIsEdit)
 					m_webform->GetBrowser()->ExecWB(OLECMDID_SELECTALL, OLECMDEXECOPT_DONTPROMPTUSER, NULL, NULL);
 			}
 		}
