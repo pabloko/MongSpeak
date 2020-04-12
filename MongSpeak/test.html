@@ -253,10 +253,13 @@
             #user > .emoji {
                 width: 17px;
             }
-			
-			#panels{
-				height: calc(100% - 40px);
-			}
+            .usrchatname .emoji {
+                width: 12px;
+            }
+
+            #panels {
+                height: calc(100% - 40px);
+            }
 
             #left {
                 position: relative;
@@ -746,7 +749,7 @@
 				}
 			}
 			
-			li.innerHTML = "<small><b>" + twemoji.parse(username) + "</b> (" + new Date().toLocaleTimeString() + ")</small><br/>" + twemoji.parse(DOMPurify.sanitize(data));
+			li.innerHTML = "<small class='usrchatname'><b>" + twemoji.parse(username) + "</b> (" + new Date().toLocaleTimeString() + ")</small><br/>" + twemoji.parse(DOMPurify.sanitize(data));
 			var currentchat = document.getElementById("chatul_" + window['self']['room']);
 			
 			if (id != window['self'].id) {
