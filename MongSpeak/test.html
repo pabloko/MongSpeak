@@ -691,7 +691,7 @@
 				leftlist.appendChild(li);
 			
 			//Nav
-			if(user.innerText == "") {
+			if(user.innerText == "" || user.innerText == null) {
 				form.style.display = "none";
 				app.style.display = "block";
 				user.innerText = data;
@@ -738,10 +738,10 @@
 			li.innerHTML = "<small><b>"+username + "</b> ("+new Date().toLocaleTimeString()+")</small><br/>" + twemoji.parse(DOMPurify.sanitize(data));
 			var currentchat = document.getElementById("chatul_" + window['self']['room']);
 			
-			if (id != window['self'].id && is_iconic())
-				audio.play();
-			else
-				li.style.textAlign = 'right';
+			if (id != window['self'].id) {
+			    if (is_iconic()) audio.play();
+			} else
+			    li.style.textAlign = 'right';
 				
 			if (typers[id]) {
 				clearTimeout(typers[id])
@@ -1048,7 +1048,7 @@
 			form.style.display = "flex";
 			app.style.display = "none";
 			//Reset data
-			window['self'] = {};
+			delete window['self'];
 			clients = [];
 			user.innerText = "";
 			leftlist.innerHTML = "";
