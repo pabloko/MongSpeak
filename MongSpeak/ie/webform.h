@@ -53,6 +53,7 @@ public:
 	~WebForm();
 	void create(HWND hWndParent, HINSTANCE hInstance, UINT id, bool showScrollbars);
 	void CloseThread();
+	IWebBrowser2* GetBrowser();
 	void Close();
 	void GoMem(wchar_t* data);
 	void Go(const char* ws);

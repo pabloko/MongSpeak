@@ -58,13 +58,11 @@ void WebForm::setupOle()
 	if (cpc != 0) {
 		IConnectionPoint *cp = 0;
 		cpc->FindConnectionPoint(DIID_DWebBrowserEvents2, &cp);
-
 		if (cp != 0) {
 			cp->Advise(this, &cookie);
 			cp->Release();
 			connected = true;
 		}
-
 		cpc->Release();
 	}
 
@@ -72,7 +70,6 @@ void WebForm::setupOle()
 		iole->Release();
 		return;
 	}
-
 	iole->QueryInterface(IID_IWebBrowser2, (void**)&ibrowser);
 	iole->Release();
 }
@@ -236,11 +233,16 @@ IHTMLDocument2 *WebForm::GetDoc()
 	if (dispatch == NULL) {
 		return NULL;
 	}
-
+	
 	IHTMLDocument2 *doc;
 	dispatch->QueryInterface(IID_IHTMLDocument2, (void**)&doc);
 	dispatch->Release();
 	return doc;
+}
+
+IWebBrowser2* WebForm::GetBrowser() {
+	if (ibrowser == nullptr) return NULL;
+	return ibrowser;
 }
 
 void WebForm::RunJSFunction(std::string cmd)
@@ -292,6 +294,67 @@ void WebForm::RunJSFunctionW(std::wstring cmd)
 	}
 }
 
+class TIHTMLEditDesigner : public IHTMLEditDesigner
+{
+public:
+	virtual HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void __RPC_FAR *__RPC_FAR *ppvObject) {
+		HRESULT hrRet = S_OK;
+		*ppvObject = NULL;
+		if (IsEqualIID(riid, IID_IUnknown))
+			*ppvObject = (IUnknown *)this;
+		else if (IsEqualIID(riid, IID_IHTMLEditDesigner))
+			*ppvObject = (IHTMLEditDesigner *)this;
+		else
+			hrRet = E_NOINTERFACE;
+		if (S_OK == hrRet)
+			((IUnknown *)*ppvObject)->AddRef();
+		return hrRet;
+	}
+	virtual ULONG   STDMETHODCALLTYPE AddRef(void) {
+		return ++m_uRefCount;
+	};
+	virtual ULONG   STDMETHODCALLTYPE Release(void) {
+		return --m_uRefCount;
+	};
+
+	virtual HRESULT STDMETHODCALLTYPE PreHandleEvent(DISPID inEvtDispId, IHTMLEventObj *pIEventObj) {
+		if (inEvtDispId == DISPID_KEYPRESS) {
+			VARIANT_BOOL bControl = 0;
+			if (FAILED(pIEventObj->get_ctrlKey(&bControl))) return S_FALSE;
+			if (bControl) {
+				long keycode = 0;
+				pIEventObj->get_keyCode(&keycode);
+				if (keycode == 3)
+					m_webform->GetBrowser()->ExecWB(OLECMDID_COPY, OLECMDEXECOPT_DONTPROMPTUSER, NULL, NULL);
+				if (keycode == 22)
+					m_webform->GetBrowser()->ExecWB(OLECMDID_PASTE, OLECMDEXECOPT_DONTPROMPTUSER, NULL, NULL);
+				if (keycode == 24)
+					m_webform->GetBrowser()->ExecWB(OLECMDID_CUT, OLECMDEXECOPT_DONTPROMPTUSER, NULL, NULL);
+				if (keycode == 1)
+					m_webform->GetBrowser()->ExecWB(OLECMDID_SELECTALL, OLECMDEXECOPT_DONTPROMPTUSER, NULL, NULL);
+			}
+		}
+		return S_FALSE;
+	};
+	virtual HRESULT STDMETHODCALLTYPE PostHandleEvent(DISPID inEvtDispId, IHTMLEventObj *pIEventObj) {
+		return S_FALSE;
+	};
+	virtual HRESULT STDMETHODCALLTYPE TranslateAccelerator(DISPID inEvtDispId, IHTMLEventObj *pIEventObj) {
+		return S_FALSE;
+	};
+	virtual HRESULT STDMETHODCALLTYPE PostEditorEventNotify(DISPID inEvtDispId, IHTMLEventObj *pIEventObj) {
+		return S_FALSE;
+	};
+
+	TIHTMLEditDesigner(WebForm* wf) : m_webform(wf) {};
+	~TIHTMLEditDesigner() {};
+
+private:
+	ULONG m_uRefCount = 0;
+	WebForm* m_webform;
+};
+
+
 void WebForm::AddCustomObject(IDispatch *custObj, std::string name)
 {
 	IHTMLDocument2 *doc = GetDoc();
@@ -302,7 +365,7 @@ void WebForm::AddCustomObject(IDispatch *custObj, std::string name)
 
 	IHTMLWindow2 *win = NULL;
 	doc->get_parentWindow(&win);
-	doc->Release();
+	
 
 	if (win == NULL) {
 		return;
@@ -344,6 +407,31 @@ void WebForm::AddCustomObject(IDispatch *custObj, std::string name)
 	if (FAILED(hr)) {
 		return;
 	}
+
+	IHTMLEditServices* m_pServices = NULL;;
+
+	if (m_pServices != (IHTMLEditServices *)NULL)
+		m_pServices->Release();
+
+	IServiceProvider *pTemp;
+	TIHTMLEditDesigner* cdes = new TIHTMLEditDesigner(this);
+	if (doc == (IHTMLDocument2 *)NULL)
+		return;
+
+	doc->QueryInterface(IID_IServiceProvider, (void **)&pTemp);
+
+	if (pTemp != (IServiceProvider *)NULL)
+	{
+		pTemp->QueryService(SID_SHTMLEditServices, IID_IHTMLEditServices,
+			(void **)&m_pServices);
+
+		if (m_pServices != (IHTMLEditServices *)NULL)
+		{
+			m_pServices->AddDesigner(cdes);
+			return;
+		}
+	}
+	doc->Release();
 }
 
 void WebForm::DocumentComplete(const wchar_t *)
@@ -436,9 +524,6 @@ LRESULT CALLBACK WebForm::WebformWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPA
 LRESULT WebForm::InstanceWndProc(UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	switch (msg) {
-		case WM_KEYDOWN:
-			wprintf(L"AA");
-		break;
 		case WM_CREATE: {
 			CREATESTRUCT *cs = (CREATESTRUCT*)lParam;
 
@@ -511,6 +596,7 @@ HRESULT STDMETHODCALLTYPE WebForm::Invoke(DISPID dispIdMember, REFIID riid,
 	LCID lcid, WORD wFlags, DISPPARAMS *pDispParams, VARIANT *pVarResult,
 	EXCEPINFO *pExcepInfo, UINT *puArgErr)
 {
+	//wprintf(L"DISPID %d\n", dispIdMember);
 	switch (dispIdMember) { // DWebBrowserEvents2
 		case DISPID_BEFORENAVIGATE2: {
 			BSTR bstrUrl = pDispParams->rgvarg[5].pvarVal->bstrVal;
