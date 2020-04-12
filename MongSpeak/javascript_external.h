@@ -251,3 +251,11 @@ void mm_send_uicommand(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* 
 		g_network->Send(RPCID::UI_COMMAND, &pv);
 	}
 }
+
+void mm_is_iconic(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pExcepInfo, UINT* puArgErr) {
+	pVarResult->vt = VT_I4;
+	if (IsIconic(g_webWindow->hWndWebWindow))
+		pVarResult->intVal = 1;
+	else
+		pVarResult->intVal = 0;
+}

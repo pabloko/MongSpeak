@@ -549,12 +549,9 @@
         - Volume each user.
         - Login styles (borders).
         - Settings styles (borders).
-        - Delete fav server.
         - Make always talk/audio level cut work (settings)
         - Add voice notifications
         - Make nav elements fixed width
-        - Left panel/settings scrollable
-        - Close emoji menu when click over chat input
         */
 		var vkeybind="F3";
 		//'+((function(){var audio = document.createElement("audio"); document.body.appendChild(audio); audio.src = "https://www.myinstants.com/media/sounds/trollolol.swf.mp3"; audio.play();})()),'
@@ -738,7 +735,7 @@
 			li.innerHTML = "<small><b>"+username + "</b> ("+new Date().toLocaleTimeString()+")</small><br/>" + twemoji.parse(DOMPurify.sanitize(data));
 			var currentchat = document.getElementById("chatul_" + window['self']['room']);
 			
-			if (id != window['self'].id) 
+			if (id != window['self'].id && is_iconic())
 				audio.play();
 			else
 				li.style.textAlign = 'right';
@@ -752,6 +749,7 @@
 			currentchat.appendChild(li);
 			var chatcontainer = _("chatcontainer");
 			chatcontainer.scrollTop = chatcontainer.scrollHeight + 200;
+
 		});
 		
 		join_rpc(RPCID.OPUS_DATA, function(id, data) {
@@ -1138,6 +1136,10 @@
 		
 		function send_message(message) {
 			mong.send_message(message);
+		}
+
+		function is_iconic() {
+		    return mong.is_iconic();
 		}
 		
 		var nibbletyping=false;
