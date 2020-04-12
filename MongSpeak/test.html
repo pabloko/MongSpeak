@@ -698,6 +698,7 @@
 				window['self'].id = id;
 				window['self'].room = 0;
 				window['self'].name = data;
+				window['self']['chat'] = _("chat_0");
 			}
 		});
 		
@@ -749,8 +750,12 @@
 			}
 			
 			currentchat.appendChild(li);
-			var chatcontainer = _("chatcontainer");
+			var chatcontainer = window['self']['chat'].firstChild;
+			var isScrolledToBottom = chatcontainer.scrollHeight - chatcontainer.clientHeight <= chatcontainer.scrollTop + 1;
+			if (isScrolledToBottom)
+			    chatcontainer.scrollTop = chatcontainer.scrollHeight - chatcontainer.clientHeight;
 			chatcontainer.scrollTop = chatcontainer.scrollHeight + 200;
+
 
 		});
 		
@@ -874,8 +879,6 @@
 				        }
 				        e.target.value = "";
 
-				        
-
 				        if (_('emojicontainer').style.display == "block")
 				            _('emojicontainer').style.display = "none";
 				    }
@@ -912,6 +915,8 @@
 			    if (chats[i].id == "chat_" + data) chats[i].style.display = "block";
                 else chats[i].style.display = "none";
 			}
+
+			window['self']['chat'] = _("chat_" + data);
 		});
 		
 
@@ -965,7 +970,7 @@
 			}
 		}
 
-		//Chat emoji parse
+		//Chat & emoji parse
 		_('emojicontainer').onmouseenter = function () {
 		    _('emojicontainer')['over'] = true;
 		}
