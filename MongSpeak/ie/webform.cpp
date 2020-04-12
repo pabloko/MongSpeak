@@ -678,7 +678,7 @@ HRESULT WebForm::DequeueCallToEvent() {
 		params.cArgs = 3;
 		params.cNamedArgs = 3;
 		hr = winEx->InvokeEx(dispid, LOCALE_USER_DEFAULT, DISPATCH_METHOD, &params, NULL, NULL, NULL);
-		SysFreeString(custObj);
+		//SysFreeString(custObj);
 		delete[] params.rgvarg;
 
 		vec_rpc_id.erase(vec_rpc_id.begin());
