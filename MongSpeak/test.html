@@ -245,10 +245,13 @@
                 color: darkred;
             }
                 
-            #userli {
+            #userli, #user {
                 display: flex;
                 justify-content: center;
                 align-items: center;
+            }
+            #user > .emoji {
+                width: 17px;
             }
 			
 			#panels{
@@ -293,6 +296,10 @@
 				border-bottom: 1px solid grey;
 				cursor:pointer;
 			}
+                
+            #leftlist .emoji {
+                width: 12px;
+            }
 			
 			/* rooms */
 			.roomtitle{
@@ -680,7 +687,7 @@
 			ti.style.margin='3px';
 			ti.style.marginRight='5px';
 			ti.id = "talk_" + id;
-			span.innerText = data;
+			span.innerHTML = twemoji.parse(data);
 			li.id = "user_" + id;
 			li.classList.add('user')
 			span.appendChild(ty)
@@ -698,7 +705,7 @@
 			if(user.innerText == "" || user.innerText == null) {
 				form.style.display = "none";
 				app.style.display = "block";
-				user.innerText = data;
+				user.innerHTML = twemoji.parse(data);
 				window['self'].id = id;
 				window['self'].room = 0;
 				window['self'].name = data;
@@ -739,7 +746,7 @@
 				}
 			}
 			
-			li.innerHTML = "<small><b>"+username + "</b> ("+new Date().toLocaleTimeString()+")</small><br/>" + twemoji.parse(DOMPurify.sanitize(data));
+			li.innerHTML = "<small><b>" + twemoji.parse(username) + "</b> (" + new Date().toLocaleTimeString() + ")</small><br/>" + twemoji.parse(DOMPurify.sanitize(data));
 			var currentchat = document.getElementById("chatul_" + window['self']['room']);
 			
 			if (id != window['self'].id) {
