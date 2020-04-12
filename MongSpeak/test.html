@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en">
 	<head>
 		<meta charset="UTF-8">
@@ -263,6 +263,7 @@
 				border-right: 1px solid grey;
 				height:100%;
 				overflow: hidden;
+                overflow-y: auto;
 			}
 			
 			#center{
@@ -279,6 +280,7 @@
 				margin: 0px;
 				padding: 0px;
 				list-style: none;
+                height:100%;
 			}
 			
 			#leftlist li{
@@ -872,11 +874,10 @@
 				        }
 				        e.target.value = "";
 
-				        var chatcontainer = e.target['chatcontainer'];
-				        var isScrolledToBottom = chatcontainer.scrollHeight - chatcontainer.clientHeight <= chatcontainer.scrollTop + 1;
-				        if (isScrolledToBottom)
-				            chatcontainer.scrollTop = chatcontainer.scrollHeight - chatcontainer.clientHeight;
-				        chatcontainer.scrollTop = chatcontainer.scrollHeight + 200;
+				        
+
+				        if (_('emojicontainer').style.display == "block")
+				            _('emojicontainer').style.display = "none";
 				    }
 				});
 
@@ -964,7 +965,17 @@
 			}
 		}
 
-        //Chat emoji parse
+		//Chat emoji parse
+		_('emojicontainer').onmouseenter = function () {
+		    _('emojicontainer')['over'] = true;
+		}
+		_('emojicontainer').onmouseleave = function () {
+		    if (_('emojicontainer')['over'] == true) {
+		        _('emojicontainer').style.display = "none";
+		        _('emojicontainer')['over'] = false;
+		    }
+		}
+
 		twemoji.parse(_('emoji-list')[0], { size: 72 });
 		(function (img, metaKey, i) {
 		    function copyToClipboard(e) {
