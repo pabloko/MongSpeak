@@ -45,6 +45,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	g_jsObject->AddMethod(L"send_uicommand", mm_send_uicommand);
 	g_jsObject->AddMethod(L"is_iconic", mm_is_iconic);
 	g_jsObject->AddMethod(L"set_username", mm_set_username);
+	g_jsObject->AddMethod(L"send_vu", mm_send_vu);
 	g_jsObject->AddRef();
 	WebformDispatchImpl* webformDispatchImpl = new WebformDispatchImpl(g_jsObject);
 	ReleaseDelete release_webformDispatchImpl(webformDispatchImpl);

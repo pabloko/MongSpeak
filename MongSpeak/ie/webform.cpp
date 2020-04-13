@@ -323,6 +323,7 @@ public:
 			if (FAILED(pIEventObj->get_srcElement(&ele))) return S_FALSE;
 			VARIANT_BOOL bIsEdit = 0;
 			if (FAILED(ele->get_isTextEdit(&bIsEdit))) return S_FALSE;
+			ele->Release();
 			VARIANT_BOOL bControl = 0;
 			if (FAILED(pIEventObj->get_ctrlKey(&bControl))) return S_FALSE;
 			if (bControl) {
