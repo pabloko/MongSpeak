@@ -1,6 +1,5 @@
 #pragma once
 #include <sapi.h>
-extern CNetwork* g_network;
 
 void mm_log(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pExcepInfo, UINT* puArgErr) {
 	if (pDispParams->cArgs > 0) {
@@ -138,10 +137,10 @@ void mm_findkeybind(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pEx
 void mm_findkeyname(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pExcepInfo, UINT* puArgErr) {
 	pVarResult->vt = VT_NULL;
 	if (pDispParams->cArgs == 1 && pDispParams->rgvarg[0].vt == VT_I4) {
-		WCHAR name[1024];
+		WCHAR name[50];
 		UINT scanCode = MapVirtualKeyW(pDispParams->rgvarg[0].intVal, MAPVK_VK_TO_VSC);
 		LONG lParamValue = (scanCode << 16);
-		int result = GetKeyNameTextW(lParamValue, name, 1024);
+		int result = GetKeyNameTextW(lParamValue, name, 50);
 		if (result > 0)
 		{
 			pVarResult->vt = VT_BSTR;

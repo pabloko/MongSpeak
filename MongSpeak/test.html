@@ -485,9 +485,10 @@
                 <fieldset class="talkconfig" id="devicetalk">
                     <legend>Talk</legend>
                     <input name="ptt" type="radio" /> Always On<br />
-                    <input name="ptt" type="radio" checked /> Push-to-Talk <button style="display:inline;" id="keybind" onclick="findkeybind(this)">F3</button><br />
+                    <input name="ptt" type="radio" checked /> Push-to-Talk <button style="display:inline;" id="keybind" onclick="findkeybind(this); this.innerText='Press any key...';">F3</button><br />
                     <input name="ptt" type="radio" /> Level<br />
-                    <input type="range" min=0 max=100 value=0 id="lvlvol" style="width:100%;margin:0;padding:0;" />
+                    <input type="range" min=1 max=100 value=1 id="lvlvol" style="width:100%;margin:0;padding:0;" />
+					<input type="range" min=1 max=100 value=1 id="plvlvol" onchange="mong.set_inputmethod(parseInt(this.value)*-1)" style="width:100%;margin:0;padding:0;color:yellow;" />
                 </fieldset>
             </div>
 			<br />
@@ -782,6 +783,13 @@
 			if (id == -2) _("upnet").innerHTML=(data/1000).toFixed(2)
 			if (id == -1) _("downnet").innerHTML=(data/1000).toFixed(2)
 			if (id == -3) _("lvlvol").value = data
+			
+			if (id == -5 && parseInt(data) > 0) {
+				_("keybind").innerText = mong.findkeyname(parseInt(data))
+				mong.set_inputmethod(parseInt(data))
+			}
+			
+			
 			if (id>0 && data==11) {
 				_('talk_'+id).classList.remove('fa-circle')
 				_('talk_'+id).classList.add('fa-circle-thin')

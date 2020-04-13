@@ -5,7 +5,7 @@ extern vector<wstring> g_jsStack;
 
 class CAudioStream : CAudioQueue {
 public:
-	CAudioStream() : fVol(1.0f), iInputMethod(VK_F3), bIsInput(FALSE), bSendVu(FALSE), fVuSum(0.0f), lVuCount(0) {
+	CAudioStream() : fVol(1.0f), iInputMethod(VK_F3), bIsInput(FALSE), bSendVu(FALSE), fVuSumMax(0.0f), fVuSumMin(0.0f), lVuCount(0), fTol(0.0f) {
 		pOpus = opus_encoder_create(DEFAULT_SAMPLERATE, OPUS_CHANNELS, OPUS_APPLICATION_VOIP, NULL);
 		opus_encoder_ctl(pOpus, OPUS_SET_BITRATE(DEFAULT_OPUS_BITRATE));
 		opus_encoder_ctl(pOpus, OPUS_SET_PREDICTION_DISABLED(TRUE));
@@ -43,9 +43,9 @@ public:
 		bSendVu = vu;
 	}
 	void DoTask(int len, char* data, WAVEFORMATEX* wf) {
-		if (fVol == 0.0f) {
+		//wprintf(L"%d \n",iInputMethod);
+		if (fVol == 0.0f)
 			return CompareInput(FALSE);
-		}
 		if (!bSendVu && iInputMethod > 0) 
 			if (!GetAsyncKeyState(iInputMethod)) 
 				return CompareInput(FALSE);
@@ -54,22 +54,26 @@ public:
 			for (int i = 0; i < len * wf->nChannels; i++)
 				pData[i] = pData[i] * fVol;
 		if (iInputMethod < 0 || bSendVu) {
-			float fTol = 0.0f;
 			lVuCount += len;
-			for (int i = 0; i < len * wf->nChannels; i = i + wf->nChannels)
-				fVuSum += pow(pData[i + 0], 2);
-			if (lVuCount > (wf->nSamplesPerSec / 30)) {
-				float fTol = sqrt(fVuSum / lVuCount);
-				if (bSendVu)
-					g_jsStack.push_back(wstring_format(L"onEvent(%d, %d, %4.0f);", RPCID::UI_COMMAND, -3, fTol * 100.0f));
-				fVuSum = 0.0f; lVuCount = 0;
+			for (int i = 0; i < len * wf->nChannels; i = i + wf->nChannels) {
+				fVuSumMin = (pData[i + 0] < fVuSumMin ? pData[i + 0] : fVuSumMin);
+				fVuSumMax = (pData[i + 0] > fVuSumMax ? pData[i + 0] : fVuSumMax);
+			}
+			if (lVuCount > (wf->nSamplesPerSec / 20)) {
+				fTol = log2(max(fVuSumMax, -fVuSumMin) / 1.0f) * 6.02;
+				if (fTol < -40.0f) fTol = -40.0f;
+				fTol += 40.0f; fTol = (fTol * 100.0f) / 40.0f;
+				if (bSendVu) 
+					g_jsStack.push_back(wstring_format(L"onEvent(%d, %d, %3.0f);", RPCID::UI_COMMAND, -3, fTol));
+				fVuSumMax = 0.0f; fVuSumMin = 0.0f; lVuCount = 0;
 			}
 			if (iInputMethod < 0) {
-				float tolerance = (iInputMethod * -1) / 100.0f;
-				if (fTol < tolerance) 
+				float tolerance = iInputMethod * -1;
+				if (fTol < tolerance)
 					return CompareInput(FALSE);
 			}
 		}
+			
 		if (bSendVu && iInputMethod > 0) {
 			if (!GetAsyncKeyState(iInputMethod)) 
 				return CompareInput(FALSE);
@@ -87,6 +91,7 @@ private:
 	int iInputMethod;
 	BOOL bIsInput;
 	BOOL bSendVu;
-	DOUBLE fVuSum;
+	DOUBLE fVuSumMax, fVuSumMin;
 	LONG lVuCount;
+	double fTol;
 };
