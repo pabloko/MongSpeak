@@ -481,28 +481,28 @@
             <div id="settingspanellist">
                 <div>
                     <fieldset class="devices" id="devicecapture">
-                        <legend>Input device</legend>
-                        <select class="selectsettings" id="indevices" onchange="mong.set_device(1, this.selectedIndex)"></select>
-                        <input type="range" min=0 max=150 value=100 onchange="set_volume(-2, parseInt(this.value))" style="width:100%;margin:0;padding:0;" />
-                    </fieldset>
+						<legend>Input device</legend>
+						<select class="selectsettings" id="indevices" onchange="mong.set_device(1, this.selectedIndex)"></select>
+						<input type="range" min=0 max=150 value=100 onchange="set_volume(-2, parseInt(this.value))" style="width:100%;margin:0;padding:0;" />
+					</fieldset>
                 </div>
                 <br />
                 <div>
                     <fieldset class="devices" id="devicerender">
-                        <legend>Output device</legend>
-                        <select class="selectsettings" id="outdevices" onchange="mong.set_device(0, this.selectedIndex)"></select>
-                        <input type="range" min=0 max=150 value=100 onchange="set_volume(-1, parseInt(this.value))" style="width:100%;margin:0;padding:0;" />
-                    </fieldset>
+						<legend>Output device</legend>
+						<select class="selectsettings" id="outdevices" onchange="mong.set_device(0, this.selectedIndex)"></select>
+						<input type="range" min=0 max=150 value=100 onchange="set_volume(-1, parseInt(this.value))" style="width:100%;margin:0;padding:0;" />
+					</fieldset>
                 </div>
                 <br />
                 <div>
-                    <fieldset class="talkconfig" id="devicetalk">
-                        <legend>Talk</legend>
-                        <input name="ptt" type="radio" /> Always On<br />
-                        <input name="ptt" type="radio" checked /> Push-to-Talk <button style="display:inline;" id="keybind" onclick="findkeybind(this)">F3</button><br />
-                        <input name="ptt" type="radio" /> Level<br />
-                        <input type="range" min=0 max=100 value=15 onchange="set_volume(0, parseInt(this.value))" style="width:100%;margin:0;padding:0;" />
-                    </fieldset>
+					<fieldset class="talkconfig" id="devicetalk">
+						<legend>Talk</legend>
+						<input name="ptt" type="radio" /> Always On<br />
+						<input name="ptt" type="radio" checked /> Push-to-Talk <button style="display:inline;" id="keybind" onclick="findkeybind(this)">F3</button><br />
+						<input name="ptt" type="radio" /> Level<br />
+						<input type="range" min=0 max=100 value=0 id="lvlvol" style="width:100%;margin:0;padding:0;" />
+					</fieldset>
                 </div>
                 <br />
                 <div>
@@ -817,6 +817,7 @@
 			log('rpc UI_COMMAND: '+id+ " | "+data);
 			if (id == -2) _("upnet").innerHTML=(data/1000).toFixed(2)
 			if (id == -1) _("downnet").innerHTML=(data/1000).toFixed(2)
+			if (id == -3) _("lvlvol").value = data
 			if (id>0 && data==11) {
 				_('talk_'+id).classList.remove('fa-circle')
 				_('talk_'+id).classList.add('fa-circle-thin')
@@ -1083,17 +1084,15 @@
 
         //Settings
 		closesetting.onclick = function () {
+			mong.send_vu(0)
 		    if (settingspanel.style.display == "flex")
 		        settingspanel.style.display = "none";
 		}
 
 		for (var i = 0; i < settings.length; i++) {
 		    settings[i].onclick = function () {
-		        if (settingspanel.style.display == "none"
-                 || settingspanel.style.display == "")
-		            settingspanel.style.display = "flex";
-		        else
-		            settingspanel.style.display = "none";
+				mong.send_vu(1)
+				settingspanel.style.display = "flex";
 		    }
 		}
 

@@ -39,6 +39,7 @@ private:
 	bool hasScrollbars;       // This is read from WS_VSCROLL|WS_HSCROLL at WM_CREATE
 	TCHAR *url;               // This was the url that the user just clicked on
 	TCHAR *kurl;              // Key\0Value\0Key2\0Value2\0\0 arguments for the url just clicked on
+	
 
 	WebformDispatchHandler *dispatchHandler;
 
@@ -48,7 +49,7 @@ private:
 public:
 	IHTMLDocument2 *GetDoc();
 	HWND hWnd;
-
+	BOOL bKeyLookup = FALSE;
 	WebForm(WebformDispatchHandler *wdh);
 	~WebForm();
 	void create(HWND hWndParent, HINSTANCE hInstance, UINT id, bool showScrollbars);

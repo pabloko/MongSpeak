@@ -31,10 +31,10 @@ public:
 	}
 	DWORD NetworkLoop() {
 		Sleep(1000);
-		HANDLE timer;
-		LARGE_INTEGER ft;
-		ft.QuadPart = -(10 * (__int64)10);
-		timer = CreateWaitableTimer(NULL, TRUE, NULL);
+		//HANDLE timer;
+		//LARGE_INTEGER ft;
+		//ft.QuadPart = -(10 * (__int64)10000);
+		//timer = CreateWaitableTimer(NULL, TRUE, NULL);
 		INT rc; WSADATA wsaData;
 		rc = WSAStartup(MAKEWORD(2, 2), &wsaData);
 		if (rc) 
@@ -98,11 +98,11 @@ public:
 				}
 				//todo: not connected
 			}
-			//Sleep(1); 
-			SetWaitableTimer(timer, &ft, 0, NULL, NULL, 0);
-			WaitForSingleObject(timer, INFINITE);
+			Sleep(1); 
+			//SetWaitableTimer(timer, &ft, 0, NULL, NULL, 0);
+			//WaitForSingleObject(timer, INFINITE);
 		}
-		CloseHandle(timer);
+		//CloseHandle(timer);
 		WSACleanup();
 		return S_OK;
 	}
@@ -145,15 +145,11 @@ public:
 			return;
 		} break;
 		}
-		/*wchar_t* rest = new wchar_t[((message.size() - 3) / 2) + 1];
+		wchar_t* rest = new wchar_t[((message.size() - 3) / 2) + 1];
 		memcpy(rest, message.data() + 3, (message.size() - 3));
-		rest[(message.size() - 3) / 2] = L'\0'; */
-		//g_jsStack.push_back(wstring_format(L"onEvent(%d, %d, '%s');", message.at(0), sessid, rest));
-		vector<uint8_t> msg(message);
-		wchar_t* rest = (wchar_t*)&msg.data()[3]; rest[(msg.size()-3)/2] = L'\0';
-		//wprintf(L"%d %d %s\n", message2.at(0), sessid, rest);
-		g_webWindow->webForm->QueueCallToEvent(msg.at(0), sessid, rest);
-		//delete[] rest;
+		rest[(message.size() - 3) / 2] = L'\0'; 
+		g_webWindow->webForm->QueueCallToEvent(message.at(0), sessid, rest);
+		delete[] rest;
 	}
 	void ConnectServer(const char* url) {
 		//Disconnect();
