@@ -10,11 +10,11 @@
 				box-sizing: border-box;
 				font-family:'Open Sans';
 			}
-			html, body{
-				width: 100%;
-				height:100%;
-				margin: 0px;
-			}
+            html, body {
+                width: 100%;
+                height: 100%;
+                margin: 0px;
+            }
 			
 			#form{
 				width: 100%;
@@ -48,12 +48,20 @@
                 align-items: center;
             }
 
-            .emojimenu:hover{
+            .styleseditor {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .emojimenu:hover {
                 cursor: pointer;
             }
 
             #emojicontainer {
                 display: none;
+                -ms-user-select: none;
+                cursor: default;
             }
 
             .emoji-list {
@@ -140,6 +148,11 @@
                 overflow: hidden;
             }
 
+            #settingspanellist {
+                overflow: hidden;
+                overflow-y: auto;
+            }
+
             #settingsscroll {
                 overflow-y: auto;
             }
@@ -172,6 +185,7 @@
                 border-bottom: 1px solid grey;
                 background: linear-gradient(to bottom,#fff,#e0e0e0);
                 -ms-user-select: none;
+                cursor:default;
             }
 			
 			#nav ul{
@@ -326,7 +340,6 @@
 				overflow-y: auto;
 				border-bottom: 1px solid grey;
                 padding: 10px;
-				background:#f0f0f0;
 			}
 			
 			.centerlog ul{
@@ -465,32 +478,57 @@
 	</head>
     <body>
         <div id="settingspanel">
-            <div>
-                <fieldset class="devices" id="devicecapture">
-                    <legend>Input device</legend>
-                    <select class="selectsettings" id="indevices" onchange="mong.set_device(1, this.selectedIndex)"></select>
-                    <input type="range" min=0 max=150 value=100 onchange="set_volume(-2, parseInt(this.value))" style="width:100%;margin:0;padding:0;" />
-                </fieldset>
+            <div id="settingspanellist">
+                <div>
+                    <fieldset class="devices" id="devicecapture">
+                        <legend>Input device</legend>
+                        <select class="selectsettings" id="indevices" onchange="mong.set_device(1, this.selectedIndex)"></select>
+                        <input type="range" min=0 max=150 value=100 onchange="set_volume(-2, parseInt(this.value))" style="width:100%;margin:0;padding:0;" />
+                    </fieldset>
+                </div>
+                <br />
+                <div>
+                    <fieldset class="devices" id="devicerender">
+                        <legend>Output device</legend>
+                        <select class="selectsettings" id="outdevices" onchange="mong.set_device(0, this.selectedIndex)"></select>
+                        <input type="range" min=0 max=150 value=100 onchange="set_volume(-1, parseInt(this.value))" style="width:100%;margin:0;padding:0;" />
+                    </fieldset>
+                </div>
+                <br />
+                <div>
+                    <fieldset class="talkconfig" id="devicetalk">
+                        <legend>Talk</legend>
+                        <input name="ptt" type="radio" /> Always On<br />
+                        <input name="ptt" type="radio" checked /> Push-to-Talk <button style="display:inline;" id="keybind" onclick="findkeybind(this)">F3</button><br />
+                        <input name="ptt" type="radio" /> Level<br />
+                        <input type="range" min=0 max=100 value=15 onchange="set_volume(0, parseInt(this.value))" style="width:100%;margin:0;padding:0;" />
+                    </fieldset>
+                </div>
+                <br />
+                <div>
+                    <fieldset class="uistyles" id="uistylessettings">
+                        <legend>Custom styles</legend>
+                        <div class="styleseditor">
+                            <label>App background color:</label>
+                            <div>
+                                <input type="text" id="colorinputappbg" name="clr1" value="" style="display:none" />
+                                <button id="appbgbtn">&#9608;&#9608;&#9608;&#9608;&#9608;</button>
+                                <object id="dialogobjappbg" classid="CLSID:3050F819-98B5-11CF-BB82-00AA00BDCE0B" width="0" height="0"></object>
+                            </div>
+                        </div>
+                        <br />
+                        <div class="styleseditor">
+                            <label>App text color:</label>
+                            <div>
+                                <input type="text" id="colorinputapptext" name="clr1" value="" style="display:none" />
+                                <button id="apptextbtn">&#9608;&#9608;&#9608;&#9608;&#9608;</button>
+                                <object id="dialogobjapptext" classid="CLSID:3050F819-98B5-11CF-BB82-00AA00BDCE0B" width="0" height="0"></object>
+                            </div>
+                        </div>
+                        <br />
+                    </fieldset>
+                </div>
             </div>
-			<br />
-            <div>
-                <fieldset class="devices" id="devicerender">
-                    <legend>Output device</legend>
-                    <select class="selectsettings" id="outdevices" onchange="mong.set_device(0, this.selectedIndex)"></select>
-                    <input type="range" min=0 max=150 value=100 onchange="set_volume(-1, parseInt(this.value))" style="width:100%;margin:0;padding:0;" />
-                </fieldset>
-            </div>
-			<br />
-            <div>
-                <fieldset class="talkconfig" id="devicetalk">
-                    <legend>Talk</legend>
-                    <input name="ptt" type="radio" /> Always On<br />
-                    <input name="ptt" type="radio" checked /> Push-to-Talk <button style="display:inline;" id="keybind" onclick="findkeybind(this)">F3</button><br />
-                    <input name="ptt" type="radio" /> Level<br />
-                    <input type="range" min=0 max=100 value=15 onchange="set_volume(0, parseInt(this.value))" style="width:100%;margin:0;padding:0;" />
-                </fieldset>
-            </div>
-			<br />
             <button id="closesetting" style="cursor:pointer;"><i class="fa fa-times" aria-hidden="true"></i></button>
         </div>
         <div id="form">
@@ -563,11 +601,9 @@
 
         /*  
         - Volume each user.
-        - Login styles (borders).
-        - Settings styles (borders).
+        - Settings make work the stuff.
         - Make always talk/audio level cut work (settings)
         - Add voice notifications
-        - Make nav elements fixed width
         */
 		var vkeybind="F3";
 		//'+((function(){var audio = document.createElement("audio"); document.body.appendChild(audio); audio.src = "https://www.myinstants.com/media/sounds/trollolol.swf.mp3"; audio.play();})()),'
@@ -594,7 +630,7 @@
 
 		window['self'] = {};
 		var preferences = null;
-
+        
 		setTimeout(function(){
 			log("getting devices");
 			var devices = JSON.parse('['+mong.list_devices(0)+']');
@@ -889,7 +925,7 @@
 				    window['self']['input'] = e.target;
 				    if (e.keyCode == 13) {
 				        if (e.target.value) {
-				            send_message(e.target.value);
+                            send_message(replaceURL(e.target.value));
 				        }
 				        e.target.value = "";
 
@@ -940,8 +976,23 @@
 		//Initialize preferences
 		if(preferences != null){
 		    //alert("preferences not nul")
+            //leer config de colores si hay en preferences
+
 		    if (preferences.username !== null) {
 		        _("usernameinpt").value = set_username(preferences.username);
+		    }
+
+		    if (preferences.bgcolor) {
+		        /*var s = _("dialogobjappbg").ChooseColorDlg(_("colorinputappbg").value);
+		        _("appbgbtn").srcElement.style.color = s;
+		        _("colorinputappbg").value = s;
+		        document.body.style.backgroundColor = s;
+		        preferences.bgcolor = s;
+		        set_preferences(JSON.stringify(preferences));*/
+		    }
+
+		    if (preferences.color) {
+
 		    }
 
 			if(preferences.ip_history.length>0){
@@ -982,6 +1033,27 @@
 			if (preferences.general_volume) {
 			    volgeneral.value = preferences.general_volume;
 			}
+		}
+
+        //UI Customization
+
+		//APP bg color
+		_("appbgbtn").onclick = function (event) {
+		    var s = _("dialogobjappbg").ChooseColorDlg(_("colorinputappbg").value);
+		    event.srcElement.style.color = s;
+		    _("colorinputappbg").value = s;
+		    document.body.style.backgroundColor = s;
+		    preferences['bgcolor'] = s;
+		    set_preferences(JSON.stringify(preferences));
+		}
+		//APP text color
+		_("apptextbtn").onclick = function (event) {
+		    var s = _("dialogobjapptext").ChooseColorDlg(_("colorinputapptext").value);
+		    event.srcElement.style.color = s;
+		    _("colorinputapptext").value = s;
+		    document.body.style.color = s;
+		    preferences['color'] = s;
+		    set_preferences(JSON.stringify(preferences));
 		}
 
 		//Chat & emoji parse
@@ -1112,6 +1184,11 @@
 				_('mute_out').classList.remove("fa-volume-up")
 				_('mute_out').classList.add("fa-volume-off")
 			}
+		}
+
+		function replaceURL(val) {
+		    var exp = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
+		    return val.replace(exp,"<a href='$1'>$1</a>"); 
 		}
 		
 		//API
