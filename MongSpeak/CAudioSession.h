@@ -2,12 +2,11 @@
 using namespace std;
 class CAudioSession {
 public:
-	CAudioSession() {
+	CAudioSession() : fVol(1.0f) {
 		pOpus = opus_decoder_create(DEFAULT_SAMPLERATE, OPUS_CHANNELS, NULL);
 		opus_decoder_ctl(pOpus, OPUS_SET_BITRATE(DEFAULT_OPUS_BITRATE));
 		opus_decoder_ctl(pOpus, OPUS_SET_APPLICATION(OPUS_APPLICATION_VOIP));
 		opus_decoder_ctl(pOpus, OPUS_SET_PREDICTION_DISABLED(TRUE));
-		fVol = 1.0f;
 	}
 	~CAudioSession() {
 		opus_decoder_destroy(pOpus);
@@ -23,11 +22,12 @@ public:
 					flTempBuf[i] = 0.0f;
 				else
 					flTempBuf[i] = flTempBuf[i] * fVol;
-		pBuffer.append(&((char*)flTempBuf)[0], &((char*)flTempBuf)[samples * OPUS_CHANNELS * sizeof(float)]);
+		if(samples > 0)
+			pBuffer.append(&((char*)flTempBuf)[0], &((char*)flTempBuf)[samples * OPUS_CHANNELS * sizeof(float)]);
 	}
 	string pBuffer;
-	float flTempBuf[2048 * 2];
 private:
 	OpusDecoder * pOpus;
 	float fVol;
+	float flTempBuf[2048 * 2];
 };
