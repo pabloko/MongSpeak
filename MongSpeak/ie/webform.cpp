@@ -314,10 +314,20 @@ public:
 		return ++m_uRefCount;
 	};
 	virtual ULONG   STDMETHODCALLTYPE Release(void) {
-		return --m_uRefCount;
+		--m_uRefCount;
+		if (m_uRefCount == 0) delete this;
+		return m_uRefCount;
 	};
 
 	virtual HRESULT STDMETHODCALLTYPE PreHandleEvent(DISPID inEvtDispId, IHTMLEventObj *pIEventObj) {
+		if (m_webform->bKeyLookup && inEvtDispId == DISPID_KEYDOWN) {
+			long keycode = NULL;
+			if (FAILED(pIEventObj->get_keyCode(&keycode))) return S_FALSE;
+			m_webform->bKeyLookup = FALSE;
+			wchar_t kc[5];
+			swprintf_s(kc, 5, L"%d", keycode);
+			m_webform->QueueCallToEvent(7, -5, kc);
+		}
 		if (inEvtDispId == DISPID_KEYPRESS) {
 			IHTMLElement* ele = NULL;
 			if (FAILED(pIEventObj->get_srcElement(&ele))) return S_FALSE;

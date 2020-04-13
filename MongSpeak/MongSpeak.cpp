@@ -29,23 +29,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	g_preferences = new CPreferences();
 	g_jsObject = new JSObject();
 	ReleaseIUnknown release_g_jsObject(g_jsObject);
-	g_jsObject->AddMethod(L"log", mm_log);
-	g_jsObject->AddMethod(L"send_message", mm_send_message);
-	g_jsObject->AddMethod(L"list_devices", mm_list_devices);
-	g_jsObject->AddMethod(L"connect", mm_connect);
-	g_jsObject->AddMethod(L"disconnect", mm_disconnect);
-	g_jsObject->AddMethod(L"change_room", mm_change_room);
-	g_jsObject->AddMethod(L"set_device", mm_set_device);
-	g_jsObject->AddMethod(L"set_preferences", mm_set_preferences);
-	g_jsObject->AddMethod(L"get_preferences", mm_get_preferences);
-	g_jsObject->AddMethod(L"set_volume", mm_set_vol);
-	g_jsObject->AddMethod(L"set_inputmethod", mm_set_inputmethod);
-	g_jsObject->AddMethod(L"findkeybind", mm_findkeybind);
-	g_jsObject->AddMethod(L"say", mm_say);
-	g_jsObject->AddMethod(L"send_uicommand", mm_send_uicommand);
-	g_jsObject->AddMethod(L"is_iconic", mm_is_iconic);
-	g_jsObject->AddMethod(L"set_username", mm_set_username);
-	g_jsObject->AddMethod(L"send_vu", mm_send_vu);
+	BindJSMethods();
 	g_jsObject->AddRef();
 	WebformDispatchImpl* webformDispatchImpl = new WebformDispatchImpl(g_jsObject);
 	ReleaseDelete release_webformDispatchImpl(webformDispatchImpl);
@@ -54,10 +38,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	const int ScreenX = (GetSystemMetrics(SM_CXSCREEN) - MAPWIDTH) / 2;
 	const int ScreenY = (GetSystemMetrics(SM_CYSCREEN) - MAPHEIGHT) / 2;
 	g_webWindow->Create(hInstance, ScreenX, ScreenY, MAPWIDTH, MAPHEIGHT, FALSE);
-	/*char path[MAX_PATH];
-	GetCurrentDirectoryA(MAX_PATH, (LPSTR)path);
-	sprintf(path, "%s\\%s", path, "test.html");
-	g_webWindow->webForm->Go((char*)path);*/
 	g_webWindow->webForm->Go("about:blank;");
 	HMODULE hmodule = GetModuleHandle(NULL);
 	HRSRC hrsrc = FindResource(hmodule, MAKEINTRESOURCE(IDR_HTML1), RT_RCDATA);
@@ -84,19 +64,14 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	g_stream->SetDeviceIn(g_audio_in);
 	SetTimer(g_webWindow->hWndWebWindow, 1, 10, 0);
 	while (GetMessage(&msg, nullptr, 0, 0)) {
-		try {
 			while (g_webWindow->webForm != nullptr && g_jsStack.size() > 0) {
 				g_webWindow->webForm->RunJSFunctionW(g_jsStack.at(0).c_str());
 				g_jsStack.erase(g_jsStack.begin(), g_jsStack.begin() + 1);
 			}
 			g_webWindow->webForm->DequeueCallToEvent();
-		} catch (...) {}
-		//if (!g_webWindow->webForm->TranslateAccelerator(&msg, NULL, NULL))
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
 	}
-	g_mix->SetDeviceOut(NULL);
-	g_stream->SetDeviceIn(NULL);
 	Sleep(20);
 	return hr;
 }
