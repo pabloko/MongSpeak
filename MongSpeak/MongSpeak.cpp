@@ -72,6 +72,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
 	}
+	g_mix->SetDeviceOut(NULL);
+	g_stream->SetDeviceIn(NULL);
 	Sleep(20);
 	return hr;
 }

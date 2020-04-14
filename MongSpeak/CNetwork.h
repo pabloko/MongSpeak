@@ -132,8 +132,6 @@ public:
 		case RPCID::UI_COMMAND: {
 			if (message.size() == 5) {
 				SHORT cmd = 0;
-				if (g_network->mID == sessid)
-					g_mix->ClearSessions();
 				rpc_read_short((vector<uint8_t>*)&message, &cmd, 3);
 				g_jsStack.push_back(wstring_format(L"onEvent(%d, %d, %d);", RPCID::UI_COMMAND, sessid, cmd));
 				return;
@@ -152,7 +150,6 @@ public:
 		delete[] rest;
 	}
 	void ConnectServer(const char* url) {
-		//Disconnect();
 		szServerUrl = (char*)url;
 	}
 	void Disconnect() {

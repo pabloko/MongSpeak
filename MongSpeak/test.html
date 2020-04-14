@@ -3,17 +3,20 @@
 	<head>
 		<meta charset="UTF-8">
 		<meta http-equiv="X-UA-Compatible" content="IE=EDGE"/>
-		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-		<link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+		<link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css' />
 		<style>
+			
 			*{
 				box-sizing: border-box;
 				font-family:'Open Sans';
 			}
+
             html, body {
                 width: 100%;
                 height: 100%;
                 margin: 0px;
+				font-size:14px;
             }
 			
 			#form{
@@ -144,8 +147,10 @@
                 background-color: white;
                 z-index: 1;
 				flex-direction:column;
-				padding:40px;
+				padding:30px;
                 overflow: hidden;
+				overflow-y: auto;
+				top:0;bottom:0;left:0;right:0;z-index:999;
             }
 
             #settingspanellist {
@@ -393,7 +398,7 @@
 			}
 			
 			#upnet {
-				padding-left:15px;
+				padding-left:13px;
 			}
 			
 			.emojiList, .stickerList {
@@ -474,60 +479,78 @@
 				opacity: 0;
 			  }
 			}
+			
+			::-ms-fill-lower {
+				background: #838383;
+			}
+			::-ms-fill-upper {
+				background: ##cbcbcb;
+			}
+
+			::-ms-thumb {
+				background: #919191;
+			}
+
+			::-ms-track {
+				color: transparent;
+			}
 		</style>
 	</head>
     <body>
         <div id="settingspanel">
-            <div>
-                <fieldset class="devices" id="devicecapture">
-                    <legend>Input device</legend>
-                    <select class="selectsettings" id="indevices" onchange="mong.set_device(1, this.selectedIndex)"></select>
-                    <input type="range" min=0 max=150 value=100 onchange="set_volume(-2, parseInt(this.value))" style="width:100%;margin:0;padding:0;" />
-                </fieldset>
-            </div>
+            <div style="clear:both;">
+			<fieldset class="devices" id="devicecapture">
+                <legend>Input device</legend>
+                <select class="selectsettings" id="indevices" onchange="mong.set_device(1, this.selectedIndex)"></select>
+                <input type="range" min=0 max=150 value=100 onchange="set_volume(-2, parseInt(this.value))" style="width:100%;padding:0;" />
+            </fieldset>
+			</div>
 			<br />
-            <div>
-                <fieldset class="devices" id="devicerender">
-                    <legend>Output device</legend>
-                    <select class="selectsettings" id="outdevices" onchange="mong.set_device(0, this.selectedIndex)"></select>
-                    <input type="range" min=0 max=150 value=100 onchange="set_volume(-1, parseInt(this.value))" style="width:100%;margin:0;padding:0;" />
-                </fieldset>
-            </div>
+            <div style="clear:both;">
+			<fieldset class="devices" id="devicerender">
+                <legend>Output device</legend>
+                <select class="selectsettings" id="outdevices" onchange="mong.set_device(0, this.selectedIndex)"></select>
+                <input type="range" min=0 max=150 value=100 onchange="set_volume(-1, parseInt(this.value))" style="width:100%;margin:0;padding:0;" />
+            </fieldset>
+			</div>
 			<br />
-            <div>
-                <fieldset class="talkconfig" id="devicetalk">
-                    <legend>Talk</legend>
-                    <input name="ptt" type="radio" /> Always On<br />
-                    <input name="ptt" type="radio" checked /> Push-to-Talk <button style="display:inline;" id="keybind" onclick="findkeybind(this); this.innerText='Press any key...';">F3</button><br />
-                    <input name="ptt" type="radio" /> Level<br />
-                    <input type="range" min=1 max=100 value=1 id="lvlvol" style="width:100%;margin:0;padding:0;" />
-					<input type="range" min=1 max=100 value=1 id="plvlvol" onchange="mong.set_inputmethod(parseInt(this.value)*-1)" style="width:100%;margin:0;padding:0;color:yellow;" />
-                </fieldset>
-                <br />
-                <div>
-                    <fieldset class="uistyles" id="uistylessettings">
-                        <legend>Custom styles</legend>
-                        <div class="styleseditor">
-                            <label>App background color:</label>
-                            <div>
-                                <input type="text" id="colorinputappbg" name="clr1" value="" style="display:none" />
-                                <button id="appbgbtn">&#9608;&#9608;&#9608;&#9608;&#9608;</button>
-                                <object id="dialogobjappbg" classid="CLSID:3050F819-98B5-11CF-BB82-00AA00BDCE0B" width="0" height="0"></object>
-                            </div>
-                        </div>
-                        <br />
-                        <div class="styleseditor">
-                            <label>App text color:</label>
-                            <div>
-                                <input type="text" id="colorinputapptext" name="clr1" value="" style="display:none" />
-                                <button id="apptextbtn">&#9608;&#9608;&#9608;&#9608;&#9608;</button>
-                                <object id="dialogobjapptext" classid="CLSID:3050F819-98B5-11CF-BB82-00AA00BDCE0B" width="0" height="0"></object>
-                            </div>
-                        </div>
-                        <br />
-                    </fieldset>
+            <div style="clear:both;">
+			<fieldset class="talkconfig" id="devicetalk">
+                <legend>Talk</legend>
+                <input name="ptt" onclick="mong.set_inputmethod(0); keybind.disabled=true; plvlvol.disabled=true;" type="radio" /> Always On<br />
+                <input name="ptt" onclick="mong.set_inputmethod(114); keybind.disabled=false; keybind.innerText='F3'; plvlvol.disabled=true;" type="radio" checked /> Push-to-Talk <button style="display:inline;" id="keybind" onclick="findkeybind(this); this.innerText='Press any key...';">F3</button><br />
+                <input name="ptt" onclick="mong.set_inputmethod(-20); keybind.disabled=true; plvlvol.disabled=false;" type="radio" /> Voice activation detection<br />
+                <input type="range" min=1 max=100 value=1 id="lvlvol" style="width:100%;margin:0;padding:0;" />
+				<input type="range" min=1 max=100 value=20 disabled="disabled" id="plvlvol" onchange="mong.set_inputmethod(parseInt(this.value)*-1)" style="width:100%;margin:0;padding:0;" />
+            </fieldset>
+			</div>
+            <br />
+            <div style="clear:both;">
+			<fieldset class="uistyles" id="uistylessettings">
+                <legend>Custom styles</legend>
+                <div class="styleseditor">
+                    <label>App background color:</label>
+                    <div>
+                        <input type="text" id="colorinputappbg" name="clr1" value="" style="display:none" />
+                        <button id="appbgbtn" style="color:#fff">&#9608;&#9608;&#9608;&#9608;&#9608;</button>
+                        <object id="dialogobjappbg" classid="CLSID:3050F819-98B5-11CF-BB82-00AA00BDCE0B" width="0" height="0"></object>
+                    </div>
                 </div>
-            </div>
+                <div class="styleseditor">
+                    <label>App text color:</label>
+                    <div>
+                        <input type="text" id="colorinputapptext" name="clr1" value="" style="display:none" />
+                        <button id="apptextbtn">&#9608;&#9608;&#9608;&#9608;&#9608;</button>
+                        <object id="dialogobjapptext" classid="CLSID:3050F819-98B5-11CF-BB82-00AA00BDCE0B" width="0" height="0"></object>
+                    </div>
+                </div>
+            </fieldset>
+			</div>
+			<br/>
+			<br />
+			<center><small>MongSpeak: By Pabloko, ini</small></center>
+			<br />
+			<br />
             <button id="closesetting" style="cursor:pointer;"><i class="fa fa-times" aria-hidden="true"></i></button>
         </div>
         <div id="form">
@@ -555,7 +578,7 @@
                     <li class="iconcentered">
 						<i id="mute_in" class="fa fa-microphone" style="width:20px;text-align:center;margin:10px; font-size:22px;cursor:pointer;"></i><small id="volpc_in" style="font-size:10px;text-align:center;background:#000;color:#eee;border-radius:3px;padding:2px;width:32px;">100%</small>
 						<i id="mute_out" class="fa fa-volume-up" style="width:20px;text-align:center;margin:10px; font-size:22px;cursor:pointer;"></i><small id="volpc_out" style="font-size:10px;text-align:center;background:#000;color:#eee;border-radius:3px;padding:2px;width:32px;">100%</small>
-						<span style="padding-right:20px; padding-left:20px; font-size:11px;">Up: <span id="upnet">0</span> kb/s<br/>Down: <span id="downnet">0</span> kb/s</span>
+						<span style="padding-right:20px; padding-left:20px; font-size:10px;">Up: <span id="upnet">0</span> kb/s<br/>Down: <span id="downnet">0</span> kb/s</span>
                         <i id="disconnect" style="cursor:pointer;" class="fa fa-power-off"></i>
                         <i id="appsettings" class="settings fa fa-cog" style="cursor:pointer;"></i>
                     </li>
@@ -694,6 +717,18 @@
 		
 		join_rpc(RPCID.USER_JOIN, function (id, data) {
 		    log('rpc USER_JOIN: ' + id + " | " + data);
+			
+			//Nav
+			if(user.innerText == "" || user.innerText == null) {
+				form.style.display = "none";
+				app.style.display = "block";
+				user.innerHTML = twemoji.parse(data);
+				window['self'].id = id;
+				window['self'].room = 0;
+				window['self'].name = data;
+				window['self']['chat'] = _("chat_0");
+			}
+			
 		    //mong.say("Usuario conectado");
 		    //console.log('rpc USER_JOIN: ' + id + " | " + data);
 			clients.push({id: id, data: data});
@@ -704,6 +739,9 @@
 			var tiain = document.createElement("i");
 			var tiout = document.createElement("i");
 			var ty = document.createElement("div");
+			var audioctl = document.createElement("div");
+			audioctl.innerHTML='<input type="range" min=0 max=150 value=100 style="margin:0;padding:0;width:100%;padding-left:10px;padding-right:10px;" onchange="set_volume('+id+', parseInt(this.value))" />'
+			audioctl.style.display='none'
 			ty.innerHTML='<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>'
 			ty.id = 'typing_'+id
 			ty.classList.add('typing')
@@ -733,27 +771,26 @@
 			span.appendChild(tiain)
 			span.appendChild(ti)
 			li.appendChild(span)
+			if (id != window.self.id)
+				li.appendChild(audioctl)
 			span.classList.add('pad')
 			if(typeof lobby !== 'undefined')
 				lobby.appendChild(li);
 			else
 				leftlist.appendChild(li);
-			
-			//Nav
-			if(user.innerText == "" || user.innerText == null) {
-				form.style.display = "none";
-				app.style.display = "block";
-				user.innerHTML = twemoji.parse(data);
-				window['self'].id = id;
-				window['self'].room = 0;
-				window['self'].name = data;
-				window['self']['chat'] = _("chat_0");
-			}
+			if (id != window.self.id)
+				span.onclick=function() {
+					if (audioctl.style.display=='none')
+						audioctl.style.display = 'inherit'
+					else
+						audioctl.style.display = 'none'
+				}
 		});
 		
 		join_rpc(RPCID.USER_LEAVE, function(id, data) {
 		    log('rpc USER_LEAVE: ' + id + " | " + data);
 		    //mong.say("Usuario ha salido");
+			if (id == window['self']['id']) return disconnect_method();
 			if(clients.length >0){
 				var found = false;
 				for(var i = 0; i < clients.length && !found; i++){
@@ -1091,14 +1128,13 @@
         //Settings
 		closesetting.onclick = function () {
 			mong.send_vu(0)
-		    if (settingspanel.style.display == "flex")
-		        settingspanel.style.display = "none";
+		    settingspanel.style.display = "none";
 		}
 
 		for (var i = 0; i < settings.length; i++) {
 		    settings[i].onclick = function () {
 				mong.send_vu(1)
-				settingspanel.style.display = "flex";
+				settingspanel.style.display = "block";
 		    }
 		}
 
@@ -1132,11 +1168,8 @@
 				}
 			}
 		};
-		//Disconnect
-		var disconnectbtn = _("disconnect");
-		disconnectbtn.onclick = function(){
-			disconnect();
-			
+		
+		var disconnect_method = function() {
 			form.style.display = "flex";
 			app.style.display = "none";
 			//Reset data
@@ -1152,6 +1185,13 @@
 			for (var i = 0; i < chats.length; i++) {
 			    chats[i].parentNode.removeChild(chats[i]);
 			}
+		}
+		
+		//Disconnect
+		var disconnectbtn = _("disconnect");
+		disconnectbtn.onclick = function(){
+			disconnect();
+			disconnect_method();
 		};
 		
 		var vol_in = 100, vol_out=100, in_muted=false, out_muted=false;
