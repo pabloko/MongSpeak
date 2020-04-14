@@ -47,6 +47,9 @@
 #pragma comment(lib, "comsuppw.lib")
 #include <audioclient.h>
 #include <mmdeviceapi.h>
+#pragma comment( lib, "vendor/libcurl/windows-Win32-v140/lib/libcurl_a.lib" )
+#define CURL_STATICLIB
+#include "vendor\libcurl\windows-Win32-v140\include\curl\curl.h"
 #pragma comment( lib, "advapi32.lib" )
 #pragma comment( lib, "avrt.lib" )
 #pragma comment( lib, "vendor/opus/opus.lib" )
@@ -72,4 +75,5 @@
 #include "CAudioStream.h"
 #include "CPreferences.h"
 #include "statics.h"
+#include "upload.h"
 #include "javascript_external.h"

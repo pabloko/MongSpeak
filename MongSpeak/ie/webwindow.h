@@ -12,12 +12,15 @@ private:
 	static LRESULT CALLBACK WebWindowWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 	LRESULT InstanceWndProc(UINT msg, WPARAM wParam, LPARAM lParam);
 	WebformDispatchHandler *webformDispatchHandler;
-
+	void* m_ondropfiles = NULL;
 public:
 	HWND hWndWebWindow;
 	WebWindow(WebformDispatchHandler *wdh);
 	WebForm *webForm;
 	void Create(HINSTANCE hInstance, UINT x, UINT y, UINT width, UINT height, bool showScrollbars);
+	void SetDropFileHandler(void* f) {
+		m_ondropfiles = f;
+	};
 };
 
 #endif

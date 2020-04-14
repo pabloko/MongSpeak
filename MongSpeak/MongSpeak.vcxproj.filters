@@ -120,6 +120,9 @@
     <ClInclude Include="CPreferences.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
+    <ClInclude Include="upload.h">
+      <Filter>Archivos de encabezado\Util</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MongSpeak.cpp">

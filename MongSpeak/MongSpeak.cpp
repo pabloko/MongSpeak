@@ -15,7 +15,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 	HRESULT hr = S_OK;
-	///ConsoleDebugger dbg;	
+	ConsoleDebugger dbg;	
 	SetProcessDPIAware();
 	if (GetCurrentHwProfileA(&hwProfileInfo) != NULL)
 		hwProfileInfo.szHwProfileGuid[strlen(&hwProfileInfo.szHwProfileGuid[1])] = '\0';
@@ -34,6 +34,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	WebformDispatchImpl* webformDispatchImpl = new WebformDispatchImpl(g_jsObject);
 	ReleaseDelete release_webformDispatchImpl(webformDispatchImpl);
 	g_webWindow = new WebWindow(webformDispatchImpl);
+	g_webWindow->SetDropFileHandler(mm_drop_handler);
 	ReleaseDelete release_g_webWindow(g_webWindow);
 	const int ScreenX = (GetSystemMetrics(SM_CXSCREEN) - MAPWIDTH) / 2;
 	const int ScreenY = (GetSystemMetrics(SM_CYSCREEN) - MAPHEIGHT) / 2;

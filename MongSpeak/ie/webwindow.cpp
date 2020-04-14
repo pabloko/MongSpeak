@@ -51,6 +51,8 @@ LRESULT CALLBACK WebWindow::WebWindowWndProc(HWND hWnd, UINT msg, WPARAM wParam,
 		SendMessage(hWnd, WM_SETICON, ICON_BIG, (LPARAM)hIcon);
 		SendMessage(hWnd, WM_SETICON, ICON_SMALL, (LPARAM)hIcon);
 
+		DragAcceptFiles(hWnd, TRUE);
+
 		WebWindow *webw = (WebWindow*)((LPCREATESTRUCT(lParam))->lpCreateParams);
 		webw->hWndWebWindow = hWnd;
 
@@ -70,6 +72,8 @@ LRESULT CALLBACK WebWindow::WebWindowWndProc(HWND hWnd, UINT msg, WPARAM wParam,
 	return webw->InstanceWndProc(msg, wParam, lParam);
 }
 
+typedef void dropfn_t(HDROP);
+
 LRESULT WebWindow::InstanceWndProc(UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	switch (msg) {
@@ -86,6 +90,10 @@ LRESULT WebWindow::InstanceWndProc(UINT msg, WPARAM wParam, LPARAM lParam)
 			MoveWindow(webForm->hWnd, 0, 0, LOWORD(lParam), HIWORD(lParam), TRUE);
 		}
 		break;
+	case WM_DROPFILES: {
+		if (m_ondropfiles != NULL) 
+			((dropfn_t*)m_ondropfiles)((HDROP)wParam);
+	} break;
 	case WM_DESTROY:
 	{
 		webForm->Close();
