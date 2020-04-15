@@ -1,6 +1,6 @@
 var fs = require('fs');
 const PORT = process.env.PORT || 80;
-var dir = __dirname+'./server/uploads';
+var dir = __dirname+'/uploads';
 
 if (!fs.existsSync(dir)){
     fs.mkdirSync(dir);
@@ -46,15 +46,15 @@ app.put('/upload/:filename', function(req, res) {
 	req.pipe(fs.createWriteStream(__dirname + '/uploads/'+newname, {flags: 'w', mode: 0666}));
 	res.end(newname)
 	setTimeout(()=>{
-		fs.unlink(__dirname + './server/uploads/'+newname)
+		fs.unlink(__dirname + '/uploads/'+newname)
 	}, 1000 * 60 * 10) //10 min ttl
 });
 
 app.get('/file/:filename',function(req, res) {
-	var filepath = './server/uploads/' + req.params.filename
+	var filepath = __dirname + '/uploads/' + req.params.filename
 	if (fs.existsSync(filepath)) {
 	res.sendFile(filepath)
-	} else res.end('')
+	} else res.end('404')
 })
 
 wss.on('connection', (ws) => {
