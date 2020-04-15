@@ -619,8 +619,10 @@
     </body>
 	<script src="https://twemoji.maxcdn.com/v/latest/twemoji.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/2.0.8/purify.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/linkifyjs@2.1.9/dist/linkify.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/linkifyjs@2.1.9/dist/linkify-html.min.js"></script>
 	<script>
-
+linkify.options.defaults.target = null;
         /*  
         - Volume each user.
         - Settings make work the stuff.
@@ -821,7 +823,8 @@
 				}
 			}
 			
-			li.innerHTML = "<small class='usrchatname'><b>" + twemoji.parse(username) + "</b> (" + new Date().toLocaleTimeString() + ")</small><br/>" + twemoji.parse(DOMPurify.sanitize(data));
+			var parsed_msg = twemoji.parse(linkifyHtml(DOMPurify.sanitize(data)))
+			li.innerHTML = "<small class='usrchatname'><b>" + twemoji.parse(username) + "</b> (" + new Date().toLocaleTimeString() + ")</small><br/>" + parsed_msg;
 			var currentchat = document.getElementById("chatul_" + window['self']['room']);
 			
 			if (id != window['self'].id) {

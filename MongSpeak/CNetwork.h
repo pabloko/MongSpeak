@@ -20,7 +20,8 @@ public:
 		TerminateThread(hTask, 0);
 		Disconnect();
 		hTask = NULL;
-		delete[] szUserName;
+		if (szUserName)
+			delete[] szUserName;
 	}
 	void SetUserName(wchar_t* name) {
 		if (wcslen(name) == 0 || wcslen(name) >= 50) return;
@@ -28,6 +29,9 @@ public:
 	}
 	wchar_t* GetUserName() {
 		return szUserName;
+	}
+	char* GetServerURL() {
+		return szServerUrl;
 	}
 	DWORD NetworkLoop() {
 		Sleep(1000);

@@ -19,7 +19,6 @@ void WebformDispatchImpl::BeforeNavigate(std::wstring url, bool *cancel)
 		*cancel = true;
 		ShellExecute(NULL, L"open", url.c_str(), NULL, NULL, SW_SHOWNORMAL);
 	}
-	
 }
 
 void WebformDispatchImpl::NavigateComplete(std::wstring url, WebForm *webForm)

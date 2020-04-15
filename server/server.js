@@ -61,7 +61,7 @@ app.put('/upload/:filename', function(req, res) {
 		if (use_virtual)
 			delete files[newname]
 		else
-			fs.unlink(__dirname + '/uploads/'+newname)
+			try { fs.unlinkSync(__dirname + '/uploads/'+newname); } catch(ex) {}
 	}, 1000 * 60 * 10) //10 min ttl
 });
 

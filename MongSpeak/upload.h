@@ -14,15 +14,28 @@ long GetFileSize(const char* fileName)
 }
 
 size_t FileUploadCb(void *ptr, size_t size, size_t nmemb, void *stream) {
-	printf("RESPONSE(%d): %s\n\n", nmemb,(CHAR*)ptr);
+	if (nmemb == 0 || nmemb > MAX_PATH) return nmemb;
 	vector<uint8_t> pv;
-	char* ret = (char*)_com_util::ConvertStringToBSTR((const char*)ptr);
-	pv.assign(&ret[0], &ret[nmemb * sizeof(wchar_t)]);
-	g_network->Send(RPCID::USER_CHAT, &pv);
-	return 0;
+	char szFileUploaded[MAX_PATH];
+	char szMessage[MAX_PATH * 5];
+	memcpy(szFileUploaded, ptr, nmemb);
+	szFileUploaded[nmemb] = '\0';
+	int iFileNameStart = 0; 
+	for (; iFileNameStart < strlen(szFileUploaded); iFileNameStart++) 
+		if (szFileUploaded[iFileNameStart] == '_') break;
+	char* szFileUploadedName = &szFileUploaded[iFileNameStart + 1];
+	if (strcmp(szFileUploadedName, (char*)stream) == 0) {
+		sprintf(szMessage, "<i class=\"fa fa-cloud-download\"></i> <a href=\"http://%s/file/%s\">%s</a>", &g_network->GetServerURL()[5], szFileUploaded, szFileUploadedName);
+		char* ret = (char*)_com_util::ConvertStringToBSTR(szMessage);
+		pv.assign(&ret[0], &ret[strlen(szMessage) * sizeof(wchar_t)]);
+		g_network->Send(RPCID::USER_CHAT, &pv);
+	}
+	return nmemb;
 }
 
 DWORD WINAPI FileUpload(void* szFile) {
+	if (g_network->GetServerURL() == NULL)
+		return 1;
 	HRESULT hr = S_OK;
 	CURL *curl;
 	CURLcode res;
@@ -37,15 +50,13 @@ DWORD WINAPI FileUpload(void* szFile) {
 		return 1;
 	curl = curl_easy_init();
 	if (curl) {
-		char szUrl[MAX_PATH];
-		char szUrl2[MAX_PATH];
-		sprintf(szUrl, "%s", (char*)szFile);
-		int strend = strlen(szUrl);
-		for (; strend > 0; strend--) if (szUrl[strend] == '\\') break;
-		sprintf(szUrl2, "http://mong-speak.herokuapp.com/upload/%s", &szUrl[strend+1]);
-
-		
-		curl_easy_setopt(curl, CURLOPT_URL, szUrl2);
+		char szFileName[MAX_PATH];
+		char szURL[MAX_PATH];
+		sprintf(szFileName, "%s", (char*)szFile);
+		int iStrStartPos = strlen(szFileName);
+		for (; iStrStartPos > 0; iStrStartPos--) { if (szFileName[iStrStartPos] == ' ') szFileName[iStrStartPos] = '_'; if (szFileName[iStrStartPos] == '\\') break; }
+		sprintf(szURL, "http://%s/upload/%s", &g_network->GetServerURL()[5], &szFileName[iStrStartPos + 1]);
+		curl_easy_setopt(curl, CURLOPT_URL, szURL);
 		curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
 		curl_easy_setopt(curl, CURLOPT_READFUNCTION, fread);
 		curl_easy_setopt(curl, CURLOPT_READDATA, fd);
@@ -53,16 +64,13 @@ DWORD WINAPI FileUpload(void* szFile) {
 		curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
 		curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
 		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, FileUploadCb);
+		curl_easy_setopt(curl, CURLOPT_WRITEDATA, &szFileName[iStrStartPos + 1]);
 		curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 		res = curl_easy_perform(curl);
 		if (res != CURLE_OK) {
-			//fprintf(stdout, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
-			//AQUI ES CUANDO PASA UN ERROR
+			
 		} else {
-			//curl_easy_getinfo(curl, CURLINFO_SPEED_UPLOAD, &speed_upload);
-			//curl_easy_getinfo(curl, CURLINFO_TOTAL_TIME, &total_time);
-			//fprintf(stdout, "Speed: %f bytes/sec during %f seconds\n", speed_upload, total_time);//dis?
-			//AQUI ES CUANDO TODO SE SUBIO OK, PERO EL OTRO ES EL READFN, SE LLAMA CUANDO HACES RES.WRITE/END...
+			
 		}
 		curl_easy_cleanup(curl);
 	}
