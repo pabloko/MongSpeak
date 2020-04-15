@@ -1,6 +1,10 @@
 var fs = require('fs');
 const PORT = process.env.PORT || 80;
+var dir = './uploads';
 
+if (!fs.existsSync(dir)){
+    fs.mkdirSync(dir);
+}
 //var privateKey = fs.readFileSync( '../ssl.key' );
 //var certificate = fs.readFileSync( '../ssl.fullchain.cer' );
 
@@ -10,6 +14,7 @@ const PORT = process.env.PORT || 80;
 //var credentials = { key: privateKey, cert: certificate };
 var https = require('http');
 var express = require('express');
+const fileUpload = require('express-fileupload');
 const app = express();
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/public/index.html');
@@ -42,6 +47,49 @@ var rpc_cb=[],
 console.log("[-] mong-speak server [-]");
 console.log(" Server listening in port: "+PORT);
 
+// default options
+app.use(fileUpload({
+	limits: {
+        fileSize: 10000000, //10mb
+		abortOnLimit: true
+    }
+}));
+
+app.put('/upload/:filename', function(req, res) {
+	var tmpname = Math.random().toString(26).slice(2)+Math.random().toString(26).slice(2);
+	var newname = tmpname+'_'+req.params.filename;
+	req.pipe(fs.createWriteStream(__dirname + '/uploads/'+newname, {flags: 'w', mode: 0666}));
+	res.end(newname)
+	setTimeout(()=>{
+		fs.unlink(__dirname + '/uploads/'+newname)
+	}, 1000 * 60 * 10) //10 min ttl
+});
+
+app.get('/file/:filename',function(req, res) {
+	var filepath = __dirname + '/uploads/' + req.params.filename
+	if (fs.existsSync(filepath)) {
+	res.sendFile(filepath)
+	} else res.end('')
+})
+
+/*app.put('/upload', function(req, res) {
+	if (!req.files || Object.keys(req.files).length === 0) {
+		return res.status(400).send('No files were uploaded.');
+	}
+
+	// The name of the input field (i.e. "sampleFile") is used to retrieve the uploaded file
+	let sampleFile = req.files;//.sampleFile;
+	console.log(sampleFile)
+
+	// Use the mv() method to place the file somewhere on your server
+	sampleFile.mv('./uploads/'+req.body.userid+'_filename.jpg', function(err) {
+		if (err)
+			return res.status(500).send(err);
+
+		res.sendFile(__dirname + '/uploads/'+req.body.userid+'_filename.jpg');
+
+	});
+});*/
 wss.on('connection', (ws) => {
 	//console.log("[WebSocketServer]connection")
 	ws['id']=Math.floor((Math.random() * 9999) + 1111)
