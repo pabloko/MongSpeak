@@ -49,12 +49,15 @@ console.log(" Server listening in port: "+PORT);
 app.put('/upload/:filename', function(req, res) {
 	var tmpname = Math.random().toString(26).slice(2)+Math.random().toString(26).slice(2);
 	var newname = tmpname+'_'+req.params.filename;
-	if (use_virtual)
+	if (use_virtual) {
 		req.on('data', (data)=>{
-			files[newname] = data
+			if (!files[newname]) files[newname]=[]
+			files[newname].push(data)
+		})
+		req.on('end', ()=> {
 			res.end(newname)
 		})
-	else {
+	} else {
 		req.pipe(fs.createWriteStream(__dirname + '/uploads/'+newname, {flags: 'w', mode: 0666}));
 		res.end(newname)
 	}
@@ -69,9 +72,10 @@ app.put('/upload/:filename', function(req, res) {
 app.get('/file/:filename',function(req, res) {
 	var filepath = __dirname + '/uploads/' + req.params.filename
 	if (use_virtual) {
-		if (files[req.params.filename])
-			res.end(files[req.params.filename])
-		else 
+		if (files[req.params.filename]){
+			files[req.params.filename].forEach((chunk)=>res.write(chunk))
+			res.end()
+		} else 
 			res.end('404')
 	} else {
 		if (fs.existsSync(filepath)) {
