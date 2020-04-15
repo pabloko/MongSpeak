@@ -38,13 +38,14 @@ DWORD WINAPI FileUpload(void* szFile) {
 	curl = curl_easy_init();
 	if (curl) {
 		char szUrl[MAX_PATH];
+		char szUrl2[MAX_PATH];
 		sprintf(szUrl, "%s", (char*)szFile);
 		int strend = strlen(szUrl);
 		for (; strend > 0; strend--) if (szUrl[strend] == '\\') break;
-		sprintf(szUrl, "http://mong-speak.herokuapp.com/upload/%s", &szUrl[strend+1]);
+		sprintf(szUrl2, "http://mong-speak.herokuapp.com/upload/%s", &szUrl[strend+1]);
 
 		
-		curl_easy_setopt(curl, CURLOPT_URL, szUrl);
+		curl_easy_setopt(curl, CURLOPT_URL, szUrl2);
 		curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
 		curl_easy_setopt(curl, CURLOPT_READFUNCTION, fread);
 		curl_easy_setopt(curl, CURLOPT_READDATA, fd);
