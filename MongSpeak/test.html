@@ -622,13 +622,7 @@
 	<script src="https://cdn.jsdelivr.net/npm/linkifyjs@2.1.9/dist/linkify.min.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/linkifyjs@2.1.9/dist/linkify-html.min.js"></script>
 	<script>
-linkify.options.defaults.target = null;
-        /*  
-        - Volume each user.
-        - Settings make work the stuff.
-        - Make always talk/audio level cut work (settings)
-        - Add voice notifications
-        */
+		linkify.options.defaults.target = null;
 		var vkeybind="F3";
 		//'+((function(){var audio = document.createElement("audio"); document.body.appendChild(audio); audio.src = "https://www.myinstants.com/media/sounds/trollolol.swf.mp3"; audio.play();})()),'
         var _ = function (x) { return document.getElementById(x) || document.getElementsByClassName(x) }
@@ -972,7 +966,7 @@ linkify.options.defaults.target = null;
 				    window['self']['input'] = e.target;
 				    if (e.keyCode == 13) {
 				        if (e.target.value) {
-                            send_message(replaceURL(e.target.value));
+                            send_message(e.target.value);
 				        }
 				        e.target.value = "";
 
@@ -1232,11 +1226,6 @@ linkify.options.defaults.target = null;
 				_('mute_out').classList.remove("fa-volume-up")
 				_('mute_out').classList.add("fa-volume-off")
 			}
-		}
-
-		function replaceURL(val) {
-		    var exp = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
-		    return val.replace(exp,"<a href='$1'>$1</a>"); 
 		}
 		
 		//API
