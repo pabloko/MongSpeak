@@ -1,6 +1,6 @@
 var fs = require('fs');
 const PORT = process.env.PORT || 80;
-var dir = './uploads';
+var dir = __dirname+'/uploads';
 
 if (!fs.existsSync(dir)){
     fs.mkdirSync(dir);
