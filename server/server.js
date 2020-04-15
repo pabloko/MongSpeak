@@ -5,22 +5,15 @@ var dir = './uploads';
 if (!fs.existsSync(dir)){
     fs.mkdirSync(dir);
 }
-//var privateKey = fs.readFileSync( '../ssl.key' );
-//var certificate = fs.readFileSync( '../ssl.fullchain.cer' );
 
-//var privateKey = fs.readFileSync(__dirname + '/cert/key.pem', 'utf8');
-//var certificate = fs.readFileSync(__dirname + '/cert/cert.pem', 'utf8');
-
-//var credentials = { key: privateKey, cert: certificate };
 var https = require('http');
 var express = require('express');
-const fileUpload = require('express-fileupload');
 const app = express();
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/public/index.html');
 })
 app.use('/',express.static(__dirname + '/public/'));
-var httpsServer = https.createServer(/*credentials,*/ app);
+var httpsServer = https.createServer(app);
 httpsServer.listen(PORT);
 var WebSocketServer = require('ws').Server;
 var wss = new WebSocketServer({server: httpsServer});
@@ -47,14 +40,6 @@ var rpc_cb=[],
 console.log("[-] mong-speak server [-]");
 console.log(" Server listening in port: "+PORT);
 
-// default options
-app.use(fileUpload({
-	limits: {
-        fileSize: 10000000, //10mb
-		abortOnLimit: true
-    }
-}));
-
 app.put('/upload/:filename', function(req, res) {
 	var tmpname = Math.random().toString(26).slice(2)+Math.random().toString(26).slice(2);
 	var newname = tmpname+'_'+req.params.filename;
@@ -72,32 +57,11 @@ app.get('/file/:filename',function(req, res) {
 	} else res.end('')
 })
 
-/*app.put('/upload', function(req, res) {
-	if (!req.files || Object.keys(req.files).length === 0) {
-		return res.status(400).send('No files were uploaded.');
-	}
-
-	// The name of the input field (i.e. "sampleFile") is used to retrieve the uploaded file
-	let sampleFile = req.files;//.sampleFile;
-	console.log(sampleFile)
-
-	// Use the mv() method to place the file somewhere on your server
-	sampleFile.mv('./uploads/'+req.body.userid+'_filename.jpg', function(err) {
-		if (err)
-			return res.status(500).send(err);
-
-		res.sendFile(__dirname + '/uploads/'+req.body.userid+'_filename.jpg');
-
-	});
-});*/
 wss.on('connection', (ws) => {
-	//console.log("[WebSocketServer]connection")
 	ws['id']=Math.floor((Math.random() * 9999) + 1111)
-	//console.log(wss.clients)
 	while (wss.clients['filter'] && wss.clients.filter((obj) => obj.id === ws.id).length > 1) {
 		ws['id']=Math.floor((Math.random() * 9999) + 1111)
 	}
-	//Update to the connected client about the existing rooms
 	var roomsbuffer = Buffer.from(JSON.stringify(rooms), "ucs2")
 	var rpcbuffer = new Buffer.alloc(3);
 	rpcbuffer.writeUInt8(RPCID.ROOMS,0);
@@ -106,8 +70,6 @@ wss.on('connection', (ws) => {
 	ws.send(finallbuffer);
 	
     ws.on('message', (message) => {
-		//console.log("[WebSocketServer]message", message)
-		//console.log('raw',message)
 		process_rpc(message[0], message.slice(1), ws)
     });
 	
@@ -129,20 +91,17 @@ wss.on('connection', (ws) => {
 
 join_rpc(RPCID.USER_JOIN,(d, ws)=>{
 	if (!ws['guid']) {ws.close(); return;}
-	//console.log("[WebSocketServer::RPC]->USER_JOIN",d)
 	if (d.length==0) {
 		ws.close();
 		return;
 	}
 	if (ws.name) return;
-	//var name = d.toString('ucs2');
 	ws['name']=d;
 	var pkthead = Buffer.alloc(3);
 	pkthead.writeUInt8(RPCID.USER_JOIN,0)
 	pkthead.writeUInt16LE(ws.id,1)
 	var message = Buffer.concat([pkthead,d])
-	ws.send(message) //stream the new client to own client
-	
+	ws.send(message)
 	wss.clients.forEach((client) => {
 		if (client !== ws && client.readyState === 1) {
 			
@@ -150,15 +109,15 @@ join_rpc(RPCID.USER_JOIN,(d, ws)=>{
 				var pkthead2 = Buffer.alloc(3);
 				pkthead2.writeUInt8(RPCID.USER_JOIN,0)
 				pkthead2.writeUInt16LE(client.id,1)
-				ws.send(Buffer.concat([pkthead2,client.name])) //stream the remote client to new client
-				client.send(message) //stream to the remote client the new client
+				ws.send(Buffer.concat([pkthead2,client.name]))
+				client.send(message)
 				
 				if (client.room_id != 0) {
 					var pktroom = Buffer.alloc(5);
 					pktroom.writeUInt8(RPCID.CHANGE_ROOM,0)
 					pktroom.writeUInt16LE(client.id,1)
 					pktroom.writeUInt16LE(client.room_id,3)
-					ws.send(pktroom) //Stream the room of some client not in lobby
+					ws.send(pktroom)
 				}
 			}
 			
@@ -171,9 +130,8 @@ join_rpc(RPCID.USER_INIT,(d, ws)=>{
 		ws.close();
 		return;
 	}
-	//console.log("[WebSocketServer::RPC]->USER_INIT",d.toString())
 	ws['guid']=d.toString()
-	ws['room_id'] = 0; //assign default room lobby
+	ws['room_id'] = 0;
 })
 
 join_rpc(RPCID.USER_CHAT,(d, ws)=>{
@@ -184,7 +142,7 @@ join_rpc(RPCID.USER_CHAT,(d, ws)=>{
 	pkthead.writeUInt16LE(ws.id,1)
 	var message = Buffer.concat([pkthead,d])
 	wss.clients.forEach((client) => {
-		if (/*client !== ws &&*/ client.readyState === 1 && client.room_id == ws['room_id']) {
+		if (client.readyState === 1 && client.room_id == ws['room_id']) {
 			client.send(message);
 		}
 	});
@@ -198,7 +156,7 @@ join_rpc(RPCID.UI_COMMAND,(d, ws)=>{
 	pkthead.writeUInt16LE(ws.id,1)
 	var message = Buffer.concat([pkthead,d])
 	wss.clients.forEach((client) => {
-		if (/*client !== ws &&*/ client.readyState === 1 /*&& client.room_id == ws['room_id']*/) {
+		if (client.readyState === 1) {
 			client.send(message);
 		}
 	});
@@ -229,7 +187,7 @@ join_rpc(RPCID.CHANGE_ROOM, (d, ws) => {
 	pkthead.writeUInt16LE(room, 3)
 	ws['room_id'] = room;
 	wss.clients.forEach((client) => {
-		if (/*client !== ws &&*/ client.readyState === 1) {
+		if (client.readyState === 1) {
 			client.send(pkthead);
 		}
 	});
@@ -242,7 +200,6 @@ function loadRooms(){
 }
 
 function initialize(){
-	//Load rooms
 	loadRooms();
 }
 
