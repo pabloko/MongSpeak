@@ -6,6 +6,11 @@ if (!fs.existsSync(dir)){
     fs.mkdirSync(dir);
 }
 
+var use_virtual = false;
+if (!fs.existsSync(dir)){
+    use_virtual = true
+}
+
 var https = require('http');
 var express = require('express');
 const app = express();
@@ -21,6 +26,7 @@ var wss = new WebSocketServer({server: httpsServer});
 var roomsObject = require('./rooms.json');
 
 var rooms = [];
+var files = {};
 
 var RPCID = {
 	USER_INIT: 		0x00,
@@ -43,18 +49,36 @@ console.log(" Server listening in port: "+PORT);
 app.put('/upload/:filename', function(req, res) {
 	var tmpname = Math.random().toString(26).slice(2)+Math.random().toString(26).slice(2);
 	var newname = tmpname+'_'+req.params.filename;
-	req.pipe(fs.createWriteStream(__dirname + '/uploads/'+newname, {flags: 'w', mode: 0666}));
-	res.end(newname)
+	if (use_virtual)
+		req.on('data', (data)=>{
+			files[newname] = data
+			res.end(newname)
+		})
+	else {
+		req.pipe(fs.createWriteStream(__dirname + '/uploads/'+newname, {flags: 'w', mode: 0666}));
+		res.end(newname)
+	}
 	setTimeout(()=>{
-		fs.unlink(__dirname + '/uploads/'+newname)
+		if (use_virtual)
+			delete files[newname]
+		else
+			fs.unlink(__dirname + '/uploads/'+newname)
 	}, 1000 * 60 * 10) //10 min ttl
 });
 
 app.get('/file/:filename',function(req, res) {
 	var filepath = __dirname + '/uploads/' + req.params.filename
-	if (fs.existsSync(filepath)) {
-	res.sendFile(filepath)
-	} else res.end('404')
+	if (use_virtual) {
+		if (files[req.params.filename])
+			res.end(files[req.params.filename])
+		else 
+			res.end('404')
+	} else {
+		if (fs.existsSync(filepath)) {
+			res.sendFile(filepath)
+		} else 
+			res.end('404')
+	}
 })
 
 wss.on('connection', (ws) => {
