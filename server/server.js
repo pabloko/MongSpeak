@@ -1,5 +1,6 @@
 var fs = require('fs');
 const PORT = process.env.PORT || 80;
+var dir = __dirname+'/uploads';
 
 var use_virtual = false;
 if (!fs.existsSync(dir)){
