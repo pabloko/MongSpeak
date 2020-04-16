@@ -729,7 +729,7 @@
 		
 		var clients = [];
 		var rooms = [];
-		
+
 		//Register RPC's
 		join_rpc(RPCID.USER_INIT, function(id, data) {
 			log('rpc USER_INIT: '+id+ " | "+data);
@@ -1324,6 +1324,11 @@
 				setTimeout(function() { nibbletyping=false; },2000)
 				mong.send_uicommand(20)
 			}
+		}
+
+		function onBeforeUnloadevent() {
+		    console.log("onBeforeUnloadevent")
+		    return false;
 		}
 		
 	</script>
