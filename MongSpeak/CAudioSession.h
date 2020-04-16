@@ -15,7 +15,7 @@ public:
 		fVol = vol;
 	}
 	void Decode(const vector<uint8_t>* pv) {
-		int samples = opus_decode_float(pOpus, (const unsigned char*)pv->data() + 3, pv->size() - 3, flTempBuf, 2048, 0);
+		int samples = opus_decode(pOpus, (const unsigned char*)pv->data() + 3, pv->size() - 3, flTempBuf, 2048, 0);
 		if (fVol != 1.0f && samples > 0) 
 			for (int i = 0; i < samples * OPUS_CHANNELS; i++)
 				if (fVol == 0.0f)
@@ -23,11 +23,11 @@ public:
 				else
 					flTempBuf[i] = flTempBuf[i] * fVol;
 		if(samples > 0)
-			pBuffer.append(&((char*)flTempBuf)[0], &((char*)flTempBuf)[samples * OPUS_CHANNELS * sizeof(float)]);
+			pBuffer.append(&((char*)flTempBuf)[0], &((char*)flTempBuf)[samples * OPUS_CHANNELS * sizeof(short)]);
 	}
 	string pBuffer;
 private:
 	OpusDecoder * pOpus;
 	float fVol;
-	float flTempBuf[2048 * 2];
+	short flTempBuf[2048 * 2];
 };

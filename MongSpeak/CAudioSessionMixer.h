@@ -49,13 +49,13 @@ public:
 	}
 	void DoTask(int count, char* data, WAVEFORMATEX* wf) {
 		ZeroMemory(data, count * wf->nBlockAlign);
-		float* flBuffer = (float*)data;
+		short* flBuffer = (short*)data;
 		map<WORD, CAudioSession*>::iterator it = pVecSessions.begin();
 		while (it != pVecSessions.end()) {
 			CAudioSession* sess = it->second;
-			float* pBuf = (float*)sess->pBuffer.c_str();
+			short* pBuf = (short*)sess->pBuffer.c_str();
 			int sm = 0;
-			int len = sess->pBuffer.length() / sizeof(float);
+			int len = sess->pBuffer.length() / sizeof(short);
 			//len /= wf->nChannels;
 			if (len > count) len = count;
 			if (len > 0) {
@@ -65,12 +65,12 @@ public:
 							flBuffer[i] = pBuf[sm];
 							if (wf->nChannels > 1) flBuffer[i + 1] = pBuf[sm];
 						} else {
-							flBuffer[i] = mix_pcm_sample_float(flBuffer[i], pBuf[sm]);
+							flBuffer[i] = mix_pcm_sample_short(flBuffer[i], pBuf[sm]);
 							if (wf->nChannels > 1) flBuffer[i + 1] = flBuffer[i];
 						}
 						sm++;
 					}
-				sess->pBuffer.erase(sess->pBuffer.begin(), sess->pBuffer.begin() + (len * sizeof(float)));
+				sess->pBuffer.erase(sess->pBuffer.begin(), sess->pBuffer.begin() + (len * sizeof(short)));
 			}
 			it++;
 		}

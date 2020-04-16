@@ -16,6 +16,7 @@ public:
 		return pAudioQueue;
 	}
 	DWORD AudioProcess() {
+		Sleep(100);
 		HRESULT hr = S_OK;
 		hr = CoInitialize(NULL);
 		if (FAILED(hr)) return -__LINE__;
@@ -32,13 +33,37 @@ public:
 		hr = pAudioClient->GetMixFormat(&pWaveFormat);
 		if (FAILED(hr)) return hr;
 		CoTaskMemFreeRelease release_pWaveFormat(pWaveFormat);
+		
+		switch (pWaveFormat->wFormatTag) {
+		case WAVE_FORMAT_IEEE_FLOAT: {
+			pWaveFormat->wFormatTag = WAVE_FORMAT_PCM;
+			pWaveFormat->wBitsPerSample = 16;
+			pWaveFormat->nBlockAlign = pWaveFormat->nChannels * pWaveFormat->wBitsPerSample / 8;
+			pWaveFormat->nAvgBytesPerSec = pWaveFormat->nBlockAlign * pWaveFormat->nSamplesPerSec;
+		}break;
+		case WAVE_FORMAT_EXTENSIBLE: {
+		PWAVEFORMATEXTENSIBLE pEx = reinterpret_cast<PWAVEFORMATEXTENSIBLE>(pWaveFormat);
+		if (IsEqualGUID(KSDATAFORMAT_SUBTYPE_IEEE_FLOAT, pEx->SubFormat)) {
+			pEx->SubFormat = KSDATAFORMAT_SUBTYPE_PCM;
+			pEx->Samples.wValidBitsPerSample = 16;
+			pWaveFormat->wBitsPerSample = 16;
+			pWaveFormat->nBlockAlign = pWaveFormat->nChannels * pWaveFormat->wBitsPerSample / 8;
+			pWaveFormat->nAvgBytesPerSec = pWaveFormat->nBlockAlign * pWaveFormat->nSamplesPerSec;
+		} 
+			else return -1;
+		}  break;
+		
+		default: {
+			return -1;
+		} break;
+		}
 		nBlockAlign = pWaveFormat->nBlockAlign;
 		hEvent = CreateEvent(nullptr, false, false, nullptr);
 		HandleRelease release_hEvent(hEvent);
 		SpeexResamplerState* pResampler = NULL;
 		if (pWaveFormat->nSamplesPerSec != DEFAULT_SAMPLERATE)
 			bNeedResample = TRUE;
-		float fResampled[9048];
+		short fResampled[9048];
 		DWORD dwFlags = AUDCLNT_STREAMFLAGS_EVENTCALLBACK;
 		/*if (pDeviceMode == EDataFlow::eRender && pDeviceDirection == EDataFlow::eCapture)
 		dwFlags |= AUDCLNT_STREAMFLAGS_LOOPBACK;*/
@@ -85,7 +110,7 @@ public:
 							szInputLen = numAvailableFrames * DEFAULT_SAMPLERATE / pWaveFormat->nSamplesPerSec;
 						ppData = (BYTE*)fResampled;
 						pAudioQueue->DoTask(szInputLen, (char*)ppData, pWaveFormat);
-						speex_resampler_process_interleaved_float(pResampler, (float*)ppData, &szInputLen, (FLOAT*)pData, &szResampledLen);
+						speex_resampler_process_interleaved_int(pResampler, (short*)ppData, &szInputLen, (short*)pData, &szResampledLen);
 					}
 					else 
 						pAudioQueue->DoTask(numAvailableFrames, (char*)ppData, pWaveFormat);
@@ -101,7 +126,7 @@ public:
 				if (bNeedResample) {
 					UINT32 szResampledLen = numAvailableFrames,
 						szInputLen = numAvailableFrames;
-					speex_resampler_process_interleaved_float(pResampler, (float*)pData, &szInputLen, fResampled, &szResampledLen);
+					speex_resampler_process_interleaved_int(pResampler, (short*)pData, &szInputLen, fResampled, &szResampledLen);
 					ppData = (BYTE*)fResampled;
 					resampled_numAvailableFrames = szResampledLen;
 				}

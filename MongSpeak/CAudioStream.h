@@ -48,18 +48,19 @@ public:
 		if (!bSendVu && iInputMethod > 0) 
 			if (!GetAsyncKeyState(iInputMethod)) 
 				return CompareInput(FALSE);
-		float* pData = (float*)data;
+		short* pData = (short*)data;
 		if (fVol != 1.0f) 
 			for (int i = 0; i < len * wf->nChannels; i+= wf->nChannels)
 				pData[i] = pData[i] * fVol;
 		if (iInputMethod < 0 || bSendVu) {
 			lVuCount += len;
 			for (int i = 0; i < len * wf->nChannels; i += wf->nChannels) {
-				fVuSumMin = (pData[i + 0] < fVuSumMin ? pData[i + 0] : fVuSumMin);
-				fVuSumMax = (pData[i + 0] > fVuSumMax ? pData[i + 0] : fVuSumMax);
+				float vl = ((float)pData[i + 0]) / (float)32768; // (float)(pData[i + 0] - 32767);
+				fVuSumMin = (vl < fVuSumMin ? vl : fVuSumMin);
+				fVuSumMax = (vl > fVuSumMax ? vl : fVuSumMax);
 			}
 			if (lVuCount > (wf->nSamplesPerSec / 20)) {
-				fTol = log2(max(fVuSumMax, -fVuSumMin) / 1.0f) * 6.02;
+				fTol = log10(max(fVuSumMax, -fVuSumMin)) * 20;
 				if (fTol < -40.0f) fTol = -40.0f;
 				fTol += 40.0f; fTol = (fTol * 100.0f) / 40.0f;
 				if (bSendVu) 
@@ -83,7 +84,7 @@ public:
 		for (int i = 0; i < len * wf->nChannels; i += wf->nChannels) {
 			fDeinterleaved[c] = pData[i]; c++;
 		}
-		int samples = opus_encode_float(pOpus, fDeinterleaved, len, szOpusBuffer, sizeof(szOpusBuffer));
+		int samples = opus_encode(pOpus, fDeinterleaved, len, szOpusBuffer, sizeof(szOpusBuffer));
 		if (g_network && samples > 0) 
 			g_network->Send(RPCID::OPUS_DATA, (char*)szOpusBuffer, samples);
 	};
@@ -98,5 +99,5 @@ private:
 	DOUBLE fVuSumMax, fVuSumMin;
 	LONG lVuCount;
 	double fTol;
-	float fDeinterleaved[2024];
+	short fDeinterleaved[2024];
 };
