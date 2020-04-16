@@ -16,7 +16,7 @@ public:
 		return pAudioQueue;
 	}
 	DWORD AudioProcess() {
-		Sleep(100);
+		Sleep(1000);
 		HRESULT hr = S_OK;
 		hr = CoInitialize(NULL);
 		if (FAILED(hr)) return -__LINE__;
@@ -49,12 +49,11 @@ public:
 			pWaveFormat->wBitsPerSample = 16;
 			pWaveFormat->nBlockAlign = pWaveFormat->nChannels * pWaveFormat->wBitsPerSample / 8;
 			pWaveFormat->nAvgBytesPerSec = pWaveFormat->nBlockAlign * pWaveFormat->nSamplesPerSec;
-		} 
-			else return -1;
+		} else return -16;
 		}  break;
 		
 		default: {
-			return -1;
+			return -16;
 		} break;
 		}
 		nBlockAlign = pWaveFormat->nBlockAlign;

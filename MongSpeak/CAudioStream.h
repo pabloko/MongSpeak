@@ -9,8 +9,18 @@ public:
 		pOpus = opus_encoder_create(DEFAULT_SAMPLERATE, OPUS_CHANNELS, OPUS_APPLICATION_VOIP, NULL);
 		opus_encoder_ctl(pOpus, OPUS_SET_BITRATE(DEFAULT_OPUS_BITRATE));
 		opus_encoder_ctl(pOpus, OPUS_SET_PREDICTION_DISABLED(TRUE));
+		pSpeexPreprocessor = speex_preprocess_state_init(160, DEFAULT_SAMPLERATE); int i = 1;
+		speex_preprocess_ctl(pSpeexPreprocessor, SPEEX_PREPROCESS_SET_DENOISE, &i); i = 1;
+		speex_preprocess_ctl(pSpeexPreprocessor, SPEEX_PREPROCESS_SET_VAD, &i); i = 1;
+		speex_preprocess_ctl(pSpeexPreprocessor, SPEEX_PREPROCESS_SET_AGC, &i);/* i = 8;
+		//speex_preprocess_ctl(pSpeexPreprocessor, SPEEX_PREPROCESS_SET_AGC_LEVEL, &i); 
+		/*i = 0;
+		speex_preprocess_ctl(pSpeexPreprocessor, SPEEX_PREPROCESS_SET_DEREVERB, &i); float f = 0.0f;
+		speex_preprocess_ctl(pSpeexPreprocessor, SPEEX_PREPROCESS_SET_DEREVERB_DECAY, &f); f = 0.0f;
+		speex_preprocess_ctl(pSpeexPreprocessor, SPEEX_PREPROCESS_SET_DEREVERB_LEVEL, &f);*/
 	}
 	~CAudioStream() {
+		speex_preprocess_state_destroy(pSpeexPreprocessor);
 		opus_encoder_destroy(pOpus);
 		if (pDeviceIn != NULL)
 			pDeviceIn->SetAudioQueue(NULL);
@@ -60,7 +70,7 @@ public:
 				fVuSumMax = (vl > fVuSumMax ? vl : fVuSumMax);
 			}
 			if (lVuCount > (wf->nSamplesPerSec / 20)) {
-				fTol = log10(max(fVuSumMax, -fVuSumMin)) * 20;
+				fTol = log2(max(fVuSumMax, -fVuSumMin)) * 6.02f;
 				if (fTol < -40.0f) fTol = -40.0f;
 				fTol += 40.0f; fTol = (fTol * 100.0f) / 40.0f;
 				if (bSendVu) 
@@ -84,9 +94,20 @@ public:
 		for (int i = 0; i < len * wf->nChannels; i += wf->nChannels) {
 			fDeinterleaved[c] = pData[i]; c++;
 		}
-		int samples = opus_encode(pOpus, fDeinterleaved, len, szOpusBuffer, sizeof(szOpusBuffer));
+		char* dein = (char*)fDeinterleaved;
+		pVecAudioBuffer.append(&dein[0], &dein[len * sizeof(short)]);
+
+		while (pVecAudioBuffer.length() > (160 * sizeof(short))) {
+			int vad = speex_preprocess_run(pSpeexPreprocessor, (short*)pVecAudioBuffer.data());
+			//wprintf(L"VAD %d\n", vad);
+			int opus_bytes = opus_encode(pOpus, (short*)pVecAudioBuffer.data(), len, szOpusBuffer, sizeof(szOpusBuffer));
+			if (g_network && opus_bytes > 0)
+				g_network->Send(RPCID::OPUS_DATA, (char*)szOpusBuffer, opus_bytes);
+			pVecAudioBuffer.erase(pVecAudioBuffer.begin(), pVecAudioBuffer.begin() + (160 * sizeof(short)));
+		}
+		/*int samples = opus_encode(pOpus, fDeinterleaved, len, szOpusBuffer, sizeof(szOpusBuffer));
 		if (g_network && samples > 0) 
-			g_network->Send(RPCID::OPUS_DATA, (char*)szOpusBuffer, samples);
+			g_network->Send(RPCID::OPUS_DATA, (char*)szOpusBuffer, samples);*/
 	};
 private:
 	OpusEncoder* pOpus;
@@ -100,4 +121,6 @@ private:
 	LONG lVuCount;
 	double fTol;
 	short fDeinterleaved[2024];
+	SpeexPreprocessState* pSpeexPreprocessor;
+	std::string pVecAudioBuffer;
 };

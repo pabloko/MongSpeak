@@ -54,6 +54,8 @@
 #include "vendor\libcurl\windows-Win32-v140\include\curl\curl.h"
 #pragma comment( lib, "advapi32.lib" )
 #pragma comment( lib, "avrt.lib" )
+#pragma comment( lib, "vendor/speexdsp/libspeexdsp.lib" )
+#include "vendor/speexdsp/speex_preprocess.h"
 #pragma comment( lib, "vendor/opus/opus.lib" )
 #pragma comment( lib, "vendor/opusenc/opusenc.lib" )
 #include "vendor/opus/opus.h"
