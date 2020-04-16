@@ -1327,7 +1327,9 @@
 		}
 
 		function onBeforeUnloadEvent() {
-		    console.log("onBeforeUnloadevent")
+		    if (document.activeElement) {
+		        if (document.activeElement.tagName == "IFRAME") return true;
+		    }
 		    return false;
 		}
 		
