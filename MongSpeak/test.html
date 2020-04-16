@@ -652,7 +652,7 @@
 				if (isValidImageURL(value))
 					return "<img src=\""+value+"\" style=\"max-width:100%; max-height:500px;border:1px solid #ddd;\" />"
 				if (isValidAudioURL(value))
-					return "<a href='"+value+"'>"+value_reduce+"</a><br><audio controls src=\""+value+"\" style=\"max-width:100%; max-height:500px;border:1px solid #ddd;\"></audio>"
+					return "<a href='"+value+"'>"+value_reduce+"</a><br><audio controls src=\""+value+"\" style=\"width:200%;zoom:0.5;\"></audio>"
 				if (isValidVideoURL(value))
 					return "<a href='"+value+"'>"+value_reduce+"</a><br><video controls loop src=\""+value+"\" style=\"max-width:100%; max-height:500px;border:1px solid #ddd;\"></video>"
 				if (value.length > 50)
