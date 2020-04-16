@@ -25,13 +25,18 @@ size_t FileUploadCb(void *ptr, size_t size, size_t nmemb, void *stream) {
 		if (szFileUploaded[iFileNameStart] == '_') break;
 	char* szFileUploadedName = &szFileUploaded[iFileNameStart + 1];
 	if (strcmp(szFileUploadedName, (char*)stream) == 0) {
-		sprintf(szMessage, "<i class=\"fa fa-cloud-download\"></i> <a href=\"http://%s/file/%s\">%s</a>", &g_network->GetServerURL()[5], szFileUploaded, szFileUploadedName);
+		sprintf(szMessage, "<i class=\"fa fa-cloud-download\"></i> <b>%s</b><br>http://%s/file/%s", szFileUploadedName, &g_network->GetServerURL()[5], szFileUploaded);
 		char* ret = (char*)_com_util::ConvertStringToBSTR(szMessage);
 		pv.assign(&ret[0], &ret[strlen(szMessage) * sizeof(wchar_t)]);
 		g_network->Send(RPCID::USER_CHAT, &pv);
 	}
 	return nmemb;
 }
+
+/*INT NotifyStatus(int status, wstring status_text) {
+	g_webWindow->webForm->QueueCallToEvent(RPCID::UI_COMMAND, status, (wchar_t*)status_text.c_str());
+	return 1;
+}*/
 
 DWORD WINAPI FileUpload(void* szFile) {
 	if (g_network->GetServerURL() == NULL)
@@ -46,8 +51,8 @@ DWORD WINAPI FileUpload(void* szFile) {
 	if (!fd)
 		return 1;
 	LONG filesize = GetFileSize((char*)szFile);
-	if (filesize <= 0)
-		return 1;
+	if (filesize <= 0 || filesize > 50000000)
+		return 1; // NotifyStatus(-10, wstring_format(L"File too big (%.1f Mb/50.0 Mb)", (double)(filesize / 1000000)));
 	curl = curl_easy_init();
 	if (curl) {
 		char szFileName[MAX_PATH];
@@ -68,9 +73,8 @@ DWORD WINAPI FileUpload(void* szFile) {
 		curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 		res = curl_easy_perform(curl);
 		if (res != CURLE_OK) {
-			
+			hr = 1; // NotifyStatus(-11, wstring(L"Something happened while uploading"));
 		} else {
-			
 		}
 		curl_easy_cleanup(curl);
 	}
@@ -83,5 +87,7 @@ void mm_drop_handler(HDROP drop) {
 		return;
 	wchar_t szFile[MAX_PATH];
 	DragQueryFile(drop, 0, szFile, MAX_PATH);
+	if (wcsstr(szFile, L"\\INetCache\\") != NULL) 
+		return;
 	CreateThread(NULL, NULL, FileUpload, _com_util::ConvertBSTRToString(szFile), NULL, NULL);
 }

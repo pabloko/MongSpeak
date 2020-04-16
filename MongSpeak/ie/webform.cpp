@@ -605,9 +605,16 @@ HRESULT STDMETHODCALLTYPE WebForm::Invoke(DISPID dispIdMember, REFIID riid,
 	//wprintf(L"DISPID %d\n", dispIdMember);
 	switch (dispIdMember) { // DWebBrowserEvents2
 		case DISPID_BEFORENAVIGATE2: {
+			BSTR bstrUrl2 = pDispParams->rgvarg[3].pvarVal->bstrVal;
 			BSTR bstrUrl = pDispParams->rgvarg[5].pvarVal->bstrVal;
+			IDispatch* pDispFrameCall = pDispParams->rgvarg[6].pdispVal;
+			IWebBrowser2* ibrow;
+			if (FAILED(pDispFrameCall->QueryInterface(IID_IWebBrowser2, (void**)&ibrow))) 
+				break;
 			bool cancel = false;
-			dispatchHandler->BeforeNavigate(bstrUrl, &cancel);
+			if (ibrow == ibrowser)
+				dispatchHandler->BeforeNavigate(bstrUrl, &cancel);
+			ibrow->Release();
 			// Set Cancel parameter to TRUE to cancel the current event
 			*(((*pDispParams).rgvarg)[0].pboolVal) = cancel ? TRUE : FALSE;
 			break;

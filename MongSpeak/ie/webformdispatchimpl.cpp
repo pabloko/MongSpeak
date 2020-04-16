@@ -13,6 +13,10 @@ WebformDispatchImpl::WebformDispatchImpl(JSObject *jsobj)
 
 void WebformDispatchImpl::BeforeNavigate(std::wstring url, bool *cancel)
 {
+	if (!url.compare(L"https://www.youtube")) {
+		*cancel = true;
+		return;
+	}
 	if (!url.compare(L"about:blank;"))
 		*cancel = false;
 	else {

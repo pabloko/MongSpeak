@@ -65,11 +65,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	g_stream->SetDeviceIn(g_audio_in);
 	SetTimer(g_webWindow->hWndWebWindow, 1, 10, 0);
 	while (GetMessage(&msg, nullptr, 0, 0)) {
-			while (g_webWindow->webForm != nullptr && g_jsStack.size() > 0) {
-				g_webWindow->webForm->RunJSFunctionW(g_jsStack.at(0).c_str());
-				g_jsStack.erase(g_jsStack.begin(), g_jsStack.begin() + 1);
-			}
-			g_webWindow->webForm->DequeueCallToEvent();
+		while (g_webWindow->webForm != nullptr && g_jsStack.size() > 0) {
+			g_webWindow->webForm->RunJSFunctionW(g_jsStack.at(0).c_str());
+			g_jsStack.erase(g_jsStack.begin(), g_jsStack.begin() + 1);
+		}
+		g_webWindow->webForm->DequeueCallToEvent();
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
 	}
