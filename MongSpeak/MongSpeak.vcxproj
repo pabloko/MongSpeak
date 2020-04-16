@@ -155,6 +155,7 @@
     <ClInclude Include="CAudioSessionMixer.h" />
     <ClInclude Include="CAudioStream.h" />
     <ClInclude Include="cleanup.h" />
+    <ClInclude Include="clipboard_data_helper.h" />
     <ClInclude Include="CNetwork.h" />
     <ClInclude Include="CPreferences.h" />
     <ClInclude Include="ie\jsobject.h" />

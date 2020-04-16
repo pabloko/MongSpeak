@@ -123,6 +123,9 @@
     <ClInclude Include="upload.h">
       <Filter>Archivos de encabezado\Util</Filter>
     </ClInclude>
+    <ClInclude Include="clipboard_data_helper.h">
+      <Filter>Archivos de encabezado\Util</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MongSpeak.cpp">

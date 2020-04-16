@@ -7,6 +7,7 @@
 #define MAPHEIGHT 450
 using namespace std;
 using namespace winreg;
+using namespace Gdiplus;
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	_In_opt_ HINSTANCE hPrevInstance,
 	_In_ LPWSTR    lpCmdLine,
@@ -14,8 +15,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 {
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
+	GdiplusStartupInput gdiplusStartupInput;
+	ULONG_PTR gdiplusToken;
+	GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
 	HRESULT hr = S_OK;
-	ConsoleDebugger dbg;	
+	///ConsoleDebugger dbg;	
 	SetProcessDPIAware();
 	if (GetCurrentHwProfileA(&hwProfileInfo) != NULL)
 		hwProfileInfo.szHwProfileGuid[strlen(&hwProfileInfo.szHwProfileGuid[1])] = '\0';
@@ -78,5 +82,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	g_mix->SetDeviceOut(NULL);
 	g_stream->SetDeviceIn(NULL);
 	Sleep(20);
+	GdiplusShutdown(gdiplusToken);
 	return hr;
 }

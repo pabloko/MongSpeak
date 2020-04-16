@@ -45,6 +45,8 @@
 #include <comutil.h>
 #include "Shlwapi.h"
 #pragma comment(lib, "comsuppw.lib")
+#include <gdiplus.h>
+#pragma comment(lib, "gdiplus.lib")
 #include <audioclient.h>
 #include <mmdeviceapi.h>
 #pragma comment( lib, "vendor/libcurl/windows-Win32-v140/lib/libcurl_a.lib" )
