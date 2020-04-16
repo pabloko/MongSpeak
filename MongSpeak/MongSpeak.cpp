@@ -15,7 +15,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 	HRESULT hr = S_OK;
-	///ConsoleDebugger dbg;	
+	ConsoleDebugger dbg;	
 	SetProcessDPIAware();
 	if (GetCurrentHwProfileA(&hwProfileInfo) != NULL)
 		hwProfileInfo.szHwProfileGuid[strlen(&hwProfileInfo.szHwProfileGuid[1])] = '\0';
@@ -70,6 +70,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 			g_jsStack.erase(g_jsStack.begin(), g_jsStack.begin() + 1);
 		}
 		g_webWindow->webForm->DequeueCallToEvent();
+		if (GetAsyncKeyState(VK_F7) &1)
+			GetClipboardImage();
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
 	}

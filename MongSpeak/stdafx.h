@@ -67,6 +67,7 @@
 #include "pcm.h"
 #include "cleanup.h"
 #include "audio_device_helper.h"
+#include "clipboard_data_helper.h"
 #include "CAudioQueue.h"
 #include "CAudioDevice.h"
 #include "CAudioSession.h"
