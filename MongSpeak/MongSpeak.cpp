@@ -39,11 +39,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	ReleaseDelete release_webformDispatchImpl(webformDispatchImpl);
 	g_webWindow = new WebWindow(webformDispatchImpl);
 	g_webWindow->SetDropFileHandler(mm_drop_handler);
-	g_webWindow->webForm->SetPasteAcceleratorHandler(mm_getclipboardimage);
 	ReleaseDelete release_g_webWindow(g_webWindow);
 	const int ScreenX = (GetSystemMetrics(SM_CXSCREEN) - MAPWIDTH) / 2;
 	const int ScreenY = (GetSystemMetrics(SM_CYSCREEN) - MAPHEIGHT) / 2;
 	g_webWindow->Create(hInstance, ScreenX, ScreenY, MAPWIDTH, MAPHEIGHT, FALSE);
+	g_webWindow->webForm->SetPasteAcceleratorHandler(mm_getclipboardimage);
 	g_webWindow->webForm->Go("about:blank;");
 	HMODULE hmodule = GetModuleHandle(NULL);
 	HRSRC hrsrc = FindResource(hmodule, MAKEINTRESOURCE(IDR_HTML1), RT_RCDATA);

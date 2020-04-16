@@ -1,5 +1,7 @@
 #pragma once
 using namespace Gdiplus;
+extern WebWindow* g_webWindow;
+
 int GetEncoderClsid(const WCHAR* format, CLSID* pClsid)
 {
 	UINT  num = 0;          // number of image encoders
@@ -26,6 +28,8 @@ int GetEncoderClsid(const WCHAR* format, CLSID* pClsid)
 }
 
 BOOL mm_getclipboardimage() {
+	OpenClipboard(g_webWindow->hWndWebWindow);
+	ReleaseClipboard release_OpenClipboard;
 	if (!IsClipboardFormatAvailable(CF_BITMAP)) return FALSE;
 	HDC hdc = GetDC(0);
 	HBITMAP handle = (HBITMAP)GetClipboardData(CF_BITMAP);

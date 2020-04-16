@@ -109,3 +109,11 @@ public:
 private:
 	HANDLE m_p;
 };
+
+class ReleaseClipboard {
+public:
+	ReleaseClipboard() {}
+	~ReleaseClipboard() {
+		CloseClipboard();
+	}
+};

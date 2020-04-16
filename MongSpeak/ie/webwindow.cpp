@@ -79,7 +79,6 @@ LRESULT WebWindow::InstanceWndProc(UINT msg, WPARAM wParam, LPARAM lParam)
 	switch (msg) {
 	case WM_CREATE: {
 		webForm->create(hWndWebWindow, hInstWebWindow, 103, showScrollbars);
-		OpenClipboard(hWndWebWindow);
 		HINSTANCE hInstance = ((LPCREATESTRUCT)lParam)->hInstance;
 		HICON hIcon = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_MONGSPEAK));
 		if (hIcon != NULL) 
@@ -97,7 +96,6 @@ LRESULT WebWindow::InstanceWndProc(UINT msg, WPARAM wParam, LPARAM lParam)
 	} break;
 	case WM_DESTROY:
 	{
-		CloseClipboard();
 		webForm->Close();
 		PostQuitMessage(0);
 	}
