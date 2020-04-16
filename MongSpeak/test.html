@@ -626,7 +626,15 @@
 		
 		function isValidImageURL(str){
 			if ( typeof str !== 'string' ) return false;
-			return !!str.match(/\w+\.(jpg|jpeg|gif|png|tiff|jiff|bmp)$/gi);
+			return !!str.match(/\w+\.(jpg|jpeg|gif|png|tiff|jiff|bmp|webp)$/gi);
+		}
+		function isValidAudioURL(str){
+			if ( typeof str !== 'string' ) return false;
+			return !!str.match(/\w+\.(mp3|ogg|aac|ogv|mp2|opus)$/gi);
+		}
+		function isValidVideoURL(str){
+			if ( typeof str !== 'string' ) return false;
+			return !!str.match(/\w+\.(mp4|avi|mov|webm)$/gi);
 		}
 		function youtube_parser(url){
 			var regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
@@ -635,13 +643,20 @@
 		}
 		
 		linkify.options.defaults.format = function(value, type) {
+			var value_reduce = value;
+			if (value.length > 50)
+					value_reduce = value.slice(0, 25) + '...' + value.slice(-25);
 			if (type === 'url') {
 				if(youtube_parser(value))
 					return value+'<br/><iframe width="100%" height="215" src="https://www.youtube.com/embed/'+youtube_parser(value)+'" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>'
 				if (isValidImageURL(value))
 					return "<img src=\""+value+"\" style=\"max-width:100%; max-height:500px;border:1px solid #ddd;\" />"
+				if (isValidAudioURL(value))
+					return "<a href='"+value+"'>"+value_reduce+"</a><br><audio controls src=\""+value+"\" style=\"max-width:100%; max-height:500px;border:1px solid #ddd;\"></audio>"
+				if (isValidVideoURL(value))
+					return "<a href='"+value+"'>"+value_reduce+"</a><br><video controls loop src=\""+value+"\" style=\"max-width:100%; max-height:500px;border:1px solid #ddd;\"></video>"
 				if (value.length > 50)
-					return value.slice(0, 25) + '...' + value.slice(-25);
+					return value_reduce;
 			}
 			return value;
 		};
