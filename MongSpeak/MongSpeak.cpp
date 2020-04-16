@@ -39,6 +39,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	ReleaseDelete release_webformDispatchImpl(webformDispatchImpl);
 	g_webWindow = new WebWindow(webformDispatchImpl);
 	g_webWindow->SetDropFileHandler(mm_drop_handler);
+	g_webWindow->webForm->SetPasteAcceleratorHandler(mm_getclipboardimage);
 	ReleaseDelete release_g_webWindow(g_webWindow);
 	const int ScreenX = (GetSystemMetrics(SM_CXSCREEN) - MAPWIDTH) / 2;
 	const int ScreenY = (GetSystemMetrics(SM_CYSCREEN) - MAPHEIGHT) / 2;
@@ -74,8 +75,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 			g_jsStack.erase(g_jsStack.begin(), g_jsStack.begin() + 1);
 		}
 		g_webWindow->webForm->DequeueCallToEvent();
-		if (GetAsyncKeyState(VK_F7) &1)
-			GetClipboardImage();
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
 	}

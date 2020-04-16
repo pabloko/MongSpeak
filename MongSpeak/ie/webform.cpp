@@ -294,6 +294,8 @@ void WebForm::RunJSFunctionW(std::wstring cmd)
 	}
 }
 
+typedef BOOL pastefile_t();
+
 class TIHTMLEditDesigner : public IHTMLEditDesigner
 {
 public:
@@ -339,14 +341,23 @@ public:
 			if (bControl) {
 				long keycode = 0;
 				if (FAILED(pIEventObj->get_keyCode(&keycode))) return S_FALSE;
+				//wprintf(L"keycode %d\n", keycode);
 				if (keycode == 3)
 					m_webform->GetBrowser()->ExecWB(OLECMDID_COPY, OLECMDEXECOPT_DONTPROMPTUSER, NULL, NULL);
-				if (keycode == 22 && bIsEdit)
-					m_webform->GetBrowser()->ExecWB(OLECMDID_PASTE, OLECMDEXECOPT_DONTPROMPTUSER, NULL, NULL);
+				if (keycode == 22) {
+					if (m_webform->GetPasteAcceleratorHandler() != NULL)
+						if (((pastefile_t*)m_webform->GetPasteAcceleratorHandler())()) return S_FALSE;
+					if (bIsEdit)
+						m_webform->GetBrowser()->ExecWB(OLECMDID_PASTE, OLECMDEXECOPT_DONTPROMPTUSER, NULL, NULL);
+				}
 				if (keycode == 24 && bIsEdit)
 					m_webform->GetBrowser()->ExecWB(OLECMDID_CUT, OLECMDEXECOPT_DONTPROMPTUSER, NULL, NULL);
 				if (keycode == 1 && bIsEdit)
 					m_webform->GetBrowser()->ExecWB(OLECMDID_SELECTALL, OLECMDEXECOPT_DONTPROMPTUSER, NULL, NULL);
+				if (keycode == 26 && bIsEdit)
+					m_webform->GetBrowser()->ExecWB(OLECMDID_UNDO, OLECMDEXECOPT_DONTPROMPTUSER, NULL, NULL);
+				if (keycode == 25 && bIsEdit)
+					m_webform->GetBrowser()->ExecWB(OLECMDID_REDO, OLECMDEXECOPT_DONTPROMPTUSER, NULL, NULL);
 			}
 		}
 		return S_FALSE;

@@ -46,6 +46,8 @@ private:
 	std::vector<short> vec_rpc_id;
 	std::vector<short> vec_pkt_id;
 	std::vector<std::wstring> vec_message;
+
+	void* m_onpastefiles = NULL;
 public:
 	IHTMLDocument2 *GetDoc();
 	HWND hWnd;
@@ -66,6 +68,12 @@ public:
 	void AddCustomObject(IDispatch *custObj, std::string name);
 	HRESULT QueueCallToEvent(short rpcid, short id, wchar_t* str);
 	HRESULT DequeueCallToEvent();
+	void SetPasteAcceleratorHandler(void* f) {
+		m_onpastefiles = f;
+	};
+	void* GetPasteAcceleratorHandler() {
+		return m_onpastefiles;
+	};
 	static LRESULT CALLBACK WebformWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 	LRESULT InstanceWndProc(UINT msg, WPARAM wParam, LPARAM lParam);
 	void setupOle();

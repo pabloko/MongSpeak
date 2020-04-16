@@ -25,17 +25,13 @@ int GetEncoderClsid(const WCHAR* format, CLSID* pClsid)
 	return 0;
 }
 
-void GetClipboardImage() {
-	if (!IsClipboardFormatAvailable(CF_BITMAP)) return;
+BOOL mm_getclipboardimage() {
+	if (!IsClipboardFormatAvailable(CF_BITMAP)) return FALSE;
 	HDC hdc = GetDC(0);
 	HBITMAP handle = (HBITMAP)GetClipboardData(CF_BITMAP);
-	if (handle)
-	{
+	if (handle) {
 		Bitmap* bmp = Bitmap::FromHBITMAP(handle, NULL);
-		if (bmp)
-		{
-			CLSID   encoderClsid;
-			Status  stat;
+		if (bmp) {
 			CLSID clsid;
 			GetEncoderClsid(L"image/jpeg", &clsid);
 			EncoderParameters encoderParameters;
@@ -48,4 +44,5 @@ void GetClipboardImage() {
 			bmp->Save(L"clipboard.jpg", &clsid, &encoderParameters);
 		}
 	}
+	return TRUE;
 }
