@@ -13,10 +13,6 @@ WebformDispatchImpl::WebformDispatchImpl(JSObject *jsobj)
 
 void WebformDispatchImpl::BeforeNavigate(std::wstring url, bool *cancel)
 {
-	if (!url.compare(L"https://www.youtube")) {
-		*cancel = true;
-		return;
-	}
 	if (!url.compare(L"about:blank;"))
 		*cancel = false;
 	else {
@@ -27,6 +23,8 @@ void WebformDispatchImpl::BeforeNavigate(std::wstring url, bool *cancel)
 
 void WebformDispatchImpl::NavigateComplete(std::wstring url, WebForm *webForm)
 {
-	webForm->AddCustomObject(jsobj, "mong");
-	webForm->SinkScriptErrorEvents(jsobj);
+	if (!url.compare(L"about:blank;")) {
+		webForm->AddCustomObject(jsobj, "mong");
+		webForm->SinkScriptErrorEvents(jsobj);
+	}
 }
