@@ -605,15 +605,45 @@ HRESULT STDMETHODCALLTYPE WebForm::Invoke(DISPID dispIdMember, REFIID riid,
 	//wprintf(L"DISPID %d\n", dispIdMember);
 	switch (dispIdMember) { // DWebBrowserEvents2
 		case DISPID_BEFORENAVIGATE2: {
-			BSTR bstrUrl2 = pDispParams->rgvarg[3].pvarVal->bstrVal;
 			BSTR bstrUrl = pDispParams->rgvarg[5].pvarVal->bstrVal;
 			IDispatch* pDispFrameCall = pDispParams->rgvarg[6].pdispVal;
 			IWebBrowser2* ibrow;
 			if (FAILED(pDispFrameCall->QueryInterface(IID_IWebBrowser2, (void**)&ibrow))) 
 				break;
-			bool cancel = false;
-			if (ibrow == ibrowser)
-				dispatchHandler->BeforeNavigate(bstrUrl, &cancel);
+			bool cancel = FALSE;
+			IHTMLDocument2 *doc = GetDoc();
+			if (doc == NULL)
+				return NULL;
+			IHTMLWindow2 *win = NULL;
+			doc->get_parentWindow(&win);
+			doc->Release();
+			if (win == NULL)
+				return NULL;
+			IDispatchEx *winEx;
+			win->QueryInterface(&winEx);
+			win->Release();
+			if (winEx != NULL) {
+				DISPID dispid;
+				BSTR idname = SysAllocString(L"onBeforeUnloadEvent");
+				HRESULT hr = winEx->GetDispID(idname, fdexNameEnsure, &dispid);
+				SysFreeString(idname);
+				if (!FAILED(hr)) {
+					DISPPARAMS params;
+					BSTR custObj = SysAllocString(vec_message[0].c_str());
+					params.cArgs = 0;
+					params.cNamedArgs = 0;
+					VARIANT var_result;
+					hr = winEx->InvokeEx(dispid, LOCALE_USER_DEFAULT, DISPATCH_METHOD, &params, &var_result, NULL, NULL);
+					if (!FAILED(hr) && var_result.vt == VT_BOOL) {
+						if (var_result.boolVal) cancel = TRUE;
+					}
+				}
+				winEx->Release();
+			}
+			if (ibrow == ibrowser) {
+				if (!cancel)
+					dispatchHandler->BeforeNavigate(bstrUrl, &cancel);
+			}
 			ibrow->Release();
 			// Set Cancel parameter to TRUE to cancel the current event
 			*(((*pDispParams).rgvarg)[0].pboolVal) = cancel ? TRUE : FALSE;
@@ -623,13 +653,19 @@ HRESULT STDMETHODCALLTYPE WebForm::Invoke(DISPID dispIdMember, REFIID riid,
 			DocumentComplete(pDispParams->rgvarg[0].pvarVal->bstrVal);
 			break;
 		case DISPID_NAVIGATECOMPLETE2: {
+			IDispatch* pDispFrameCall = pDispParams->rgvarg[1].pdispVal;
+			IWebBrowser2* ibrow;
+			if (FAILED(pDispFrameCall->QueryInterface(IID_IWebBrowser2, (void**)&ibrow)))
+				break;
 			BSTR bstrUrl = pDispParams->rgvarg[0].pvarVal->bstrVal;
-			dispatchHandler->NavigateComplete(bstrUrl, this);
+			if (ibrow == ibrowser)
+				dispatchHandler->NavigateComplete(bstrUrl, this);
+			ibrow->Release();
 			break;
 		}
 		case DISPID_AMBIENT_DLCONTROL:
 			pVarResult->vt = VT_I4;
-			pVarResult->lVal = DLCTL_DLIMAGES | DLCTL_VIDEOS | DLCTL_BGSOUNDS | DLCTL_SILENT;
+			pVarResult->lVal = DLCTL_DLIMAGES | DLCTL_VIDEOS | DLCTL_BGSOUNDS | DLCTL_SILENT | DLCTL_URL_ENCODING_ENABLE_UTF8 | DLCTL_NO_BEHAVIORS;
 			break;
 		default:
 			return DISP_E_MEMBERNOTFOUND;
