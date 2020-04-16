@@ -54,25 +54,32 @@ public:
 		while (it != pVecSessions.end()) {
 			CAudioSession* sess = it->second;
 			float* pBuf = (float*)sess->pBuffer.c_str();
-			int len = sess->pBuffer.length() / wf->nBlockAlign;
+			int sm = 0;
+			int len = sess->pBuffer.length() / sizeof(float);
+			//len /= wf->nChannels;
 			if (len > count) len = count;
 			if (len > 0) {
 				if (fVol != 0.0f)
-					for (int i = 0; i < len * wf->nChannels; i++) {
-						if (it == pVecSessions.begin())
-							flBuffer[i] = pBuf[i];
-						else
-							flBuffer[i] = mix_pcm_sample_float(flBuffer[i], pBuf[i]);
+					for (int i = 0; i < len * wf->nChannels; i+= wf->nChannels) {
+						if (it == pVecSessions.begin()) {
+							flBuffer[i] = pBuf[sm];
+							if (wf->nChannels > 1) flBuffer[i + 1] = pBuf[sm];
+						} else {
+							flBuffer[i] = mix_pcm_sample_float(flBuffer[i], pBuf[sm]);
+							if (wf->nChannels > 1) flBuffer[i + 1] = flBuffer[i];
+						}
+						sm++;
 					}
-				sess->pBuffer.erase(sess->pBuffer.begin(), sess->pBuffer.begin() + (len * wf->nBlockAlign));
+				sess->pBuffer.erase(sess->pBuffer.begin(), sess->pBuffer.begin() + (len * sizeof(float)));
 			}
 			it++;
 		}
-		float* pData = (float*)data;
 		if (fVol != 0.0f)
 			if (fVol != 1.0f)
-				for (int i = 0; i < count * OPUS_CHANNELS; i++)
-					pData[i] = pData[i] * fVol;
+				for (int i = 0; i < count * wf->nChannels; i += wf->nChannels) {
+					flBuffer[i] = flBuffer[i] * fVol;
+					if (wf->nChannels > 1) flBuffer[i + 1] = flBuffer[i];
+				}
 	}
 private:
 	map<WORD, CAudioSession*> pVecSessions;

@@ -43,7 +43,6 @@ public:
 		bSendVu = vu;
 	}
 	void DoTask(int len, char* data, WAVEFORMATEX* wf) {
-		//wprintf(L"%d \n",iInputMethod);
 		if (fVol == 0.0f)
 			return CompareInput(FALSE);
 		if (!bSendVu && iInputMethod > 0) 
@@ -51,11 +50,11 @@ public:
 				return CompareInput(FALSE);
 		float* pData = (float*)data;
 		if (fVol != 1.0f) 
-			for (int i = 0; i < len * wf->nChannels; i++)
+			for (int i = 0; i < len * wf->nChannels; i+= wf->nChannels)
 				pData[i] = pData[i] * fVol;
 		if (iInputMethod < 0 || bSendVu) {
 			lVuCount += len;
-			for (int i = 0; i < len * wf->nChannels; i = i + wf->nChannels) {
+			for (int i = 0; i < len * wf->nChannels; i += wf->nChannels) {
 				fVuSumMin = (pData[i + 0] < fVuSumMin ? pData[i + 0] : fVuSumMin);
 				fVuSumMax = (pData[i + 0] > fVuSumMax ? pData[i + 0] : fVuSumMax);
 			}
@@ -79,7 +78,12 @@ public:
 				return CompareInput(FALSE);
 		}
 		CompareInput(TRUE);
-		int samples = opus_encode_float(pOpus, (const float*)data, len, szOpusBuffer, sizeof(szOpusBuffer));
+
+		int c = 0;
+		for (int i = 0; i < len * wf->nChannels; i += wf->nChannels) {
+			fDeinterleaved[c] = pData[i]; c++;
+		}
+		int samples = opus_encode_float(pOpus, fDeinterleaved, len, szOpusBuffer, sizeof(szOpusBuffer));
 		if (g_network && samples > 0) 
 			g_network->Send(RPCID::OPUS_DATA, (char*)szOpusBuffer, samples);
 	};
@@ -94,4 +98,5 @@ private:
 	DOUBLE fVuSumMax, fVuSumMin;
 	LONG lVuCount;
 	double fTol;
+	float fDeinterleaved[2024];
 };

@@ -62,8 +62,8 @@
 #define RANDOM_PREFIX libopusenc
 #include "vendor/opusenc/speex_resampler.h"
 #define DEFAULT_SAMPLERATE 16000
-#define DEFAULT_OPUS_BITRATE 42000
-#define OPUS_CHANNELS 2
+#define DEFAULT_OPUS_BITRATE 16000
+#define OPUS_CHANNELS 1
 
 #include "uirpc.h"
 #include "pcm.h"
