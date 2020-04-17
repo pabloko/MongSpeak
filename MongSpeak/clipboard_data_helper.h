@@ -30,7 +30,19 @@ int GetEncoderClsid(const WCHAR* format, CLSID* pClsid)
 BOOL mm_getclipboardimage() {
 	OpenClipboard(g_webWindow->hWndWebWindow);
 	ReleaseClipboard release_OpenClipboard;
-	if (!IsClipboardFormatAvailable(CF_BITMAP)) return FALSE;
+	if (!IsClipboardFormatAvailable(CF_BITMAP)) {
+		if (IsClipboardFormatAvailable(CF_HDROP)) {
+			HGLOBAL hGlobal = (HGLOBAL)GetClipboardData(CF_HDROP);
+			if (hGlobal) {
+				HDROP hDrop = (HDROP)GlobalLock(hGlobal);
+				if (hDrop) {
+					mm_drop_handler(hDrop);
+				}
+			}
+			return TRUE;
+		}
+		return FALSE;
+	}
 	HDC hdc = GetDC(0);
 	HBITMAP handle = (HBITMAP)GetClipboardData(CF_BITMAP);
 	if (handle) {
