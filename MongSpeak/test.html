@@ -518,8 +518,9 @@
 			<fieldset class="talkconfig" id="devicetalk">
                 <legend>Talk</legend>
                 <input name="ptt" onclick="mong.set_inputmethod(0); keybind.disabled=true; plvlvol.disabled=true;" type="radio" /> Always On<br />
-                <input name="ptt" onclick="mong.set_inputmethod(114); keybind.disabled=false; keybind.innerText='F3'; plvlvol.disabled=true;" type="radio" checked /> Push-to-Talk <button style="display:inline;" id="keybind" onclick="findkeybind(this); this.innerText='Press any key...';">F3</button><br />
-                <input name="ptt" onclick="mong.set_inputmethod(-20); keybind.disabled=true; plvlvol.disabled=false;" type="radio" /> Voice activation detection<br />
+                <input name="ptt" onclick="mong.set_inputmethod(114); keybind.disabled=false; keybind.innerText='F3'; plvlvol.disabled=true;" type="radio" /> Push-to-Talk <button style="display:inline;" id="keybind" onclick="findkeybind(this); this.innerText='Press any key...';" disabled>F3</button><br />
+                <input name="ptt" onclick="mong.set_inputmethod(-666); keybind.disabled=true; plvlvol.disabled=true;" type="radio" checked /> Automatic voice activation detection<br />
+				<input name="ptt" onclick="mong.set_inputmethod(-20); plvlvol.value='20'; keybind.disabled=true; plvlvol.disabled=false;" type="radio" /> Manual voice activation detection<br />
                 <input type="range" min=1 max=100 value=1 id="lvlvol" style="width:100%;margin:0;padding:0;" />
 				<input type="range" min=1 max=100 value=20 disabled="disabled" id="plvlvol" onchange="mong.set_inputmethod(parseInt(this.value)*-1)" style="width:100%;margin:0;padding:0;" />
             </fieldset>

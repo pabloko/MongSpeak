@@ -19,7 +19,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	ULONG_PTR gdiplusToken;
 	GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
 	HRESULT hr = S_OK;
-	ConsoleDebugger dbg;	
+	///ConsoleDebugger dbg;	
 	SetProcessDPIAware();
 	if (GetCurrentHwProfileA(&hwProfileInfo) != NULL)
 		hwProfileInfo.szHwProfileGuid[strlen(&hwProfileInfo.szHwProfileGuid[1])] = '\0';

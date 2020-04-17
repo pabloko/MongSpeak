@@ -5,17 +5,15 @@ extern vector<wstring> g_jsStack;
 #define PREPROCESS_SAMPLES (160*2)
 class CAudioStream : CAudioQueue {
 public:
-	CAudioStream() : fVol(1.0f), iInputMethod(VK_F3), bIsInput(FALSE), bSendVu(FALSE), fVuSumMax(0.0f), fVuSumMin(0.0f), lVuCount(0), fTol(0.0f) {
+	CAudioStream() : fVol(1.0f), iInputMethod(-666), bIsInput(FALSE), bSendVu(FALSE), fVuSumMax(0.0f), fVuSumMin(0.0f), lVuCount(0), fTol(0.0f) {
 		pOpus = opus_encoder_create(DEFAULT_SAMPLERATE, OPUS_CHANNELS, OPUS_APPLICATION_VOIP, NULL);
 		opus_encoder_ctl(pOpus, OPUS_SET_BITRATE(DEFAULT_OPUS_BITRATE));
 		opus_encoder_ctl(pOpus, OPUS_SET_PREDICTION_DISABLED(TRUE));
 		FLOAT f; INT i;
 		pSpeexPreprocessor = speex_preprocess_state_init(PREPROCESS_SAMPLES, DEFAULT_SAMPLERATE); 
-		//f = 0.60f;
 		i = 98;
 		speex_preprocess_ctl(pSpeexPreprocessor, SPEEX_PREPROCESS_SET_PROB_START, &i);
 		f = 0.3f;
-		//i = 2;
 		speex_preprocess_ctl(pSpeexPreprocessor, SPEEX_PREPROCESS_SET_PROB_CONTINUE, &f);
 		i = 1;
 		speex_preprocess_ctl(pSpeexPreprocessor, SPEEX_PREPROCESS_SET_DENOISE, &i); 
@@ -23,14 +21,6 @@ public:
 		speex_preprocess_ctl(pSpeexPreprocessor, SPEEX_PREPROCESS_SET_VAD, &i); 
 		i = 1;
 		speex_preprocess_ctl(pSpeexPreprocessor, SPEEX_PREPROCESS_SET_AGC, &i); 
-		/*i = 8000;
-		speex_preprocess_ctl(pSpeexPreprocessor, SPEEX_PREPROCESS_SET_AGC_LEVEL, &i); */
-		i = 0;
-		speex_preprocess_ctl(pSpeexPreprocessor, SPEEX_PREPROCESS_SET_DEREVERB, &i);  
-		f = 0.0f;
-		speex_preprocess_ctl(pSpeexPreprocessor, SPEEX_PREPROCESS_SET_DEREVERB_DECAY, &f); 
-		f = 0.0f;
-		speex_preprocess_ctl(pSpeexPreprocessor, SPEEX_PREPROCESS_SET_DEREVERB_LEVEL, &f);
 	}
 	~CAudioStream() {
 		speex_preprocess_state_destroy(pSpeexPreprocessor);
@@ -75,7 +65,7 @@ public:
 		if (fVol != 1.0f) 
 			for (int i = 0; i < len * wf->nChannels; i+= wf->nChannels)
 				pData[i] = pData[i] * fVol;
-		if (iInputMethod < 0 || bSendVu) {
+		if ((iInputMethod < 0 && iInputMethod > -200) || bSendVu) {
 			lVuCount += len;
 			for (int i = 0; i < len * wf->nChannels; i += wf->nChannels) {
 				float vl = ((float)pData[i + 0]) / (float)32768; // (float)(pData[i + 0] - 32767);
@@ -90,38 +80,35 @@ public:
 					g_jsStack.push_back(wstring_format(L"onEvent(%d, %d, %3.0f);", RPCID::UI_COMMAND, -3, fTol));
 				fVuSumMax = 0.0f; fVuSumMin = 0.0f; lVuCount = 0;
 			}
-			if (iInputMethod < 0) {
+			if (iInputMethod < 0 && iInputMethod > -200) {
 				float tolerance = iInputMethod * -1;
 				if (fTol < tolerance)
 					return CompareInput(FALSE);
 			}
 		}
-			
 		if (bSendVu && iInputMethod > 0) {
 			if (!GetAsyncKeyState(iInputMethod)) 
 				return CompareInput(FALSE);
 		}
 		///CompareInput(TRUE);
-
 		int c = 0;
 		for (int i = 0; i < len * wf->nChannels; i += wf->nChannels) {
 			fDeinterleaved[c] = pData[i]; c++;
 		}
 		char* dein = (char*)fDeinterleaved;
 		pVecAudioBuffer.append(&dein[0], &dein[len * sizeof(short)]);
-
 		while (pVecAudioBuffer.length() > (PREPROCESS_SAMPLES * sizeof(short))) {
 			int vad = speex_preprocess_run(pSpeexPreprocessor, (short*)pVecAudioBuffer.data());
-			wprintf(L"VAD %d\n", vad);
+			//wprintf(L"VAD %d\n", vad);
 			int opus_bytes = opus_encode(pOpus, (short*)pVecAudioBuffer.data(), PREPROCESS_SAMPLES, szOpusBuffer, sizeof(szOpusBuffer));
-			CompareInput(vad==1?TRUE:FALSE);
-			if (g_network && vad && opus_bytes > 0)
-				g_network->Send(RPCID::OPUS_DATA, (char*)szOpusBuffer, opus_bytes);
 			pVecAudioBuffer.erase(pVecAudioBuffer.begin(), pVecAudioBuffer.begin() + (PREPROCESS_SAMPLES * sizeof(short)));
+			//CompareInput(vad==1?TRUE:FALSE);
+			if (iInputMethod==-666 && vad == 0)
+				return CompareInput(FALSE);
+			CompareInput(TRUE);
+			if (g_network && opus_bytes > 0)
+				g_network->Send(RPCID::OPUS_DATA, (char*)szOpusBuffer, opus_bytes);
 		}
-		/*int samples = opus_encode(pOpus, fDeinterleaved, len, szOpusBuffer, sizeof(szOpusBuffer));
-		if (g_network && samples > 0) 
-			g_network->Send(RPCID::OPUS_DATA, (char*)szOpusBuffer, samples);*/
 	};
 private:
 	OpusEncoder* pOpus;

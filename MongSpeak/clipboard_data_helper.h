@@ -37,6 +37,7 @@ BOOL mm_getclipboardimage() {
 				HDROP hDrop = (HDROP)GlobalLock(hGlobal);
 				if (hDrop) {
 					mm_drop_handler(hDrop);
+					GlobalUnlock(hDrop);
 				}
 			}
 			return TRUE;

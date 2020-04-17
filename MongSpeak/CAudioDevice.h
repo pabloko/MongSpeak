@@ -10,10 +10,6 @@ public:
 		bWorking = FALSE;
 		TerminateThread(hThread, 0);
 	}
-	void Reset() {
-		bWorking = TRUE;
-		hThread = CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)CAudioDevice::AudioThread, (void*)this, NULL, NULL);
-	}
 	void SetAudioQueue(CAudioQueue* aq) {
 		pAudioQueue = aq;
 	}
@@ -21,7 +17,7 @@ public:
 		return pAudioQueue;
 	}
 	DWORD AudioProcess() {
-		Sleep(100);
+		//Sleep(100);
 		HRESULT hr = S_OK;
 		hr = CoInitialize(NULL);
 		if (FAILED(hr)) return -__LINE__;
@@ -101,7 +97,7 @@ public:
 			if ((DWORD)pAudioClient == 0xDDDDDDDD) 
 				return 666;
 			hr = pAudioClient->GetCurrentPadding(&NumPaddingFrames);
-			if (FAILED(hr)) /*return hr;*/ continue;
+			if (FAILED(hr)) return hr;
 			UINT32 numAvailableFrames = hNumBufferFrames - NumPaddingFrames;
 			if (pDeviceDirection == EDataFlow::eRender) {
 				if (numAvailableFrames == 0) continue;
@@ -120,24 +116,24 @@ public:
 						if (pAudioQueue != nullptr)
 							pAudioQueue->DoTask(numAvailableFrames, (char*)ppData, pWaveFormat);
 				hr = pAudioRenderClient->ReleaseBuffer(numAvailableFrames, 0);
-				if (FAILED(hr)) /*return hr;*/  continue;
+				if (FAILED(hr)) return hr;
 			}
 			if (pDeviceDirection == EDataFlow::eCapture) {
 				DWORD pFlags = NULL;
 				hr = pAudioCaptureClient->GetBuffer(&pData, &numAvailableFrames, &pFlags, NULL, NULL);
-				if (FAILED(hr)) /*return hr;*/ continue;
-				wprintf(L"iac flags %d\n", pFlags);
+				if (FAILED(hr)) return hr;
+				//wprintf(L"iac flags %d\n", pFlags);
 				if (pFlags > 0) {
-					if (pFlags & AUDCLNT_BUFFERFLAGS_SILENT) ZeroMemory(pData, numAvailableFrames);
+					ZeroMemory(pData, numAvailableFrames);
 					if (pFlags & AUDCLNT_BUFFERFLAGS_DATA_DISCONTINUITY) {
-						Sleep(10);
+						Sleep(10); //trick: try to compensate underflow with overflow
 						iDiscontinuities++;
 						iRecoverDisc = 0;
 						if (iDiscontinuities > 10) {
 							iDiscontinuities = 0;
 							wprintf(L"IRRECOVERABLE DEVICE ALERT\n");
 							if (g_webWindow)
-								g_webWindow->webForm->QueueCallToEvent(RPCID::UI_COMMAND, -666, (wchar_t*)L"Irrecoverable device state");
+								g_webWindow->webForm->QueueCallToEvent(RPCID::UI_COMMAND, -666, (wchar_t*)L"Irrecoverable");
 							return AUDCLNT_BUFFERFLAGS_DATA_DISCONTINUITY;
 						}
 					}
@@ -160,7 +156,7 @@ public:
 						pAudioQueue->DoTask(resampled_numAvailableFrames, (char*)ppData, pWaveFormat);
 				}
 				hr = pAudioCaptureClient->ReleaseBuffer(numAvailableFrames);
-				if (FAILED(hr)) /*return hr;*/ continue;
+				if (FAILED(hr)) return hr;
 			}
 		}
 		bWorking = FALSE;
@@ -168,6 +164,7 @@ public:
 	}
 	static DWORD AudioThread(void* pParam) {
 		DWORD hr = ((CAudioDevice*)pParam)->AudioProcess();
+		((CAudioDevice*)pParam)->bWorking = FALSE;
 		return hr;
 	}
 private:
