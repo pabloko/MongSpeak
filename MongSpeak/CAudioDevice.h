@@ -16,7 +16,6 @@ public:
 		return pAudioQueue;
 	}
 	DWORD AudioProcess() {
-		Sleep(1000);
 		HRESULT hr = S_OK;
 		hr = CoInitialize(NULL);
 		if (FAILED(hr)) return -__LINE__;
@@ -120,17 +119,19 @@ public:
 				DWORD pFlags;
 				hr = pAudioCaptureClient->GetBuffer(&pData, &numAvailableFrames, &pFlags, NULL, NULL);
 				if (FAILED(hr)) return hr;
-				BYTE* ppData = pData;
-				UINT32 resampled_numAvailableFrames = numAvailableFrames;
-				if (bNeedResample) {
-					UINT32 szResampledLen = numAvailableFrames,
-						szInputLen = numAvailableFrames;
-					speex_resampler_process_interleaved_int(pResampler, (short*)pData, &szInputLen, fResampled, &szResampledLen);
-					ppData = (BYTE*)fResampled;
-					resampled_numAvailableFrames = szResampledLen;
+				if (pFlags != AUDCLNT_BUFFERFLAGS_SILENT && pFlags != AUDCLNT_BUFFERFLAGS_DATA_DISCONTINUITY && pFlags != AUDCLNT_BUFFERFLAGS_TIMESTAMP_ERROR) {
+					BYTE* ppData = pData;
+					UINT32 resampled_numAvailableFrames = numAvailableFrames;
+					if (bNeedResample) {
+						UINT32 szResampledLen = numAvailableFrames,
+							szInputLen = numAvailableFrames;
+						speex_resampler_process_interleaved_int(pResampler, (short*)pData, &szInputLen, fResampled, &szResampledLen);
+						ppData = (BYTE*)fResampled;
+						resampled_numAvailableFrames = szResampledLen;
+					}
+					if (pAudioQueue != nullptr)
+						pAudioQueue->DoTask(resampled_numAvailableFrames, (char*)ppData, pWaveFormat);
 				}
-				if (pAudioQueue != nullptr)
-					pAudioQueue->DoTask(resampled_numAvailableFrames, (char*)ppData, pWaveFormat);
 				hr = pAudioCaptureClient->ReleaseBuffer(numAvailableFrames);
 				if (FAILED(hr)) return hr;
 			}
