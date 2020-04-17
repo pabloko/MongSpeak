@@ -9,6 +9,10 @@ public:
 		bWorking = FALSE;
 		TerminateThread(hThread, 0);
 	}
+	void Reset() {
+		TerminateThread(hThread, 0);
+		hThread = CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)CAudioDevice::AudioThread, (void*)this, NULL, NULL);
+	}
 	void SetAudioQueue(CAudioQueue* aq) {
 		pAudioQueue = aq;
 	}
@@ -105,13 +109,14 @@ public:
 				if (pAudioQueue != nullptr)
 					if (bNeedResample) {
 						UINT32 szResampledLen = numAvailableFrames,
-							szInputLen = numAvailableFrames * DEFAULT_SAMPLERATE / pWaveFormat->nSamplesPerSec;
+						szInputLen = numAvailableFrames * DEFAULT_SAMPLERATE / pWaveFormat->nSamplesPerSec;
 						ppData = (BYTE*)fResampled;
 						pAudioQueue->DoTask(szInputLen, (char*)ppData, pWaveFormat);
 						speex_resampler_process_interleaved_int(pResampler, (short*)ppData, &szInputLen, (short*)pData, &szResampledLen);
 					}
 					else 
-						pAudioQueue->DoTask(numAvailableFrames, (char*)ppData, pWaveFormat);
+						if (pAudioQueue != nullptr)
+							pAudioQueue->DoTask(numAvailableFrames, (char*)ppData, pWaveFormat);
 				hr = pAudioRenderClient->ReleaseBuffer(numAvailableFrames, 0);
 				if (FAILED(hr)) return hr;
 			}
@@ -119,7 +124,20 @@ public:
 				DWORD pFlags;
 				hr = pAudioCaptureClient->GetBuffer(&pData, &numAvailableFrames, &pFlags, NULL, NULL);
 				if (FAILED(hr)) return hr;
-				if (pFlags != AUDCLNT_BUFFERFLAGS_SILENT && pFlags != AUDCLNT_BUFFERFLAGS_DATA_DISCONTINUITY && pFlags != AUDCLNT_BUFFERFLAGS_TIMESTAMP_ERROR) {
+				//wprintf(L"iac flags %d\n", pFlags);
+				if (pFlags > 0) {
+					if (pFlags & AUDCLNT_BUFFERFLAGS_SILENT) ZeroMemory(pData, numAvailableFrames);
+					if (pFlags & AUDCLNT_BUFFERFLAGS_DATA_DISCONTINUITY) {
+						Sleep(10);
+						iDiscontinuities++;
+						if (iDiscontinuities > 10) {
+							iDiscontinuities = 0;
+							Reset();
+						}
+					}
+					if (pAudioQueue != nullptr)
+						pAudioQueue->DoTask(0, NULL, pWaveFormat);
+				} else {
 					BYTE* ppData = pData;
 					UINT32 resampled_numAvailableFrames = numAvailableFrames;
 					if (bNeedResample) {
@@ -160,4 +178,5 @@ private:
 	HANDLE hThread = nullptr;
 	BOOL bNeedResample = FALSE;
 	CAudioQueue* pAudioQueue = nullptr;
+	UINT32 iDiscontinuities = 0;
 };
