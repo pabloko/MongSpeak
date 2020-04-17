@@ -501,7 +501,7 @@
             <div style="clear:both;">
 			<fieldset class="devices" id="devicecapture">
                 <legend>Input device</legend>
-                <select class="selectsettings" id="indevices" onchange="mong.set_device(1, this.selectedIndex)"></select>
+                <select class="selectsettings" id="indevices" onchange="dvin=this.selectedIndex; mong.set_device(1, dvin)"></select>
                 <input type="range" min=0 max=150 value=100 onchange="set_volume(-2, parseInt(this.value))" style="width:100%;padding:0;" />
             </fieldset>
 			</div>
@@ -509,7 +509,7 @@
             <div style="clear:both;">
 			<fieldset class="devices" id="devicerender">
                 <legend>Output device</legend>
-                <select class="selectsettings" id="outdevices" onchange="mong.set_device(0, this.selectedIndex)"></select>
+                <select class="selectsettings" id="outdevices" onchange="dvout=this.selectedIndex; mong.set_device(0, dvout)"></select>
                 <input type="range" min=0 max=150 value=100 onchange="set_volume(-1, parseInt(this.value))" style="width:100%;margin:0;padding:0;" />
             </fieldset>
 			</div>
@@ -623,7 +623,7 @@
 	<script src="https://cdn.jsdelivr.net/npm/linkifyjs@2.1.9/dist/linkify-html.min.js"></script>
 	<script>
 		linkify.options.defaults.target = null;
-		
+		var dvin = 0, dvout=0;
 		function isValidImageURL(str){
 			if ( typeof str !== 'string' ) return false;
 			return !!str.match(/\w+\.(jpg|jpeg|gif|png|tiff|jiff|bmp|webp)$/gi);
@@ -894,6 +894,10 @@
 			if (id == -5 && parseInt(data) > 0) {
 				_("keybind").innerText = mong.findkeyname(parseInt(data))
 				mong.set_inputmethod(parseInt(data))
+			}
+			
+			if (id == -666) {
+				mong.set_device(1, dvin) //recover lost input device
 			}
 			
 			
