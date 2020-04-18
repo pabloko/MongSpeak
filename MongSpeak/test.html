@@ -1118,6 +1118,11 @@
 			if (preferences.general_volume) {
 			    volgeneral.value = preferences.general_volume;
 			}
+		} else {
+			preferences={}
+			preferences['username']=set_username();
+			preferences['ip_history']=[]
+			_("usernameinpt").value = preferences.username;
 		}
 
         //UI Customization
@@ -1190,7 +1195,7 @@
 			if(/*userinput && */addressinput){
 			    if (/*userinput.value != "" && */addressinput.value != "") {
 			        preferences.username = set_username(_("usernameinpt").value);
-			        set_preferences("mong", JSON.stringify(preferences));
+			        set_preferences(JSON.stringify(preferences));
 					connect(addressinput.value);
 					if(preferences){
 						if(preferences.ip_history.length>0){
@@ -1302,8 +1307,8 @@
 
 		}
 
-		function set_preferences(key, val){
-			mong.set_preferences(key, val);
+		function set_preferences(val){
+			mong.set_preferences("mong", val);
 		}
 
 		function get_preferences(key){

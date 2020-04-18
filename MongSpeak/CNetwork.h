@@ -24,6 +24,7 @@ public:
 			delete[] szUserName;
 	}
 	void SetUserName(wchar_t* name) {
+		if (name == NULL) return;
 		if (wcslen(name) == 0 || wcslen(name) >= 50) return;
 		swprintf_s(szUserName, 50, L"%s", name);
 	}

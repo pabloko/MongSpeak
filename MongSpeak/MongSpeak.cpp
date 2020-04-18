@@ -30,6 +30,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	hr = OleInitialize(0);
 	if (FAILED(hr)) return hr;
 	OleInitializeCleanup release_OleInitialize;
+	g_network = new CNetwork();
+	ReleaseDelete release_g_network(g_network);
 	g_preferences = new CPreferences();
 	g_jsObject = new JSObject();
 	ReleaseIUnknown release_g_jsObject(g_jsObject);
@@ -52,8 +54,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	void *data = LockResource(hglobal);
 	g_webWindow->webForm->GoMem(_com_util::ConvertStringToBSTR((char*)data));
 	MSG msg;
-	g_network = new CNetwork();
-	ReleaseDelete release_g_network(g_network);
 	hr = get_default_device(&g_dev_in, EDataFlow::eCapture);
 	if (FAILED(hr)) return hr;
 	hr = get_default_device(&g_dev_out, EDataFlow::eRender);
