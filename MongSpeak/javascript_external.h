@@ -1,6 +1,6 @@
 #pragma once
 #include <sapi.h>
-
+//Logs a string to the debug console
 void mm_log(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pExcepInfo, UINT* puArgErr) {
 	if (pDispParams->cArgs > 0) {
 		if (pDispParams->rgvarg[0].vt == VT_BSTR) {
@@ -8,7 +8,7 @@ void mm_log(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pExcepInfo,
 		}
 	}
 }
-
+//List audio devices input/output to a stringified json array
 void mm_list_devices(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pExcepInfo, UINT* puArgErr) {
 	if (pDispParams->cArgs == 1) {
 		if (pDispParams->rgvarg[0].vt == VT_I4) {
@@ -20,7 +20,7 @@ void mm_list_devices(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pE
 		}
 	}
 }
-
+//Connect to a server
 void mm_connect(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pExcepInfo, UINT* puArgErr) {
 	if (pDispParams->cArgs > 0) {
 		//if type string
@@ -29,11 +29,11 @@ void mm_connect(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pExcepI
 		}
 	}
 }
-
+//Disconnect from server
 void mm_disconnect(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pExcepInfo, UINT* puArgErr) {
 	g_network->Disconnect();
 }
-
+//Send RPCID::CHANGE_ROOM
 void mm_change_room(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pExcepInfo, UINT* puArgErr) {
 	if (pDispParams->cArgs > 0) {
 		if (pDispParams->rgvarg[0].vt == VT_I4) {
@@ -43,7 +43,7 @@ void mm_change_room(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pEx
 		}
 	}
 }
-
+//Send RPCID::USER_CHAT
 void mm_send_message(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pExcepInfo, UINT* puArgErr) {
 	if (pDispParams->cArgs > 0) {
 		if (pDispParams->rgvarg[0].vt == VT_BSTR) {
@@ -51,7 +51,7 @@ void mm_send_message(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pE
 		}
 	}
 }
-
+//Change audio device, input/output, device id (0=default, 1...n devices from list)
 void mm_set_device(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pExcepInfo, UINT* puArgErr) {
 	if (pDispParams->cArgs == 2) {
 		HRESULT hr = S_OK;
@@ -88,13 +88,13 @@ void mm_set_device(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pExc
 		}
 	}
 }
-
+//Read key,value from regedit
 void mm_set_preferences(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pExcepInfo, UINT* puArgErr) {
 	if (pDispParams->cArgs == 2 && pDispParams->rgvarg[0].vt == VT_BSTR && pDispParams->rgvarg[1].vt == VT_BSTR) {
 		g_preferences->SetPreferences(pDispParams->rgvarg[1].bstrVal, pDispParams->rgvarg[0].bstrVal);
 	}
 }
-
+//Write key,value from regedit
 void mm_get_preferences(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pExcepInfo, UINT* puArgErr) {
 	if (pDispParams->cArgs == 1 && pDispParams->rgvarg[0].vt == VT_BSTR) {
 		wstring data = g_preferences->GetPreferences(pDispParams->rgvarg[0].bstrVal);
@@ -104,7 +104,7 @@ void mm_get_preferences(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO*
 		} else pVarResult->vt = VT_NULL;
 	}
 }
-
+//Set volume multiplicator of -1=Output -2:Input >=0: id of CAudioSession in CAudioSessionMixer
 void mm_set_vol(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pExcepInfo, UINT* puArgErr) {
 	if (pDispParams->cArgs == 2 && pDispParams->rgvarg[1].vt == VT_I4 && pDispParams->rgvarg[0].vt == VT_I4) {
 		short client = pDispParams->rgvarg[1].intVal;
@@ -123,17 +123,17 @@ void mm_set_vol(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pExcepI
 		}
 	}
 }
-
+//Set CAudioStream input method
 void mm_set_inputmethod(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pExcepInfo, UINT* puArgErr) {
 	if (pDispParams->cArgs == 1 && pDispParams->rgvarg[0].vt == VT_I4) {
 		g_stream->SetInputMethod(pDispParams->rgvarg[0].intVal);
 	}
 }
-
+//Next key pressed after this call will send a UI_COMMAND id -5
 void mm_findkeybind(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pExcepInfo, UINT* puArgErr) {
 	g_webWindow->webForm->bKeyLookup = TRUE;
 }
-
+//virtual keycode to string representation
 void mm_findkeyname(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pExcepInfo, UINT* puArgErr) {
 	pVarResult->vt = VT_NULL;
 	if (pDispParams->cArgs == 1 && pDispParams->rgvarg[0].vt == VT_I4) {
@@ -148,7 +148,7 @@ void mm_findkeyname(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pEx
 		}
 	}
 }
-
+//Text-to-speech thread
 DWORD WINAPI tts(void* pv) {
 	const wchar_t* str = (const wchar_t*)pv;
 	ISpVoice* pVoice = NULL;
@@ -165,12 +165,12 @@ DWORD WINAPI tts(void* pv) {
 	CoUninitialize();
 	return hr;
 }
-
+//Spawns a tts thread to say a string
 void mm_say(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pExcepInfo, UINT* puArgErr) {
 	if (pDispParams->cArgs == 1 && pDispParams->rgvarg[0].vt == VT_BSTR)
 		CreateThread(NULL, NULL, tts, pDispParams->rgvarg[0].bstrVal, NULL, NULL);
 }
-
+//Broadcast UI_COMMAND over the network
 void mm_send_uicommand(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pExcepInfo, UINT* puArgErr) {
 	if (pDispParams->cArgs == 1 && pDispParams->rgvarg[0].vt == VT_I4) {
 		vector<uint8_t> pv;
@@ -178,7 +178,8 @@ void mm_send_uicommand(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* 
 		g_network->Send(RPCID::UI_COMMAND, &pv);
 	}
 }
-
+//Check if window is minimized to play notification sound alerts
+//Todo: we need to move this to WM_ACTIVATE, notification should play if not visible, also should be in settings
 void mm_is_iconic(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pExcepInfo, UINT* puArgErr) {
 	pVarResult->vt = VT_I4;
 	if (IsIconic(g_webWindow->hWndWebWindow))
@@ -186,7 +187,8 @@ void mm_is_iconic(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pExce
 	else
 		pVarResult->intVal = 0;
 }
-
+//Set the username and returns it, if no param provided, returns default PC name or previously saved
+//note: ie fails when pVarResult is filled but you dont put the returned to a var
 void mm_set_username(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pExcepInfo, UINT* puArgErr) {
 	if (pDispParams->cArgs == 1 && pDispParams->rgvarg[0].vt == VT_BSTR) {
 		g_network->SetUserName(pDispParams->rgvarg[0].bstrVal);
@@ -194,13 +196,13 @@ void mm_set_username(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pE
 	pVarResult->vt = VT_BSTR;
 	pVarResult->bstrVal = SysAllocString(g_network->GetUserName());
 }
-
+//Set CAudioStream fast vu updates
 void mm_send_vu(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pExcepInfo, UINT* puArgErr) {
 	if (pDispParams->cArgs == 1 && pDispParams->rgvarg[0].vt == VT_I4) {
 		g_stream->SendVU(pDispParams->rgvarg[0].intVal?TRUE:FALSE);
 	}
 }
-
+//Bind JS Interface methods to IE "mong" object
 void BindJSMethods() {
 	g_jsObject->AddMethod(L"log", mm_log);
 	g_jsObject->AddMethod(L"send_message", mm_send_message);

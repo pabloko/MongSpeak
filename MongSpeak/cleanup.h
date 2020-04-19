@@ -1,4 +1,6 @@
 #pragma once
+/*Classes in this file are used to safely delete/release/dispose anything that need it
+Class destructors in C++ are used as "scope end" event */
 
 class PropVariantClearCleanup {
 public:

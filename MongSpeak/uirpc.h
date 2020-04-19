@@ -55,7 +55,7 @@ enum RPCID {
 
 //uiRPC
 //UNSAFE ILLEGAL RPC SYSTEM: architecture relies on unsafe union and illegal access to its members :S
-//also rpc handler are hackish and not thread-safe, and string conversion is pure shit for window$ only.
+//also rpc handler are hackish and not thread-safe
 
 #define rpc_type_header(type)\
 extern void rpc_write_##type(vector<uint8_t>* vt, type ob, int pos); \
@@ -99,38 +99,3 @@ rpc_type_init(float)
 rpc_type_init(double)
 rpc_type_init(int64_t)
 rpc_type_init(uint64_t)
-
-int rpc_read_string(vector<uint8_t>* vt, wchar_t* out, int pos, int len = NULL) {
-	if (len == NULL) {
-		len = 0;
-		for (vector<uint8_t>::iterator it = vt->begin() + pos; it != vt->end(); ++it) {
-			if (*it == 0x00) break;
-			len++;
-		}
-	}
-	char* utf8str = new char[len + 1];
-	copy(vt->begin() + pos, vt->begin() + pos + len, utf8str);
-	utf8str[len] = '\0';
-	int output_size = MultiByteToWideChar(CP_UTF8, NULL, utf8str, len, NULL, NULL);
-	if (out != NULL) {
-		MultiByteToWideChar(CP_UTF8, 0, utf8str, -1, out, output_size);
-		out[output_size] = '\0';
-	}
-	delete[] utf8str;
-	return output_size;
-}
-
-void rpc_write_string(vector<uint8_t>* vt, const wchar_t* in, int pos = -1, int len = NULL) {
-	if (len == NULL)
-		len = lstrlenW(in);
-	int output_size = WideCharToMultiByte(CP_UTF8, NULL, in, len, NULL, NULL, NULL, NULL);
-	char* wid = new char[output_size + 1];
-	WideCharToMultiByte(CP_UTF8, NULL, in, len, wid, output_size, NULL, NULL);
-	if (pos == -1)
-		vt->insert(vt->end(), &wid[0], &wid[output_size]);
-	else
-		vt->insert(vt->begin() + pos, &wid[0], &wid[output_size]);
-	delete[] wid;
-}
-
-
