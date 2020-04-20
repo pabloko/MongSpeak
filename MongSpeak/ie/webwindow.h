@@ -13,6 +13,7 @@ private:
 	LRESULT InstanceWndProc(UINT msg, WPARAM wParam, LPARAM lParam);
 	WebformDispatchHandler *webformDispatchHandler;
 	void* m_ondropfiles = NULL;
+	BOOL bActiveWindow = FALSE;
 public:
 	HWND hWndWebWindow;
 	WebWindow(WebformDispatchHandler *wdh);
@@ -21,6 +22,9 @@ public:
 	void SetDropFileHandler(void* f) {
 		m_ondropfiles = f;
 	};
+	BOOL GetWindowIsActive() {
+		return bActiveWindow;
+	}
 };
 
 #endif

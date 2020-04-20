@@ -94,6 +94,9 @@ LRESULT WebWindow::InstanceWndProc(UINT msg, WPARAM wParam, LPARAM lParam)
 		if (m_ondropfiles != NULL) 
 			((dropfn_t*)m_ondropfiles)((HDROP)wParam);
 	} break;
+	case WM_ACTIVATE: {
+		bActiveWindow = LOWORD(wParam) == 0 ? FALSE : TRUE;
+	} break;
 	case WM_DESTROY:
 	{
 		webForm->Close();
