@@ -100,15 +100,38 @@ public:
 		while (pVecAudioBuffer.length() > (PREPROCESS_SAMPLES * sizeof(short))) {
 			int vad = speex_preprocess_run(pSpeexPreprocessor, (short*)pVecAudioBuffer.data());
 			//wprintf(L"VAD %d\n", vad);
+			
+			if (iInputMethod == -666 && vad == 0) {
+				CompareInput(FALSE);
+				pVecAudioBuffer.erase(pVecAudioBuffer.begin(), pVecAudioBuffer.begin() + (PREPROCESS_SAMPLES * sizeof(short)));
+				continue;
+			}
+
+			/*if (bIsInput == FALSE) {
+				float fader = 0.0f;
+				float fader_step = 1.0f / PREPROCESS_SAMPLES;
+				for (int cc = 0; cc < PREPROCESS_SAMPLES; cc++) {
+					if (fader < 1.0f) fader += fader_step;
+					fDeinterleaved[cc] = fDeinterleaved[cc] * fader;
+				}
+			}*/
+
+			CompareInput(TRUE);
+
 			int opus_bytes = opus_encode(pOpus, (short*)pVecAudioBuffer.data(), PREPROCESS_SAMPLES, szOpusBuffer, sizeof(szOpusBuffer));
 			pVecAudioBuffer.erase(pVecAudioBuffer.begin(), pVecAudioBuffer.begin() + (PREPROCESS_SAMPLES * sizeof(short)));
-			//CompareInput(vad==1?TRUE:FALSE);
-			if (iInputMethod==-666 && vad == 0)
-				return CompareInput(FALSE);
-			CompareInput(TRUE);
-			if (g_network && opus_bytes > 0)
-				g_network->Send(RPCID::OPUS_DATA, (char*)szOpusBuffer, opus_bytes);
+
+			if (opus_bytes > 0)
+				pVecOpusBuffer.append(&szOpusBuffer[0], &szOpusBuffer[opus_bytes]);
+			/*if (g_network && opus_bytes > 0)
+				g_network->Send(RPCID::OPUS_DATA, (char*)szOpusBuffer, opus_bytes);*/
 		}
+
+		if (g_network && pVecOpusBuffer.size() > 0) {
+			g_network->Send(RPCID::OPUS_DATA, (char*)pVecOpusBuffer.c_str(), pVecOpusBuffer.size());
+			pVecOpusBuffer.erase(pVecOpusBuffer.begin(), pVecOpusBuffer.end());
+		}
+
 	};
 private:
 	OpusEncoder* pOpus;
@@ -124,4 +147,5 @@ private:
 	short fDeinterleaved[2024];
 	SpeexPreprocessState* pSpeexPreprocessor;
 	std::string pVecAudioBuffer;
+	std::string pVecOpusBuffer;
 };
