@@ -33,20 +33,31 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	g_network = new CNetwork();
 	ReleaseDelete release_g_network(g_network);
 	g_preferences = new CPreferences();
+	const int ScreenX = (GetSystemMetrics(SM_CXSCREEN) - MAPWIDTH) / 2;
+	const int ScreenY = (GetSystemMetrics(SM_CYSCREEN) - MAPHEIGHT) / 2;
+
+#ifdef USING_MSHTML
 	g_jsObject = new JSObject();
 	ReleaseIUnknown release_g_jsObject(g_jsObject);
-	BindJSMethods();
 	g_jsObject->AddRef();
 	WebformDispatchImpl* webformDispatchImpl = new WebformDispatchImpl(g_jsObject);
 	ReleaseDelete release_webformDispatchImpl(webformDispatchImpl);
 	g_webWindow = new WebWindow(webformDispatchImpl);
-	g_webWindow->SetDropFileHandler(mm_drop_handler);
 	ReleaseDelete release_g_webWindow(g_webWindow);
-	const int ScreenX = (GetSystemMetrics(SM_CXSCREEN) - MAPWIDTH) / 2;
-	const int ScreenY = (GetSystemMetrics(SM_CYSCREEN) - MAPHEIGHT) / 2;
 	g_webWindow->Create(hInstance, ScreenX, ScreenY, MAPWIDTH, MAPHEIGHT, FALSE);
-	g_webWindow->webForm->SetPasteAcceleratorHandler(mm_getclipboardimage);
+	
 	g_webWindow->webForm->Go("about:blank;");
+#endif
+
+#ifdef USING_MINIBLINK
+	g_webWindow = new WebWindow();
+	g_jsObject = g_webWindow;
+	ReleaseDelete release_g_webWindow(g_webWindow);
+#endif
+
+	g_webWindow->webForm->SetPasteAcceleratorHandler(mm_getclipboardimage);
+	g_webWindow->SetDropFileHandler(mm_drop_handler);
+	BindJSMethods();
 	HMODULE hmodule = GetModuleHandle(NULL);
 	HRSRC hrsrc = FindResource(hmodule, MAKEINTRESOURCE(IDR_HTML1), RT_RCDATA);
 	if (!hrsrc) return FALSE;
@@ -68,6 +79,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	ReleaseDelete release_g_stream(g_stream);
 	g_mix->SetDeviceOut(g_audio_out);
 	g_stream->SetDeviceIn(g_audio_in);
+
 	SetTimer(g_webWindow->hWndWebWindow, 1, 10, 0);
 	while (GetMessage(&msg, nullptr, 0, 0)) {
 		while (g_webWindow->webForm != nullptr && g_jsStack.size() > 0) {
@@ -78,6 +90,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
 	}
+
 	g_mix->SetDeviceOut(NULL);
 	g_stream->SetDeviceIn(NULL);
 	Sleep(20);

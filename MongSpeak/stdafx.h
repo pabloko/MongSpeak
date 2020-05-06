@@ -5,6 +5,9 @@
 
 #pragma once
 
+#define USING_MSHTML
+//#define USING_MINIBLINK
+
 #include "targetver.h"
 #define _CRT_SECURE_NO_WARNINGS
 #define WIN32_LEAN_AND_MEAN
@@ -32,10 +35,12 @@
 #include <malloc.h>
 #include <memory.h>
 #include <tchar.h>
+#ifdef USING_MSHTML
 #include "ie/webform.h"
 #include "ie/webwindow.h"
 #include "ie/webformdispatchimpl.h"
 #include "ie/jsobject.h"
+#endif
 #include <tchar.h>
 #include <map>
 #include <string>
@@ -66,7 +71,10 @@
 #define DEFAULT_SAMPLERATE 16000
 #define DEFAULT_OPUS_BITRATE 28000
 #define OPUS_CHANNELS 1
-
+#ifdef USING_MINIBLINK
+#include "vendor/wke/wke.h"
+#include "wke_impl.h"
+#endif
 #include "uirpc.h"
 #include "pcm.h"
 #include "cleanup.h"

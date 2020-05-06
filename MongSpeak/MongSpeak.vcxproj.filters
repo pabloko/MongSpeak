@@ -28,6 +28,9 @@
     <Filter Include="UI">
       <UniqueIdentifier>{5776a6dd-5ff6-4501-8f8b-76163dd9306f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="WKE">
+      <UniqueIdentifier>{85d915e3-e712-4adf-9fcf-dbad38a8a5f1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -125,6 +128,9 @@
     </ClInclude>
     <ClInclude Include="clipboard_data_helper.h">
       <Filter>Archivos de encabezado\Util</Filter>
+    </ClInclude>
+    <ClInclude Include="wke_impl.h">
+      <Filter>WKE</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

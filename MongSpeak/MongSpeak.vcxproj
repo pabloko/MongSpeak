@@ -183,6 +183,7 @@
     <ClInclude Include="uirpc.h" />
     <ClInclude Include="upload.h" />
     <ClInclude Include="WinReg.h" />
+    <ClInclude Include="wke_impl.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ie\jsobject.cpp" />
