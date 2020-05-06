@@ -5,8 +5,8 @@
 
 #pragma once
 
-#define USING_MSHTML
-//#define USING_MINIBLINK
+//#define USING_MSHTML
+#define USING_MINIBLINK
 
 #include "targetver.h"
 #define _CRT_SECURE_NO_WARNINGS

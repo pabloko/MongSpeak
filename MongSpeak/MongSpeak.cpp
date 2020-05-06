@@ -57,13 +57,13 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	g_webWindow->webForm->SetPasteAcceleratorHandler(mm_getclipboardimage);
 	g_webWindow->SetDropFileHandler(mm_drop_handler);
-	BindJSMethods();
 	HMODULE hmodule = GetModuleHandle(NULL);
 	HRSRC hrsrc = FindResource(hmodule, MAKEINTRESOURCE(IDR_HTML1), RT_RCDATA);
 	if (!hrsrc) return FALSE;
 	HGLOBAL hglobal = LoadResource(hmodule, hrsrc);
 	void *data = LockResource(hglobal);
 	g_webWindow->webForm->GoMem(_com_util::ConvertStringToBSTR((char*)data));
+	BindJSMethods();
 	MSG msg;
 	hr = get_default_device(&g_dev_in, EDataFlow::eCapture);
 	if (FAILED(hr)) return hr;

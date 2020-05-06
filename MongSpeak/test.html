@@ -623,6 +623,7 @@
 	<script src="https://cdn.jsdelivr.net/npm/linkifyjs@2.1.9/dist/linkify.min.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/linkifyjs@2.1.9/dist/linkify-html.min.js"></script>
 	<script>
+		if (!window['mong']) window['mong']=window;
 		linkify.options.defaults.target = null;
 		var dvin = 0, dvout=0;
 		function isValidImageURL(str){
