@@ -202,6 +202,12 @@ void mm_send_vu(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pExcepI
 	}
 }
 
+void mm_shellexecute(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pExcepInfo, UINT* puArgErr) {
+	if (pDispParams->cArgs == 1 && pDispParams->rgvarg[0].vt == VT_BSTR) {
+		ShellExecute(NULL, L"open", pDispParams->rgvarg[0].bstrVal, NULL, NULL, SW_SHOWNORMAL);
+	}
+}
+
 void BindJSMethods() {
 	g_jsObject->AddMethod(L"log", mm_log);
 	g_jsObject->AddMethod(L"send_message", mm_send_message);
@@ -221,4 +227,5 @@ void BindJSMethods() {
 	g_jsObject->AddMethod(L"is_iconic", mm_is_iconic);
 	g_jsObject->AddMethod(L"set_username", mm_set_username);
 	g_jsObject->AddMethod(L"send_vu", mm_send_vu);
+	g_jsObject->AddMethod(L"shellexecute", mm_shellexecute);
 }

@@ -5,21 +5,40 @@
 typedef void t_invoke_t(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pExcepInfo, UINT* puArgErr);
 typedef BOOL t_pastefile_t();
 typedef void t_dropfn_t(HDROP);
-
 wchar_t gPath[MAX_PATH];
+static WNDPROC        orig_wndproc;
+static HWND          orig_wnd;
 
 class WebForm {
 public:
-	
+	static LRESULT CALLBACK wnd_proc(HWND wnd, UINT umsg, WPARAM wparam, LPARAM lparam) {
+		extern WebForm* g_webWindow;
+		if (g_webWindow->bKeyLookup) {
+			if (umsg == WM_KEYDOWN) {
+				g_webWindow->bKeyLookup = false;
+				wchar_t kc[5];
+				swprintf_s(kc, 5, L"%d", wparam);
+				g_webWindow->QueueCallToEvent(7, -5, kc);
+			}
+		}
+		return CallWindowProc(orig_wndproc, wnd, umsg, wparam, lparam);
+	}
+	static void UninstallKeyHook(void) {
+		if (orig_wnd != NULL) {
+			SetWindowLong(orig_wnd, GWL_WNDPROC, (LONG)(UINT_PTR)orig_wndproc);
+			orig_wnd = NULL;
+		}
+	}
+	static void InstallKeyHook(HWND wnd) {
+		if (orig_wndproc == NULL || wnd != orig_wnd) {
+			UninstallKeyHook();
+			orig_wndproc = (WNDPROC)(UINT_PTR)SetWindowLong(wnd, GWL_WNDPROC, (LONG)(UINT_PTR)wnd_proc);
+			orig_wnd = wnd;
+		}
+	}
 	static LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		extern WebForm* g_webWindow;
 		switch (msg) {
-		/*case WM_NCCREATE: {
-			HICON hIcon = LoadIcon(GetModuleHandle(NULL), MAKEINTRESOURCE(IDC_MYICON));
-			SendMessage(hwnd, WM_SETICON, ICON_BIG, (LPARAM)hIcon);
-			SendMessage(hwnd, WM_SETICON, ICON_SMALL, (LPARAM)hIcon);
-			
-		} break;*/
 		case WM_CREATE: {
 			DragAcceptFiles(hwnd, TRUE);
 			HINSTANCE hInstance = ((LPCREATESTRUCT)lParam)->hInstance;
@@ -39,7 +58,6 @@ public:
 			g_webWindow->bActiveWindow = LOWORD(wParam) == 0 ? FALSE : TRUE;
 		} break;
 		case WM_DESTROY: {
-			//g_webWindow->Release();
 			PostQuitMessage(0);
 		} break;
 		}
@@ -80,14 +98,14 @@ public:
 		wsprintf(DllPath, L"%sfront_end\\inspector.html", gPath);
 		if (PathFileExists(DllPath))
 			wkeShowDevtools(m_webview, DllPath, NULL, NULL);
-		//wkeLoadURL(m_webview, "http://google.es");
 		ShowWindow(hWndWebWindow, SW_SHOW);
 		wkeShowWindow(m_webview, TRUE);
-		//jsExecState es = wkeGlobalExec(m_webview);
-		//jsSetGlobal(es, "mong", jsGetGlobal(es,"window"));
+		HWND hwndWke = GetWindow(hWndWebWindow, GW_CHILD);
+		InstallKeyHook(hwndWke);
 	}
 
 	~WebForm() {
+		UninstallKeyHook();
 		wkeShutdown();
 	}
 
@@ -146,12 +164,7 @@ public:
 
 	void AddMethod(const wchar_t* a, /*t_invoke_t*/void* b) {
 		if (m_webview == NULL) return;
-		//m_pScriptCommands.insert(std::make_pair(std::wstring(a), b));
-		//st_jsmethod* method = (st_jsmethod*)malloc(sizeof(st_jsmethod));
-		//method->_this = this;
-		//method->_cb = b;
-		//method->_name = _wcsdup(a);
-		wkeJsBindFunction(_com_util::ConvertBSTRToString((BSTR)a), MethodHandler, b, 10);
+		wkeJsBindFunction(_com_util::ConvertBSTRToString((BSTR)a), MethodHandler, b, 0);
 	}
 	
 	void RunJSFunctionW(const wchar_t* c) {
