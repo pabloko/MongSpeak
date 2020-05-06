@@ -502,7 +502,7 @@
 			<fieldset class="devices" id="devicecapture">
                 <legend>Input device</legend>
                 <select class="selectsettings" id="indevices" onchange="dvin=this.selectedIndex; mong.set_device(1, dvin)"></select>
-                <input type="range" min=0 max=150 value=100 onchange="set_volume(-2, parseInt(this.value))" style="width:100%;padding:0;" />
+                <input type="range" min=0 max=150 value=100 onchange="_set_volume(-2, parseInt(this.value))" style="width:100%;padding:0;" />
             </fieldset>
 			</div>
 			<br />
@@ -510,7 +510,7 @@
 			<fieldset class="devices" id="devicerender">
                 <legend>Output device</legend>
                 <select class="selectsettings" id="outdevices" onchange="dvout=this.selectedIndex; mong.set_device(0, dvout)"></select>
-                <input type="range" min=0 max=150 value=100 onchange="set_volume(-1, parseInt(this.value))" style="width:100%;margin:0;padding:0;" />
+                <input type="range" min=0 max=150 value=100 onchange="_set_volume(-1, parseInt(this.value))" style="width:100%;margin:0;padding:0;" />
             </fieldset>
 			</div>
 			<br />
@@ -518,7 +518,7 @@
 			<fieldset class="talkconfig" id="devicetalk">
                 <legend>Talk</legend>
                 <input name="ptt" onclick="mong.set_inputmethod(0); keybind.disabled=true; plvlvol.disabled=true;" type="radio" /> Always On<br />
-                <input name="ptt" onclick="mong.set_inputmethod(114); keybind.disabled=false; keybind.innerText='F3'; plvlvol.disabled=true;" type="radio" /> Push-to-Talk <button style="display:inline;" id="keybind" onclick="findkeybind(this); this.innerText='Press any key...';" disabled>F3</button><br />
+                <input name="ptt" onclick="mong.set_inputmethod(114); keybind.disabled=false; keybind.innerText='F3'; plvlvol.disabled=true;" type="radio" /> Push-to-Talk <button style="display:inline;" id="keybind" onclick="_findkeybind(this); this.innerText='Press any key...';" disabled>F3</button><br />
                 <input name="ptt" onclick="mong.set_inputmethod(-666); keybind.disabled=true; plvlvol.disabled=true;" type="radio" checked /> Automatic voice activation detection<br />
 				<input name="ptt" onclick="mong.set_inputmethod(-20); plvlvol.value='20'; keybind.disabled=true; plvlvol.disabled=false;" type="radio" /> Manual voice activation detection<br />
                 <input type="range" min=1 max=100 value=1 id="lvlvol" style="width:100%;margin:0;padding:0;" />
@@ -692,7 +692,8 @@
         
 		setTimeout(function(){
 			log("getting devices");
-			var devices = JSON.parse('['+mong.list_devices(0)+']');
+			var devices = JSON.parse('[' + mong.list_devices(0) + ']');
+			console.log(devices);
 			var outdevices = _("outdevices");
 			for(var i = 0; i < devices[1].length; i++){
 				//alert(devices[1][i]);
@@ -953,7 +954,7 @@
 				roomtitle.addEventListener("click", function(room){
 				    //alert("change_room("+self.id+", "+room.id+")");
 				    if (window['self']['room'] != room.id) {
-				        change_room(parseInt(room.id)); 
+				        _change_room(parseInt(room.id)); 
 				        window['self']['room'] = room.id;
 				    }
 				}.bind(this,jsonObj[i]));
@@ -1011,7 +1012,7 @@
 				    window['self']['input'] = e.target;
 				    if (e.keyCode == 13) {
 				        if (e.target.value) {
-                            send_message(e.target.value);
+                            _send_message(e.target.value);
 				        }
 				        e.target.value = "";
 
@@ -1057,7 +1058,7 @@
 		
 
         //Obtengo json de regedit
-		preferences = JSON.parse(get_preferences("mong"));
+		preferences = JSON.parse(_get_preferences("mong"));
 
 		//Initialize preferences
 		if(preferences != null){
@@ -1065,7 +1066,7 @@
             //leer config de colores si hay en preferences
 
 		    if (preferences.username !== null) {
-		        _("usernameinpt").value = set_username(preferences.username);
+		        _("usernameinpt").value = _set_username(preferences.username);
 		    }
 
 		    if (preferences.bgcolor) {
@@ -1100,7 +1101,7 @@
 					    var ipli = _(evt.target.dataset.id);
 					    if (ipli) {
 					        preferences.ip_history.splice(evt.target.dataset.idx, 1);
-					        set_preferences(JSON.stringify(preferences));
+					        _set_preferences(JSON.stringify(preferences));
 					        console.log(preferences.ip_history)
 					        ipli.parentNode.removeChild(ipli);
 					    }
@@ -1121,7 +1122,7 @@
 			}
 		} else {
 			preferences={}
-			preferences['username']=set_username();
+			preferences['username']=_set_username();
 			preferences['ip_history']=[]
 			_("usernameinpt").value = preferences.username;
 		}
@@ -1135,7 +1136,7 @@
 		    _("colorinputappbg").value = s;
 		    document.body.style.backgroundColor = s;
 		    preferences['bgcolor'] = s;
-		    set_preferences(JSON.stringify(preferences));
+		    _set_preferences(JSON.stringify(preferences));
 		}
 		//APP text color
 		_("apptextbtn").onclick = function (event) {
@@ -1144,7 +1145,7 @@
 		    _("colorinputapptext").value = s;
 		    document.body.style.color = s;
 		    preferences['color'] = s;
-		    set_preferences(JSON.stringify(preferences));
+		    _set_preferences(JSON.stringify(preferences));
 		}
 
 		//Chat & emoji parse
@@ -1188,16 +1189,16 @@
 		volgeneral.onchange = function () {
 		    console.log("volgeneral: " + volgeneral.value);
 		    preferences.general_volume = volgeneral.value;
-		    set_preferences(JSON.stringify(preferences));
+		    _set_preferences(JSON.stringify(preferences));
 		}
 
 		//Connect
 		connectbtn.onclick = function(){
 			if(/*userinput && */addressinput){
 			    if (/*userinput.value != "" && */addressinput.value != "") {
-			        preferences.username = set_username(_("usernameinpt").value);
-			        set_preferences(JSON.stringify(preferences));
-					connect(addressinput.value);
+			        preferences.username = _set_username(_("usernameinpt").value);
+			        _set_preferences(JSON.stringify(preferences));
+					_connect(addressinput.value);
 					if(preferences){
 						if(preferences.ip_history.length>0){
 							//console.log("preferences.ip_history>0")
@@ -1237,7 +1238,7 @@
 		//Disconnect
 		var disconnectbtn = _("disconnect");
 		disconnectbtn.onclick = function(){
-			disconnect();
+			_disconnect();
 			disconnect_method();
 		};
 		
@@ -1279,7 +1280,7 @@
 		}
 		
 		//API
-		function set_volume(a,b) {
+		function _set_volume(a,b) {
 			if (a==-1) {
 				vol_out=b
 				_('volpc_out').innerHTML=b+'%'
@@ -1291,44 +1292,41 @@
 			mong.set_volume(a,b)
 		}
 		
-		function findkeybind(e) {
+		function _findkeybind(e) {
 			vkeybind=mong.findkeybind(); 
 			e.innerHTML=vkeybind;
 		}
 		
-		function connect(address){
+		function _connect(address){
 			mong.connect("ws://"+address);
 		}
 
-		function disconnect(){
+		function _disconnect(){
 			mong.disconnect();
 		}
 
-		function set_device(){
 
-		}
-
-		function set_preferences(val){
+		function _set_preferences(val){
 			mong.set_preferences("mong", val);
 		}
 
-		function get_preferences(key){
+		function _get_preferences(key){
 			return mong.get_preferences(key) || null;
 		}
 		
-		function change_room(roomid){
+		function _change_room(roomid){
 			mong.change_room(roomid);
 		}
 		
-		function send_message(message) {
+		function _send_message(message) {
 			mong.send_message(message);
 		}
 
-		function is_iconic() {
+		function _is_iconic() {
 		    return !mong.is_iconic();
 		}
 
-		function set_username(username) {
+		function _set_username(username) {
 		    return mong.set_username(username);
 		}
 		

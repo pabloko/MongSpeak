@@ -6,6 +6,8 @@ typedef void t_invoke_t(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO*
 typedef BOOL t_pastefile_t();
 typedef void t_dropfn_t(HDROP);
 
+wchar_t gPath[MAX_PATH];
+
 class WebForm {
 public:
 	
@@ -69,6 +71,15 @@ public:
 		RegisterClassEx(&wc);
 		hWndWebWindow = CreateWindowEx(0, g_szClassName, L"MongSpeak", WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN | WS_CLIPSIBLINGS, CW_USEDEFAULT, CW_USEDEFAULT, 600, 400, NULL, NULL, hInstance, NULL);
 		m_webview = wkeCreateWebWindow(wkeWindowType::WKE_WINDOW_TYPE_CONTROL, hWndWebWindow, 0, 0, 600, 400);
+		wchar_t DllPath[MAX_PATH] = { 0 };
+		GetModuleFileName(NULL, DllPath, sizeof(DllPath));
+		wchar_t DllPath_dir[MAX_PATH] = { 0 };
+		wchar_t DllPath_drive[20] = { 0 };
+		_wsplitpath_s(DllPath, DllPath_drive, sizeof(DllPath_drive) / 2, DllPath_dir, sizeof(DllPath_dir) / 2, NULL, 0, NULL, 0);
+		wsprintf(gPath, L"%s%s", DllPath_drive, DllPath_dir);
+		wsprintf(DllPath, L"%sfront_end\\inspector.html", gPath);
+		if (PathFileExists(DllPath))
+			wkeShowDevtools(m_webview, DllPath, NULL, NULL);
 		//wkeLoadURL(m_webview, "http://google.es");
 		ShowWindow(hWndWebWindow, SW_SHOW);
 		wkeShowWindow(m_webview, TRUE);
