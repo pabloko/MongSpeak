@@ -970,6 +970,7 @@
 		    log('rpc USER_CHAT: ' + id + " | " + data);
 		    //console.log('rpc USER_CHAT: ' + id + " | " + data);
 			var li = document.createElement("li");
+			li.style.position='relative'
 			var username = null;
 			var found = false;
 			for(var i = 0; i < clients.length && !found; i++){
@@ -1025,8 +1026,35 @@
 			if (id == -666) {
 				mong.set_device(1, dvin) //recover lost input device
 			}
-			
-			
+			if (id == -8) { //file upload %
+				console.log(data)
+				window['self']['input'].value = data;
+			}
+			if (id == -9) { //file upload started
+				window['self']['input'].disabled = true
+				window['self']['input'].value = data;
+			}
+			if (id == -10) { //file is higher than limit
+				window['self']['input'].value = data;
+				setTimeout(function() {
+					window['self']['input'].value=""
+					window['self']['input'].disabled = false
+				},1000)
+			}
+			if (id == -11) { //failed upload
+				window['self']['input'].value = data;
+				setTimeout(function() {
+					window['self']['input'].value=""
+					window['self']['input'].disabled = false
+				},1000)
+			}
+			if (id == -12) { //ok upload
+				window['self']['input'].value = data;
+				setTimeout(function() {
+					window['self']['input'].value=""
+					window['self']['input'].disabled = false
+				},1000)
+			}
 			if (id>0 && data==11) {
 				_('talk_'+id).classList.remove('fa-circle')
 				_('talk_'+id).classList.add('fa-circle-thin')
@@ -1076,6 +1104,7 @@
 				roomtitle.classList.add("pad");
 				roomtitle.addEventListener("click", function(room){
 				    //alert("change_room("+self.id+", "+room.id+")");
+					if (window['self']['input'].disabled) return;
 				    if (window['self']['room'] != room.id) {
 				        _change_room(parseInt(room.id)); 
 				        window['self']['room'] = room.id;

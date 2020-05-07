@@ -7,7 +7,7 @@ short mix_pcm_sample_short(short aa, short bb) {
 		m = a * b / 32768;
 	else
 		m = 2 * (a + b) - (a * b) / 32768 - 65536;
-	if (m == 65536)
+	if (m >= 65536)
 		m = 65535;
 	m -= 32768;
 	return (short)m;

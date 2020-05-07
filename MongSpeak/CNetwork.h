@@ -186,10 +186,10 @@ public:
 	static DWORD NetworkThread(void* obj) {
 		return ((CNetwork*)obj)->NetworkLoop();
 	}
+	LONG nBytesReaded, nBytesWritten;
 private:
 	HANDLE hTask;
 	BOOL bConnected;
-	LONG nBytesReaded, nBytesWritten;
 	WORD mID;
 	WORD mRoom;
 	WebSocket* gWS;

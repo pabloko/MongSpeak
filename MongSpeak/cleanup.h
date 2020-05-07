@@ -10,6 +10,16 @@ private:
 	PROPVARIANT * m_p;
 };
 
+class BoolToggleCleanup {
+public:
+	BoolToggleCleanup(BOOL *p) : m_p(p) {}
+	~BoolToggleCleanup() {
+		*m_p=FALSE;
+	}
+private:
+	BOOL* m_p;
+};
+
 class ReleaseSpeexResampler {
 public:
 	ReleaseSpeexResampler(SpeexResamplerState *p) : m_p(p) {}
@@ -20,6 +30,7 @@ public:
 private:
 	SpeexResamplerState * m_p;
 };
+
 class ReleaseIUnknown {
 public:
 	ReleaseIUnknown(IUnknown *p) : m_p(p) {}
