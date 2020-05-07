@@ -22,6 +22,7 @@
 #include <tchar.h>
 #include "stdio.h"
 #include <windows.h>
+#include <Commdlg.h>
 #include <time.h>
 //#include <mmsystem.h>
 #include <mmdeviceapi.h>

@@ -69,7 +69,6 @@ public:
 					//todo: newly connected socket
 					string ident(&hwProfileInfo.szHwProfileGuid[1]);
 					Send(RPCID::USER_IDENT, &ident);
-					Send(RPCID::USER_JOIN, (char*)szUserName, wcslen(szUserName)*2);
 				}
 				bConnected = TRUE;
 				try {
@@ -122,9 +121,9 @@ public:
 			if (g_network->mID == NULL)
 				g_network->mID = sessid;
 		} break;
-		/*case RPCID::USER_CHAT: {
-			
-		} break;*/
+		case RPCID::ROOMS: {
+			g_network->Send(RPCID::USER_JOIN, (char*)g_network->szUserName, wcslen(g_network->szUserName) * sizeof(wchar_t));
+		} break;
 		case RPCID::CHANGE_ROOM: {
 			SHORT room = 0;
 			if (message.size() != 5) return;

@@ -13,8 +13,17 @@ class WebForm {
 public:
 	static LRESULT CALLBACK wnd_proc(HWND wnd, UINT umsg, WPARAM wparam, LPARAM lparam) {
 		extern WebForm* g_webWindow;
-		if (g_webWindow->bKeyLookup) {
-			if (umsg == WM_KEYDOWN) {
+		if (umsg == WM_DROPFILES) { 
+			if (g_webWindow->m_dropfile_handler_ != NULL)
+				((t_dropfn_t*)g_webWindow->m_dropfile_handler_)((HDROP)wparam);
+			return false; 
+		}
+		if (umsg == WM_KEYDOWN) {
+			if (wparam == 86 && GetAsyncKeyState(VK_CONTROL) & 1) {
+				if (g_webWindow->m_paste_handler_ != NULL)
+					((t_pastefile_t*)g_webWindow->m_paste_handler_)();
+			}
+			if (g_webWindow->bKeyLookup) {
 				g_webWindow->bKeyLookup = false;
 				wchar_t kc[5];
 				swprintf_s(kc, 5, L"%d", wparam);
@@ -51,8 +60,7 @@ public:
 				wkeResize(g_webWindow->m_webview, LOWORD(lParam), HIWORD(lParam));
 		} break;
 		case WM_DROPFILES: {
-			if (g_webWindow->m_dropfile_handler_ != NULL)
-				((t_dropfn_t*)g_webWindow->m_dropfile_handler_)((HDROP)wParam);
+			return false;
 		} break;
 		case WM_ACTIVATE: {
 			g_webWindow->bActiveWindow = LOWORD(wParam) == 0 ? FALSE : TRUE;
@@ -100,8 +108,12 @@ public:
 			wkeShowDevtools(m_webview, DllPath, NULL, NULL);
 		ShowWindow(hWndWebWindow, SW_SHOW);
 		wkeShowWindow(m_webview, TRUE);
+		wkeSetNavigationToNewWindowEnable(m_webview, FALSE);
+		wkeSetDragDropEnable(m_webview, FALSE);
+		wkeSetContextMenuEnabled(m_webview, FALSE);
 		HWND hwndWke = GetWindow(hWndWebWindow, GW_CHILD);
 		InstallKeyHook(hwndWke);
+		
 	}
 
 	~WebForm() {
@@ -125,7 +137,7 @@ public:
 			break;
 		case jsType::JSTYPE_NUMBER:
 			vt->vt = VT_I4;
-			vt->boolVal = jsToInt(es, val);
+			vt->intVal = jsToInt(es, val);
 			break;
 		default:
 			vt->vt = VT_NULL;
@@ -186,6 +198,7 @@ public:
 
 	int DequeueCallToEvent() {
 		if (m_webview == NULL) return E_ABORT;
+		//if (vec_rpc_id.size() > 0) {
 		while (vec_rpc_id.size() > 0) {
 			jsExecState es = wkeGlobalExec(m_webview);
 			jsValue* args = new jsValue[3];

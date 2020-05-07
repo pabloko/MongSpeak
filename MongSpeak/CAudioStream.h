@@ -72,7 +72,7 @@ public:
 				fVuSumMin = (vl < fVuSumMin ? vl : fVuSumMin);
 				fVuSumMax = (vl > fVuSumMax ? vl : fVuSumMax);
 			}
-			if (lVuCount > (wf->nSamplesPerSec / 20)) {
+			if (lVuCount > (wf->nSamplesPerSec / 60)) {
 				fTol = log2(max(fVuSumMax, -fVuSumMin)) * 6.02f;
 				if (fTol < -40.0f) fTol = -40.0f;
 				fTol += 40.0f; fTol = (fTol * 100.0f) / 40.0f;

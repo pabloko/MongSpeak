@@ -109,7 +109,8 @@ void mm_set_vol(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pExcepI
 	if (pDispParams->cArgs == 2 && pDispParams->rgvarg[1].vt == VT_I4 && pDispParams->rgvarg[0].vt == VT_I4) {
 		short client = pDispParams->rgvarg[1].intVal;
 		float vol = pDispParams->rgvarg[0].intVal / 100.0f;
-		//wprintf(L"new vol on %d %f\n", client, vol);
+		wprintf(L"new vol on %d %f\n", client, vol);
+		if (vol < 0 || vol > 2) return;
 		switch (client) {
 		case -1: {
 			g_mix->SetVol(vol);
@@ -208,6 +209,26 @@ void mm_shellexecute(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pE
 	}
 }
 
+void mm_choosecolor (DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pExcepInfo, UINT* puArgErr) {
+	pVarResult->vt = VT_I4;
+	pVarResult->intVal = -1;
+	if (pDispParams->cArgs != 1 || pDispParams->rgvarg[0].vt != VT_I4) return;
+	CHOOSECOLOR cc;
+	static COLORREF acrCustClr[16];
+	ZeroMemory(&cc, sizeof(cc));
+	cc.lStructSize = sizeof(cc);
+	cc.hwndOwner = g_webWindow->hWndWebWindow;
+	cc.lpCustColors = (LPDWORD)acrCustClr;
+	cc.rgbResult = pDispParams->rgvarg[0].intVal;
+	cc.Flags = CC_FULLOPEN | CC_RGBINIT | CC_ANYCOLOR;
+	if (ChooseColor(&cc) == TRUE) {
+		pVarResult->intVal = cc.rgbResult;
+		return;
+	}
+	pVarResult->intVal = -2;
+}
+
+
 void BindJSMethods() {
 	g_jsObject->AddMethod(L"log", mm_log);
 	g_jsObject->AddMethod(L"send_message", mm_send_message);
@@ -228,4 +249,5 @@ void BindJSMethods() {
 	g_jsObject->AddMethod(L"set_username", mm_set_username);
 	g_jsObject->AddMethod(L"send_vu", mm_send_vu);
 	g_jsObject->AddMethod(L"shellexecute", mm_shellexecute);
+	g_jsObject->AddMethod(L"choosecolor", mm_choosecolor);
 }

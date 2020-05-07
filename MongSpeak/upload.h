@@ -1,8 +1,7 @@
 #pragma once
 #include <shellapi.h>
 
-long GetFileSize(const char* fileName)
-{
+long GetFileSize(const char* fileName) {
 	BOOL fOk;
 	WIN32_FILE_ATTRIBUTE_DATA fileInfo;
 	if (NULL == fileName)
