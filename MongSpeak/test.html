@@ -29,7 +29,7 @@
 				justify-content: center;
 				flex-direction: column;
 				align-items: center;
-				background-image:url(https://picsum.photos/800/600);
+				background-image:url(https://picsum.photos/800/600?grayscale);
 				background-size:cover;
 				background-position: center center;
 			}
@@ -987,7 +987,7 @@
 			var currentchat = document.getElementById("chatul_" + window['self']['room']);
 			
 			if (id != window['self'].id) {
-			    if (is_iconic()) audio.play();
+			    if (_is_iconic()) audio.play();
 			} else
 			    li.style.textAlign = 'right';
 				
@@ -1506,6 +1506,31 @@
 				dest = event.target.href
 			event.preventDefault();
 			mong.shellexecute(dest);
+		}, false);
+		
+		
+		var BORDER_SIZE = 4;
+
+		var m_pos;
+		function resize(e){
+		  //var dx = m_pos - e.x;
+		  //m_pos = e.x;
+		  //center.style.width = (parseInt(getComputedStyle(center, '').width) + dx) + "px";
+		  var xPercent = parseInt(e.pageX / window.innerWidth * 100);
+		  if (xPercent < 20 || xPercent > 80) return;
+		  left.style.width=xPercent+'%'
+		  center.style.width=(100-xPercent)+'%'
+		}
+
+		center.addEventListener("mousedown", function(e){
+		  if (e.offsetX < BORDER_SIZE) {
+			m_pos = e.x;
+			document.addEventListener("mousemove", resize, false);
+		  }
+		}, false);
+
+		center.addEventListener("mouseup", function(){
+			document.removeEventListener("mousemove", resize, false);
 		}, false);
 		
 	</script>
