@@ -21,9 +21,8 @@ double GetFileSize(const char* fileName) {
 	return (double)((fileInfo.nFileSizeHigh * (MAXDWORD + 1)) + fileInfo.nFileSizeLow);
 }
 
-INT NotifyStatus(int status, wstring status_text) {
+void NotifyStatus(int status, wstring status_text) {
 	g_webWindow->webForm->QueueCallToEvent(RPCID::UI_COMMAND, status, (wchar_t*)status_text.c_str());
-	return 1;
 }
 
 size_t FileUploadCb(void *ptr, size_t size, size_t nmemb, void *stream) {
@@ -37,17 +36,18 @@ size_t FileUploadCb(void *ptr, size_t size, size_t nmemb, void *stream) {
 	for (; iFileNameStart < strlen(szFileUploaded); iFileNameStart++) 
 		if (szFileUploaded[iFileNameStart] == '_') break;
 	char* szFileUploadedName = &szFileUploaded[iFileNameStart + 1];
-	if (strcmp(szFileUploadedName, (char*)stream) == 0) {
+	if (g_network != NULL && strcmp(szFileUploadedName, (char*)stream) == 0) {
 		sprintf(szMessage, "<i class=\"fa fa-cloud-download\"></i> <b>%s</b><br>http://%s/file/%s", szFileUploadedName, &g_network->GetServerURL()[5], szFileUploaded);
 		char* ret = (char*)_com_util::ConvertStringToBSTR(szMessage);
 		pv.assign(&ret[0], &ret[strlen(szMessage) * sizeof(wchar_t)]);
 		g_network->Send(RPCID::USER_CHAT, &pv);
-	}
+	} else
+		NotifyStatus(-11, wstring(L"Something happened while uploading"));
 	return nmemb;
 }
 
 size_t  FileReadCb(void*  _Buffer, size_t _ElementSize, size_t _ElementCount, upload_metadata_t*  _Stream) {
-	size_t tosend = fread(_Buffer, _ElementSize, _ElementCount / 10, _Stream->fd);
+	size_t tosend = fread(_Buffer, _ElementSize, _ElementCount/10, _Stream->fd);
 	_Stream->sent_bt += tosend * _ElementSize;
 	g_network->nBytesWritten += tosend * _ElementSize;
 	int uploaded_pc = _Stream->sent_bt / _Stream->size * 100;
@@ -78,9 +78,9 @@ DWORD WINAPI FileUpload(void* szFile) {
 	fd = fopen((char*)szFile, "rb");
 	if (!fd)
 		return 1;
-	LONG filesize = GetFileSize((char*)szFile);
+	double filesize = GetFileSize((char*)szFile);
 	if (filesize <= 0 || filesize > 50000000) {
-		NotifyStatus(-10, wstring_format(L"File too big (%f Mb/50.0 Mb)", filesize / 1000000));
+		NotifyStatus(-10, wstring_format(L"File too big (%.1f Mb/50.0 Mb)", filesize / 1000000));
 		return 1;
 	}
 	curl = curl_easy_init();
@@ -98,6 +98,11 @@ DWORD WINAPI FileUpload(void* szFile) {
 		meta->sent_bt = 0;
 		meta->time_limit = GetTickCount();
 		sprintf(szURL, "http://%s/upload/%s", &g_network->GetServerURL()[5], &szFileName[iStrStartPos + 1]);
+		struct curl_slist *chunk = NULL;
+		char* header = new char[500];
+		sprintf(header, "user-mong: %s", &hwProfileInfo.szHwProfileGuid[1]);
+		chunk = curl_slist_append(chunk, header);
+		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, chunk);
 		curl_easy_setopt(curl, CURLOPT_URL, szURL);
 		curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
 		curl_easy_setopt(curl, CURLOPT_READFUNCTION, FileReadCb);
@@ -118,7 +123,9 @@ DWORD WINAPI FileUpload(void* szFile) {
 			NotifyStatus(-12, wstring_format(L"Uploading: %s (%.1f Mb)", meta->filename, (double)((double)meta->size / 1000000.0f)));
 		}
 		Sleep(1000);
+		curl_slist_free_all(chunk);
 		delete meta;
+		delete[] header;
 		curl_easy_cleanup(curl);
 	}
 	fclose(fd);

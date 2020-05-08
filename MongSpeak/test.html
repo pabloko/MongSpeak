@@ -95,6 +95,7 @@
 				border-left:0;
                 overflow: hidden;
                 overflow-y: scroll;
+				z-index:99;
             }
 			
 
@@ -616,6 +617,16 @@
 				height:60px;
 				background-size:contain;
 			}
+			#center::before {
+				content: " ";
+				width: 4px;
+				height: 100%;
+				position: absolute;
+				background: linear-gradient(90deg, rgba(62,62,62,0.15) 0%, rgba(255,255,255,0) 100%);
+				top: 0px;
+				left: 0px;
+				cursor: pointer; /*todo: want horizontal resize cursor but dont work in ::after/::before*/
+			}
 
 		</style>
 	</head>
@@ -1012,6 +1023,8 @@
 			log('rpc OPUS_DATA: '+id+ " | "+data);
 		});
 		
+		var pci;
+		
 		join_rpc(RPCID.UI_COMMAND, function(id, data) {
 			log('rpc UI_COMMAND: '+id+ " | "+data);
 			if (id == -2) _("upnet").innerHTML=(data/1000).toFixed(2)
@@ -1029,31 +1042,48 @@
 			if (id == -8) { //file upload %
 				console.log(data)
 				window['self']['input'].value = data;
+				pci.style.width=data.split(' ')[2].replace('(','').replace(')','').trim()
+				console.log(data.split(' ')[2].replace('(','').replace(')','').trim())
 			}
 			if (id == -9) { //file upload started
 				window['self']['input'].disabled = true
 				window['self']['input'].value = data;
+				
+				pci = document.createElement('div')
+				pci.style.position='absolute'
+				pci.style.height='40px'
+				pci.style.width='0%'
+				pci.style.background='#e0e0e0'
+				pci.style.top='0'
+				pci.style.left='0'
+				pci.style.zIndex='-1'
+				window['self']['input'].parentNode.appendChild(pci)
+				
 			}
 			if (id == -10) { //file is higher than limit
 				window['self']['input'].value = data;
 				setTimeout(function() {
 					window['self']['input'].value=""
 					window['self']['input'].disabled = false
-				},1000)
+					pci.parentNode.removeChild(pci);
+				},2000)
 			}
 			if (id == -11) { //failed upload
 				window['self']['input'].value = data;
 				setTimeout(function() {
 					window['self']['input'].value=""
 					window['self']['input'].disabled = false
-				},1000)
+					pci.parentNode.removeChild(pci);
+				},2000)
 			}
 			if (id == -12) { //ok upload
 				window['self']['input'].value = data;
+				pci.style.width='100%'
 				setTimeout(function() {
 					window['self']['input'].value=""
 					window['self']['input'].disabled = false
-				},1000)
+					pci.parentNode.removeChild(pci);
+				},2000)
 			}
 			if (id>0 && data==11) {
 				_('talk_'+id).classList.remove('fa-circle')
@@ -1150,8 +1180,8 @@
 
 				var emoji = document.createElement("div");
 				emoji.classList.add("emojimenu");
-				emoji.innerHTML = "&#x1F600;";//nop
-				emoji.innerHTML = twemoji.parse(emoji.innerText)
+				emoji.innerHTML = '<img src="https://img.icons8.com/android/24/000000/happy.png" style="width:18px; height:18px; opacity:.8;" />' //"&#x1F600;";//nop
+				//emoji.innerHTML = twemoji.parse(emoji.innerText)
                 
 				emoji.onclick = function () {
 				    if (_('emojicontainer').style.display == "none" || _('emojicontainer').style.display =="")
