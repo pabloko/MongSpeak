@@ -2,6 +2,10 @@
 
 extern CNetwork* g_network;
 extern vector<wstring> g_jsStack;
+extern ITaskbarList3* g_Taskbar;
+extern BOOL bPreventSimultaneousUpload;
+extern void set_taskbar_state();
+
 #define PREPROCESS_SAMPLES (160*2)
 class CAudioStream : CAudioQueue {
 public:
@@ -50,6 +54,13 @@ public:
 			else
 				rpc_write_short(&pv, 11);
 			g_network->Send(RPCID::UI_COMMAND, &pv);
+			if (g_Taskbar && bPreventSimultaneousUpload == FALSE) {
+				if (bIsInput) {
+					g_Taskbar->SetProgressState(g_webWindow->hWndWebWindow, TBPF_NORMAL);
+					g_Taskbar->SetProgressValue(g_webWindow->hWndWebWindow, 100, 100);
+				}
+				else set_taskbar_state();
+			}
 		}
 	}
 	void SendVU(BOOL vu) {
@@ -133,6 +144,9 @@ public:
 		}
 
 	};
+	float GetVol() {
+		return fVol;
+	}
 private:
 	OpusEncoder* pOpus;
 	CAudioDevice* pDeviceIn;

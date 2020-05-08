@@ -72,7 +72,7 @@ public:
 		return DefWindowProc(hwnd, msg, wParam, lParam);
 	}
 
-	WebForm() {
+	WebForm(int x, int y, int w, int h) {
 		extern WebForm* g_webWindow;
 		bActiveWindow = FALSE;
 		webForm = this;
@@ -95,8 +95,8 @@ public:
 		wc.lpszClassName = g_szClassName;
 		wc.hIconSm = NULL;
 		RegisterClassEx(&wc);
-		hWndWebWindow = CreateWindowEx(0, g_szClassName, L"MongSpeak", WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN | WS_CLIPSIBLINGS, CW_USEDEFAULT, CW_USEDEFAULT, 600, 400, NULL, NULL, hInstance, NULL);
-		m_webview = wkeCreateWebWindow(wkeWindowType::WKE_WINDOW_TYPE_CONTROL, hWndWebWindow, 0, 0, 600, 400);
+		hWndWebWindow = CreateWindowEx(0, g_szClassName, L"MongSpeak", WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN | WS_CLIPSIBLINGS, x, y, w, h, NULL, NULL, hInstance, NULL);
+		m_webview = wkeCreateWebWindow(wkeWindowType::WKE_WINDOW_TYPE_CONTROL, hWndWebWindow, 0, 0, w, h);
 		wchar_t DllPath[MAX_PATH] = { 0 };
 		GetModuleFileName(NULL, DllPath, sizeof(DllPath));
 		wchar_t DllPath_dir[MAX_PATH] = { 0 };

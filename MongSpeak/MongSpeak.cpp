@@ -35,7 +35,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	g_preferences = new CPreferences();
 	const int ScreenX = (GetSystemMetrics(SM_CXSCREEN) - MAPWIDTH) / 2;
 	const int ScreenY = (GetSystemMetrics(SM_CYSCREEN) - MAPHEIGHT) / 2;
-
+	
 #ifdef USING_MSHTML
 	g_jsObject = new JSObject();
 	ReleaseIUnknown release_g_jsObject(g_jsObject);
@@ -45,12 +45,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	g_webWindow = new WebWindow(webformDispatchImpl);
 	ReleaseDelete release_g_webWindow(g_webWindow);
 	g_webWindow->Create(hInstance, ScreenX, ScreenY, MAPWIDTH, MAPHEIGHT, FALSE);
-	
 	g_webWindow->webForm->Go("about:blank;");
 #endif
 
 #ifdef USING_MINIBLINK
-	g_webWindow = new WebWindow();
+	g_webWindow = new WebWindow(ScreenX, ScreenY, MAPWIDTH, MAPHEIGHT);
 	g_jsObject = g_webWindow;
 	ReleaseDelete release_g_webWindow(g_webWindow);
 #endif
@@ -67,8 +66,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	MSG msg;
 	hr = get_default_device(&g_dev_in, EDataFlow::eCapture);
 	if (FAILED(hr)) return hr;
+	ReleaseIUnknown g_dev_in_release(g_dev_in);
 	hr = get_default_device(&g_dev_out, EDataFlow::eRender);
 	if (FAILED(hr)) return hr;
+	ReleaseIUnknown g_dev_out_release(g_dev_out);
 	g_audio_in = new CAudioDevice(g_dev_in, EDataFlow::eCapture);
 	ReleaseDelete release_g_audio_in(g_audio_in);
 	g_audio_out = new CAudioDevice(g_dev_out, EDataFlow::eRender);
@@ -80,8 +81,14 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	g_mix->SetDeviceOut(g_audio_out);
 	g_stream->SetDeviceIn(g_audio_in);
 
+	UINT taskbarButtonCreatedMessageId = RegisterWindowMessage(L"TaskbarButtonCreated");
+	ChangeWindowMessageFilterEx(g_webWindow->hWndWebWindow, taskbarButtonCreatedMessageId, MSGFLT_ALLOW, NULL);
+	g_Taskbar = NULL;
+	ReleaseIUnknown g_Taskbar_release(g_Taskbar);
 	SetTimer(g_webWindow->hWndWebWindow, 1, 10, 0);
 	while (GetMessage(&msg, nullptr, 0, 0)) {
+		if (msg.message == taskbarButtonCreatedMessageId && g_Taskbar == NULL)
+			hr = CoCreateInstance(CLSID_TaskbarList, NULL, CLSCTX_INPROC_SERVER, IID_ITaskbarList3, (void**)&g_Taskbar);
 		g_webWindow->webForm->DequeueCallToEvent();
 		while (g_webWindow->webForm != nullptr && g_jsStack.size() > 0) {
 			g_webWindow->webForm->RunJSFunctionW(g_jsStack.at(0).c_str());

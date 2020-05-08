@@ -107,6 +107,32 @@ void mm_get_preferences(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO*
 	}
 }
 
+void set_taskbar_state() {
+	if (g_Taskbar) {
+		if (g_mix->GetVol() == 0.0f) {
+			g_Taskbar->SetProgressState(g_webWindow->hWndWebWindow, TBPF_ERROR);
+			g_Taskbar->SetProgressValue(g_webWindow->hWndWebWindow, 100, 100);
+			return;
+		}
+		if (g_stream->GetVol() == 0.0f) {
+			g_Taskbar->SetProgressState(g_webWindow->hWndWebWindow, TBPF_PAUSED);
+			g_Taskbar->SetProgressValue(g_webWindow->hWndWebWindow, 100, 100);
+			return;
+		}
+		g_Taskbar->SetProgressState(g_webWindow->hWndWebWindow, TBPF_NORMAL);
+		g_Taskbar->SetProgressValue(g_webWindow->hWndWebWindow, 0, 100);
+	}
+}
+
+void mm_set_taskbar(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pExcepInfo, UINT* puArgErr) {
+	if (pDispParams->cArgs == 2 && pDispParams->rgvarg[1].vt == VT_I4 && pDispParams->rgvarg[0].vt == VT_I4) {
+		g_Taskbar->SetProgressState(g_webWindow->hWndWebWindow, (TBPFLAG)pDispParams->rgvarg[1].intVal);
+		g_Taskbar->SetProgressValue(g_webWindow->hWndWebWindow, pDispParams->rgvarg[0].intVal, 100);
+		return;
+	} 
+	set_taskbar_state();
+}
+
 void mm_set_vol(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pExcepInfo, UINT* puArgErr) {
 	if (pDispParams->cArgs == 2 && pDispParams->rgvarg[1].vt == VT_I4 && pDispParams->rgvarg[0].vt == VT_I4) {
 		short client = pDispParams->rgvarg[1].intVal;
@@ -116,9 +142,11 @@ void mm_set_vol(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pExcepI
 		switch (client) {
 			case -1: {
 				g_mix->SetVol(vol);
+				set_taskbar_state();
 			} break;
 			case -2: {
 				g_stream->SetVol(vol);
+				set_taskbar_state();
 			} break;
 			default: {
 				g_mix->GetSession(client)->SetVol(vol);
@@ -262,4 +290,5 @@ void BindJSMethods() {
 	g_jsObject->AddMethod(L"send_vu", mm_send_vu);
 	g_jsObject->AddMethod(L"shellexecute", mm_shellexecute);
 	g_jsObject->AddMethod(L"choosecolor", mm_choosecolor);
+	g_jsObject->AddMethod(L"set_taskbar", mm_set_taskbar);
 }

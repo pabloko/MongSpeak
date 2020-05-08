@@ -1,4 +1,5 @@
 #pragma once
+
 CAudioSessionMixer* g_mix;
 JSObject* g_jsObject;
 WebWindow* g_webWindow;
@@ -11,3 +12,4 @@ CNetwork* g_network;
 HW_PROFILE_INFOA hwProfileInfo;
 vector<wstring> g_jsStack;
 CPreferences* g_preferences;
+ITaskbarList3* g_Taskbar;

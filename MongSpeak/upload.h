@@ -1,6 +1,7 @@
 #pragma once
 #include <shellapi.h>
 
+extern void set_taskbar_state();
 typedef struct {
 	FILE* fd;
 	wchar_t* filename;
@@ -43,6 +44,10 @@ size_t FileUploadCb(void *ptr, size_t size, size_t nmemb, void *stream) {
 		g_network->Send(RPCID::USER_CHAT, &pv);
 	} else
 		NotifyStatus(-11, wstring(L"Something happened while uploading"));
+	if (g_Taskbar) {
+		g_Taskbar->SetProgressState(g_webWindow->hWndWebWindow, TBPF_NORMAL);
+		g_Taskbar->SetProgressValue(g_webWindow->hWndWebWindow, 100, 100);
+	}
 	return nmemb;
 }
 
@@ -57,6 +62,10 @@ size_t  FileReadCb(void*  _Buffer, size_t _ElementSize, size_t _ElementCount, up
 		if (_Stream->time_limit + 50 < GetTickCount()) {
 			_Stream->time_limit = GetTickCount();
 			NotifyStatus(-8, wstring_format(L"Uploading: %s (%d%%)", _Stream->filename, _Stream->sent_pc));
+			if (g_Taskbar) {
+				g_Taskbar->SetProgressState(g_webWindow->hWndWebWindow, TBPF_NORMAL);
+				g_Taskbar->SetProgressValue(g_webWindow->hWndWebWindow, _Stream->sent_pc, 100);
+			}
 		}
 	}
 	Sleep(5);
@@ -128,6 +137,8 @@ DWORD WINAPI FileUpload(void* szFile) {
 		delete meta;
 		delete[] header;
 		curl_easy_cleanup(curl);
+		if (g_Taskbar) 
+			set_taskbar_state();
 	}
 	fclose(fd);
 	return hr;

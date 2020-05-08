@@ -29,6 +29,7 @@
 #include <audioclient.h>
 #include <avrt.h>
 #include <functiondiscoverykeys_devpkey.h>
+#include <Shobjidl.h>
 #include <tchar.h>
 #include <vector>
 #include <string>
