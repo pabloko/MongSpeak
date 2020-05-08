@@ -81,6 +81,9 @@ public:
 					if (wf->nChannels > 1) flBuffer[i + 1] = flBuffer[i];
 				}
 	}
+	float GetVol() {
+		return fVol;
+	}
 private:
 	map<WORD, CAudioSession*> pVecSessions;
 	CAudioDevice* pDeviceOut;

@@ -49,7 +49,8 @@ size_t FileUploadCb(void *ptr, size_t size, size_t nmemb, void *stream) {
 size_t  FileReadCb(void*  _Buffer, size_t _ElementSize, size_t _ElementCount, upload_metadata_t*  _Stream) {
 	size_t tosend = fread(_Buffer, _ElementSize, _ElementCount/10, _Stream->fd);
 	_Stream->sent_bt += tosend * _ElementSize;
-	g_network->nBytesWritten += tosend * _ElementSize;
+	if (g_network)
+		g_network->nBytesWritten += tosend * _ElementSize;
 	int uploaded_pc = _Stream->sent_bt / _Stream->size * 100;
 	if (uploaded_pc > _Stream->sent_pc) {
 		_Stream->sent_pc = uploaded_pc;

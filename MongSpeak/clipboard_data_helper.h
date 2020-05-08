@@ -2,10 +2,9 @@
 using namespace Gdiplus;
 extern WebWindow* g_webWindow;
 
-int GetEncoderClsid(const WCHAR* format, CLSID* pClsid)
-{
-	UINT  num = 0;          // number of image encoders
-	UINT  size = 0;         // size of the image encoder array in bytes
+int GetEncoderClsid(const WCHAR* format, CLSID* pClsid) {
+	UINT  num = 0;
+	UINT  size = 0;
 	ImageCodecInfo* pImageCodecInfo = NULL;
 	GetImageEncodersSize(&num, &size);
 	if (size == 0)
@@ -14,10 +13,8 @@ int GetEncoderClsid(const WCHAR* format, CLSID* pClsid)
 	if (pImageCodecInfo == NULL)
 		return -1; 
 	GetImageEncoders(num, size, pImageCodecInfo);
-	for (UINT j = 0; j < num; ++j)
-	{
-		if (wcscmp(pImageCodecInfo[j].MimeType, format) == 0)
-		{
+	for (UINT j = 0; j < num; ++j) {
+		if (wcscmp(pImageCodecInfo[j].MimeType, format) == 0) {
 			*pClsid = pImageCodecInfo[j].Clsid;
 			free(pImageCodecInfo);
 			return j;  
@@ -44,7 +41,6 @@ BOOL mm_getclipboardimage() {
 		}
 		return FALSE;
 	}
-	HDC hdc = GetDC(0);
 	HBITMAP handle = (HBITMAP)GetClipboardData(CF_BITMAP);
 	if (handle) {
 		Bitmap* bmp = Bitmap::FromHBITMAP(handle, NULL);
@@ -64,6 +60,7 @@ BOOL mm_getclipboardimage() {
 			bmp->Save(file.c_str() , &clsid, &encoderParameters);
 			CreateThread(NULL, NULL, FileUpload, _com_util::ConvertBSTRToString((BSTR)file.c_str()), NULL, NULL);
 		}
+		else return FALSE;
 	}
 	return TRUE;
 }

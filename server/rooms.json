@@ -2,37 +2,49 @@
     {
         "id": "0",
         "name": "Lobby",
-        "max": "999",
-		"users":[]
+        "max": "100",
+		"pass":"",
+		"opts":{"nochat":false, "novoice":false},
+		"cust":""
     },
     {
         "id": "1",
         "name": "Room #1",
-        "max": "100",
-		"users":[]
+        "max": "30",
+		"pass":"",
+		"opts":{"nochat":false, "novoice":false},
+		"cust":""
     },
     {
         "id": "2",
         "name": "Room #2",
-        "max": "5",
-		"users":[]
+        "max": "30",
+		"pass":"",
+		"opts":{"nochat":false, "novoice":false},
+		"cust":""
     },
     {
         "id": "3",
         "name": "Room #3",
-        "max": "999",
-		"users":[]
+        "max": "30",
+		"pass":"",
+		"opts":{"nochat":false, "novoice":true},
+		"cust":""
     },
     {
         "id": "4",
         "name": "Room #4",
-        "max": "999",
-		"users":[]
+        "max": "30",
+		"pass":"demo4",
+		"opts":{"nochat":false, "novoice":false},
+		"cust":"you passed!"
     },
     {
         "id": "5",
         "name": "Room #5",
-        "max": "999",
-		"users":[]
+        "max": "30",
+		"pass":"",
+		"opts":{"nochat":true, "novoice":false},
+		"cust":""
     }
 ]

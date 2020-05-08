@@ -2,11 +2,8 @@
 #include <sapi.h>
 
 void mm_log(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pExcepInfo, UINT* puArgErr) {
-	if (pDispParams->cArgs > 0) {
-		if (pDispParams->rgvarg[0].vt == VT_BSTR) {
-			wprintf(L"[JS] %s\n", pDispParams->rgvarg[0].bstrVal);
-		}
-	}
+	if (pDispParams->cArgs > 0 && pDispParams->rgvarg[0].vt == VT_BSTR)
+		wprintf(L"[JS] %s\n", pDispParams->rgvarg[0].bstrVal);
 }
 
 void mm_list_devices(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pExcepInfo, UINT* puArgErr) {
@@ -15,7 +12,6 @@ void mm_list_devices(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pE
 			wstring res;
 			HRESULT hr = list_devices((EDataFlow)(pDispParams->rgvarg[0].intVal), &res);
 			pVarResult->vt = VT_BSTR;
-			
 			pVarResult->bstrVal = SysAllocString(res.c_str());
 		}
 	}
@@ -24,32 +20,35 @@ void mm_list_devices(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pE
 void mm_connect(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pExcepInfo, UINT* puArgErr) {
 	if (pDispParams->cArgs > 0) {
 		//if type string
-		if (pDispParams->rgvarg[0].vt == VT_BSTR) {
+		if (pDispParams->rgvarg[0].vt == VT_BSTR && g_network) {
 			g_network->ConnectServer(_com_util::ConvertBSTRToString(pDispParams->rgvarg[0].bstrVal));
 		}
 	}
 }
 
 void mm_disconnect(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pExcepInfo, UINT* puArgErr) {
-	g_network->Disconnect();
+	if (g_network)
+		g_network->Disconnect();
 }
 
 void mm_change_room(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pExcepInfo, UINT* puArgErr) {
-	if (pDispParams->cArgs > 0) {
-		if (pDispParams->rgvarg[0].vt == VT_I4) {
-			vector<uint8_t> pv;
-			rpc_write_short(&pv, pDispParams->rgvarg[0].intVal);
-			g_network->Send(RPCID::CHANGE_ROOM, &pv);
-		}
+	if (pDispParams->cArgs == 1 && pDispParams->rgvarg[0].vt == VT_I4) {
+		vector<uint8_t> pv;
+		rpc_write_short(&pv, pDispParams->rgvarg[0].intVal);
+		g_network->Send(RPCID::CHANGE_ROOM, &pv);
+	}
+	if (pDispParams->cArgs == 2 && pDispParams->rgvarg[1].vt == VT_I4 && pDispParams->rgvarg[0].vt == VT_BSTR) {
+		vector<uint8_t> pv;
+		rpc_write_short(&pv, pDispParams->rgvarg[1].intVal);
+		uint8_t* pval = (uint8_t*)pDispParams->rgvarg[0].bstrVal;
+		pv.insert(pv.end(), &pval[0], &pval[wcslen(pDispParams->rgvarg[0].bstrVal) * sizeof(wchar_t)]);
+		g_network->Send(RPCID::CHANGE_ROOM, &pv);
 	}
 }
 
 void mm_send_message(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pExcepInfo, UINT* puArgErr) {
-	if (pDispParams->cArgs > 0) {
-		if (pDispParams->rgvarg[0].vt == VT_BSTR) {
-			g_network->Send(RPCID::USER_CHAT, (char*)pDispParams->rgvarg[0].bstrVal, wcslen(pDispParams->rgvarg[0].bstrVal) * 2);
-		}
-	}
+	if (pDispParams->cArgs > 0 && pDispParams->rgvarg[0].vt == VT_BSTR && g_network)
+		g_network->Send(RPCID::USER_CHAT, (char*)pDispParams->rgvarg[0].bstrVal, wcslen(pDispParams->rgvarg[0].bstrVal) * 2);
 }
 
 void mm_set_device(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pExcepInfo, UINT* puArgErr) {
@@ -61,8 +60,10 @@ void mm_set_device(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pExc
 			//wprintf(L"change audio device %d->%d\n", flow, deviceIndex);
 			if (flow == EDataFlow::eCapture) {
 				g_stream->SetDeviceIn(NULL);
-				delete g_audio_in;
-				g_dev_in->Release();
+				if (g_audio_in)
+					delete g_audio_in;
+				if (g_dev_in)
+					g_dev_in->Release();
 				if (deviceIndex == 0)
 					hr = get_default_device(&g_dev_in, flow);
 				else
@@ -74,8 +75,10 @@ void mm_set_device(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pExc
 			}
 			if (flow == EDataFlow::eRender) {
 				g_mix->SetDeviceOut(NULL);
-				delete g_audio_out;
-				g_dev_out->Release();
+				if (g_audio_out)
+					delete g_audio_out;
+				if (g_dev_out)
+					g_dev_out->Release();
 				if (deviceIndex == 0)
 					hr = get_default_device(&g_dev_out, flow);
 				else
@@ -90,9 +93,8 @@ void mm_set_device(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pExc
 }
 
 void mm_set_preferences(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pExcepInfo, UINT* puArgErr) {
-	if (pDispParams->cArgs == 2 && pDispParams->rgvarg[0].vt == VT_BSTR && pDispParams->rgvarg[1].vt == VT_BSTR) {
+	if (pDispParams->cArgs == 2 && pDispParams->rgvarg[0].vt == VT_BSTR && pDispParams->rgvarg[1].vt == VT_BSTR) 
 		g_preferences->SetPreferences(pDispParams->rgvarg[1].bstrVal, pDispParams->rgvarg[0].bstrVal);
-	}
 }
 
 void mm_get_preferences(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pExcepInfo, UINT* puArgErr) {
@@ -109,18 +111,18 @@ void mm_set_vol(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pExcepI
 	if (pDispParams->cArgs == 2 && pDispParams->rgvarg[1].vt == VT_I4 && pDispParams->rgvarg[0].vt == VT_I4) {
 		short client = pDispParams->rgvarg[1].intVal;
 		float vol = pDispParams->rgvarg[0].intVal / 100.0f;
-		wprintf(L"new vol on %d %f\n", client, vol);
+		//wprintf(L"new vol on %d %f\n", client, vol);
 		if (vol < 0 || vol > 2) return;
 		switch (client) {
-		case -1: {
-			g_mix->SetVol(vol);
-		} break;
-		case -2: {
-			g_stream->SetVol(vol);
-		} break;
-		default: {
-			g_mix->GetSession(client)->SetVol(vol);
-		} break;
+			case -1: {
+				g_mix->SetVol(vol);
+			} break;
+			case -2: {
+				g_stream->SetVol(vol);
+			} break;
+			default: {
+				g_mix->GetSession(client)->SetVol(vol);
+			} break;
 		}
 	}
 }
@@ -158,18 +160,36 @@ DWORD WINAPI tts(void* pv) {
 		return FALSE;
 	hr = CoCreateInstance(CLSID_SpVoice, NULL, CLSCTX_ALL, IID_ISpVoice, (void **)&pVoice);
 	if (SUCCEEDED(hr)) {
-		hr = pVoice->SetRate(3);
+		if (g_mix != NULL)
+			hr = pVoice->SetVolume((g_mix->GetVol() * 0.6f) * 100);
+		/* TODO: fix this, output device*/
+		/*IAudioClient* audio_client;
+		IMMDevice* dev;
+		//get_default_device(&dev, EDataFlow::eRender);
+		get_specific_device(2, &dev, EDataFlow::eRender);
+		dev->Activate(__uuidof(IAudioClient), CLSCTX_ALL, NULL, reinterpret_cast<void**>(&audio_client));
+		WAVEFORMATEX* wf;
+		audio_client->GetMixFormat(&wf);
+		audio_client->Initialize(AUDCLNT_SHAREMODE_SHARED, AUDCLNT_STREAMFLAGS_NOPERSIST | AUDCLNT_SESSIONFLAGS_DISPLAY_HIDE, 0, 0, wf, NULL);
+		audio_client->Start();
+		IAudioRenderClient* audio_render_client;
+		audio_client->GetService(__uuidof(IAudioRenderClient), reinterpret_cast<void**>(&audio_render_client));
+		hr = pVoice->SetOutput(audio_render_client, FALSE);
+		/**/
+		hr = pVoice->SetRate(2);
 		hr = pVoice->Speak(str, 0, NULL);
 		pVoice->Release();
 		pVoice = NULL;
+		/*audio_client->Stop();*/
 	}
 	CoUninitialize();
+	delete[] str;
 	return hr;
 }
 
 void mm_say(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pExcepInfo, UINT* puArgErr) {
 	if (pDispParams->cArgs == 1 && pDispParams->rgvarg[0].vt == VT_BSTR)
-		CreateThread(NULL, NULL, tts, pDispParams->rgvarg[0].bstrVal, NULL, NULL);
+		CreateThread(NULL, NULL, tts, _wcsdup(pDispParams->rgvarg[0].bstrVal), NULL, NULL);
 }
 
 void mm_send_uicommand(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pExcepInfo, UINT* puArgErr) {
@@ -182,10 +202,6 @@ void mm_send_uicommand(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* 
 
 void mm_is_iconic(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pExcepInfo, UINT* puArgErr) {
 	pVarResult->vt = VT_I4;
-	/*if (IsIconic(g_webWindow->hWndWebWindow))
-		pVarResult->intVal = 1;
-	else
-		pVarResult->intVal = 0;*/
 	pVarResult->intVal = g_webWindow->GetWindowIsActive();
 }
 
@@ -198,20 +214,17 @@ void mm_set_username(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pE
 }
 
 void mm_send_vu(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pExcepInfo, UINT* puArgErr) {
-	if (pDispParams->cArgs == 1 && pDispParams->rgvarg[0].vt == VT_I4) {
-		g_stream->SendVU(pDispParams->rgvarg[0].intVal?TRUE:FALSE);
-	}
+	if (pDispParams->cArgs == 1 && pDispParams->rgvarg[0].vt == VT_I4 && g_stream)
+		g_stream->SendVU(pDispParams->rgvarg[0].intVal ? TRUE : FALSE);
 }
 
 void mm_shellexecute(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pExcepInfo, UINT* puArgErr) {
-	if (pDispParams->cArgs == 1 && pDispParams->rgvarg[0].vt == VT_BSTR) {
+	if (pDispParams->cArgs == 1 && pDispParams->rgvarg[0].vt == VT_BSTR) 
 		ShellExecute(NULL, L"open", pDispParams->rgvarg[0].bstrVal, NULL, NULL, SW_SHOWNORMAL);
-	}
 }
 
 void mm_choosecolor (DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pExcepInfo, UINT* puArgErr) {
-	pVarResult->vt = VT_I4;
-	pVarResult->intVal = -1;
+	pVarResult->vt = VT_NULL;
 	if (pDispParams->cArgs != 1 || pDispParams->rgvarg[0].vt != VT_I4) return;
 	CHOOSECOLOR cc;
 	static COLORREF acrCustClr[16];
@@ -222,10 +235,9 @@ void mm_choosecolor (DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pE
 	cc.rgbResult = pDispParams->rgvarg[0].intVal;
 	cc.Flags = CC_FULLOPEN | CC_RGBINIT | CC_ANYCOLOR;
 	if (ChooseColor(&cc) == TRUE) {
+		pVarResult->vt = VT_I4;
 		pVarResult->intVal = cc.rgbResult;
-		return;
 	}
-	pVarResult->intVal = -2;
 }
 
 

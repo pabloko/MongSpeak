@@ -59,7 +59,7 @@ public:
 					/*if (szServerUrl)
 						delete[] szServerUrl;*/
 					szServerUrl = NULL;
-					bConnected = FALSE;
+					//bConnected = FALSE;
 					mID = NULL;
 				}
 			}
@@ -69,6 +69,7 @@ public:
 					//todo: newly connected socket
 					string ident(&hwProfileInfo.szHwProfileGuid[1]);
 					Send(RPCID::USER_IDENT, &ident);
+					SetWindowTextA(g_webWindow->hWndWebWindow, string_format("MongSpeak | %s", &szServerUrl[5]).c_str());
 				}
 				bConnected = TRUE;
 				try {
@@ -97,8 +98,9 @@ public:
 			else {
 				if (bConnected) {
 					//todo: Connection lost
+					bConnected = FALSE;
+					SetWindowTextA(g_webWindow->hWndWebWindow, "MongSpeak");
 					g_jsStack.push_back(wstring_format(L"onEvent(%d, %d, '');", RPCID::USER_LEAVE, mID));
-					Disconnect();
 				}
 				//todo: not connected
 			}
