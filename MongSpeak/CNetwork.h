@@ -98,6 +98,7 @@ public:
 			else {
 				if (bConnected) {
 					//todo: Connection lost
+					Disconnect();
 					bConnected = FALSE;
 					SetWindowTextA(g_webWindow->hWndWebWindow, "MongSpeak");
 					g_jsStack.push_back(wstring_format(L"onEvent(%d, %d, '');", RPCID::USER_LEAVE, mID));

@@ -39,6 +39,11 @@ console.log(" Server listening in port: "+PORT);
 var known_clients=[]
 var banned_guids=[]
 var banned_ips=[]
+var getWSByID = function(gd) {
+	if (Array.from(wss.clients).filter((obj) => obj.id === gd).length > 0)
+		return Array.from(wss.clients).filter((obj) => obj.id === gd)[0]
+	return null;
+}
 var getKnownClientByGuid = function(gd) {
 	if (known_clients.filter((obj) => obj.guid === gd).length > 0)
 		return known_clients.filter((obj) => obj.guid === gd)[0]
@@ -105,21 +110,48 @@ app.get('/file/:filename',function(req, res) {
 	}
 })
 
+app.get('/admin/:pw/:action/:uid/:data',function(req, res) {
+	//todo: auth
+	
+	if (req.params.pw!=SECRET) return res.end('')
+	res.setHeader('Content-Type', 'text/html');
+	var ws = getWSByID(parseInt(req.params.uid))
+	if (ws) 
+		switch (req.params.action) {
+			case 'kick': {
+				ws.close()
+			} break;
+			case 'move': {
+				handle_room_change(parseInt(req.params.data),ws)
+			} break;
+			case 'dis_chat': {
+				ws.dis_chat = parseInt(req.params.data)
+			} break;
+			case 'dis_voice': {
+				ws.dis_voice = parseInt(req.params.data)
+			} break;
+			case 'dis_move': {
+				ws.dis_move = parseInt(req.params.data)
+			} break;
+		}
+	res.end('<meta http-equiv="refresh" content="0;URL=\'/admin/'+req.params.pw+'/\'" />')
+})
+
 app.get('/admin/:pw',function(req, res) {
 	
 	//todo: auth
-	if (req.params.pw!=SECRET) res.end('')
-	
+	if (req.params.pw!=SECRET) return res.end('')
+	res.setHeader('Content-Type', 'text/html');
 	var room_list=""
 	var room_options=''
 	var user_list=""
 	rooms.forEach((room)=>{
-		room_list+='<tr><td>#'+room.id+' <BUTTON>REMOVE</BUTTON></td><td><input type="text" value="'+room.name+'" /></td><td><input type="text" /></td><td><input type="text" /></td><td><small>[<input type="checkbox" /> AUDIO][<input type="checkbox" /> CHAT]</small></td><td><textarea></textarea></td></tr>'
+		room_list+='<tr><td>#'+room.id+' <BUTTON>REMOVE</BUTTON></td><td><input type="text" value="'+room.name+'" /></td><td><input type="text" /></td><td><input type="text" /></td><td><small>[<input type="checkbox" /> VOICE][<input type="checkbox" /> CHAT]</small></td><td><textarea></textarea></td></tr>'
 		room_options+='<option value="'+room.id+'">'+room.name+'</option>'
 	})
 	wss.clients.forEach((client)=>{
-		user_list+='<li>['+client._socket.remoteAddress.replace('::ffff:','')+'] <b>'+client.name+'</b> ('+client.id+') <i><small>'+client.guid+'</small></i><br>'
-		user_list+='<button>KICK</button> | <select><option selected value="'+client.room_id+'">'+rooms[client.room_id].name+' [in use]</option>'+room_options+'</select><button>MOVE ROOM</button> | Disallow: <small>[<input type="checkbox" /> VOICE] [<input type="checkbox" /> CHAT] [<input type="checkbox" /> ROOMCHANGE</small>]</li>'
+		user_list+='<li>['+client.ipaddr+'] <b>'+(new TextDecoder('utf-16', { fatal: true }).decode(client.name).toString())+'</b> ('+client.id+') <i><small>'+client.guid+'</small></i><br>'
+		user_list+='<button onclick="docommand(\'kick\','+client.id+',0)">KICK</button> | <select onchange="docommand(\'move\','+client.id+',this.value)"><option selected value="'+client.room_id+'">'+rooms[client.room_id].name+' [in use]</option>'+room_options+'</select> | Disallow: <small>[<input onchange="docommand(\'dis_voice\','+client.id+',this.checked?1:0)" type="checkbox" '+(client.dis_voice?'checked':'')+' /> VOICE] [<input onchange="docommand(\'dis_chat\','+client.id+',this.checked?1:0)" type="checkbox" '+(client.dis_chat?'checked':'')+' /> CHAT] [<input onchange="docommand(\'dis_move\','+client.id+',this.checked?1:0)" type="checkbox" '+(client.dis_move?'checked':'')+' /> ROOMCHANGE</small>]</li>'
 	})
 	var known_options=""
 	known_clients.forEach((c)=>{
@@ -156,19 +188,28 @@ app.get('/admin/:pw',function(req, res) {
 	<fieldset style="float:left;width:48%"><legend>Banned GUIDs</legend><select multiple style="width:100%;"></select><br><button>UnBan</button><input type="text"/><button>MANUAL BAN GUID</button></fieldset><hr>
 	Files:<br>
 	<ul>`+file_list+`</ul>
+	<script>
+	var docommand = function(a,b,c) {
+		var path = window.location.pathname
+		if (!path.endsWith('/')) path = path+'/'
+		window.location.href=path+a+'/'+b+'/'+c
+	}
+	</script>
 	</body>
 	</html>`;
 	
 	res.end(html);
 })
 
-wss.on('connection', (ws) => {
+wss.on('connection', (ws,req) => {
 
 	ws['id']=Math.floor((Math.random() * 9999) + 1111)
 	while (Array.from(wss.clients).filter((obj) => obj.id === ws.id).length > 1) {
 		ws['id']=Math.floor((Math.random() * 9999) + 1111)
 	}
-	
+	var ip_addr = req.headers['x-forwarded-for'] || req.connection.remoteAddress.replace('::ffff:','');
+	//console.log(ip_addr.replace('::ffff:',''));
+	ws['ipaddr'] = ip_addr;
 	var kickInactive = setTimeout(()=>{
 		ws.close()
 	},500)
@@ -204,6 +245,11 @@ join_rpc(RPCID.USER_JOIN,(d, ws)=>{
 	}
 	if (ws.name) return;
 	ws['name']=d;
+	
+	ws['dis_chat']=false
+	ws['dis_voice']=false
+	ws['dis_move']=false
+	
 	var pkthead = Buffer.alloc(3);
 	pkthead.writeUInt8(RPCID.USER_JOIN,0)
 	pkthead.writeUInt16LE(ws.id,1)
@@ -233,7 +279,11 @@ join_rpc(RPCID.USER_JOIN,(d, ws)=>{
 	
 	var kcli = getKnownClientByGuid(ws.guid)
 	if (kcli==null)
-		known_clients.push({name:ws.name,guid:ws.guid,ip:ws._socket.remoteAddress.replace('::ffff:','')})
+		known_clients.push({
+			name: new TextDecoder('utf-16', { fatal: true }).decode(ws.name).toString(),
+			guid: ws['guid'],
+			ip:   ws['ipaddr']
+		})
 })
 
 join_rpc(RPCID.USER_INIT,(d, ws)=>{
@@ -261,6 +311,7 @@ join_rpc(RPCID.USER_INIT,(d, ws)=>{
 join_rpc(RPCID.USER_CHAT,(d, ws)=>{
 	if (!ws['guid']) {ws.close(); return;}
 	if (d.length==0) return;
+	if (ws.dis_chat) return;
 	var pkthead = Buffer.alloc(3);
 	pkthead.writeUInt8(RPCID.USER_CHAT,0)
 	pkthead.writeUInt16LE(ws.id,1)
@@ -290,6 +341,7 @@ join_rpc(RPCID.UI_COMMAND,(d, ws)=>{
 join_rpc(RPCID.OPUS_DATA,(d, ws)=>{
 	if (!ws['guid']) {ws.close(); return;}
 	if (d.length==0) return;
+	if (ws.dis_voice) return;
 	var pkthead = Buffer.alloc(3);
 	pkthead.writeUInt8(RPCID.OPUS_DATA,0)
 	pkthead.writeUInt16LE(ws.id,1)
@@ -304,7 +356,12 @@ join_rpc(RPCID.OPUS_DATA,(d, ws)=>{
 join_rpc(RPCID.CHANGE_ROOM, (d, ws) => {
 	if (!ws['guid']) {ws.close(); return;}
 	if (d.length!=2) return;
+	if (ws.dis_move) return;
 	var room = d.readUInt16LE(0)
+	handle_room_change(room,ws)
+});
+
+var handle_room_change = function(room,ws) {
 	var pkthead = Buffer.alloc(5);
 	pkthead.writeUInt8(RPCID.CHANGE_ROOM,0)
 	pkthead.writeUInt16LE(ws.id,1)
@@ -315,7 +372,7 @@ join_rpc(RPCID.CHANGE_ROOM, (d, ws) => {
 			client.send(pkthead);
 		}
 	});
-});
+}
 
 function loadRooms(){
 	roomsObject.forEach((room)=>{
