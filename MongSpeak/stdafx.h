@@ -5,6 +5,12 @@
 
 #pragma once
 
+<<<<<<< Updated upstream
+=======
+//#define USING_MSHTML
+#define USING_MINIBLINK
+
+>>>>>>> Stashed changes
 #include "targetver.h"
 #define _CRT_SECURE_NO_WARNINGS
 #define WIN32_LEAN_AND_MEAN
