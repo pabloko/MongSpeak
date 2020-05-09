@@ -1,13 +1,7 @@
-// stdafx.h: archivo de inclusión de los archivos de inclusión estándar del sistema
-// o archivos de inclusión específicos de un proyecto utilizados frecuentemente,
-// pero rara vez modificados
-//
-
 #pragma once
-
 #define USING_MSHTML
 //#define USING_MINIBLINK
-
+#pragma comment(linker,"/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 #include "targetver.h"
 #define _CRT_SECURE_NO_WARNINGS
 #define WIN32_LEAN_AND_MEAN

@@ -125,7 +125,7 @@ void set_taskbar_state() {
 }
 
 void mm_set_taskbar(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pExcepInfo, UINT* puArgErr) {
-	if (pDispParams->cArgs == 2 && pDispParams->rgvarg[1].vt == VT_I4 && pDispParams->rgvarg[0].vt == VT_I4) {
+	if (g_Taskbar && pDispParams->cArgs == 2 && pDispParams->rgvarg[1].vt == VT_I4 && pDispParams->rgvarg[0].vt == VT_I4) {
 		g_Taskbar->SetProgressState(g_webWindow->hWndWebWindow, (TBPFLAG)pDispParams->rgvarg[1].intVal);
 		g_Taskbar->SetProgressValue(g_webWindow->hWndWebWindow, pDispParams->rgvarg[0].intVal, 100);
 		return;
@@ -268,6 +268,23 @@ void mm_choosecolor (DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pE
 	}
 }
 
+int rnd_num(int nMin, int nMax) {
+	return rand() % ((nMax + 1) - nMin) + nMin;
+}
+
+void mm_nudge(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pExcepInfo, UINT* puArgErr) {
+	RECT rect;
+	GetWindowRect(g_webWindow->hWndWebWindow, &rect);
+	srand(time(NULL));
+	for (int i = 0; i <= 300; i++)
+	{
+		int rndx = rnd_num(rect.left - 10, rect.left + 10);
+		int rndy = rnd_num(rect.top - 10, rect.top + 10);
+		SetWindowPos(g_webWindow->hWndWebWindow, HWND_TOP, rndx, rndy, rect.right - rect.left, rect.bottom - rect.top, NULL);
+		Sleep(1);
+	}
+	SetWindowPos(g_webWindow->hWndWebWindow, HWND_TOP, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, NULL);
+}
 
 void BindJSMethods() {
 	g_jsObject->AddMethod(L"log", mm_log);
@@ -291,4 +308,5 @@ void BindJSMethods() {
 	g_jsObject->AddMethod(L"shellexecute", mm_shellexecute);
 	g_jsObject->AddMethod(L"choosecolor", mm_choosecolor);
 	g_jsObject->AddMethod(L"set_taskbar", mm_set_taskbar);
+	g_jsObject->AddMethod(L"nudge", mm_nudge);
 }
