@@ -394,24 +394,35 @@
 				display: flex;
 				justify-content: center;
 				align-items: center;
-                position: relative;
+                /*position: relative;*/
 			}
 			
-			.inputbox{
+			/*.inputbox{
 				margin-right: 10px;
 				margin-left: 10px;
 				width:100%;
 				display: flex;
 				top: 50%;
 				left: 50%;
+			}*/
+			.inputbox {
+				margin-right: 10px;
+				margin-left: 10px;
+				width: 100%;
+				display: block;
+				position: absolute;
+				left: 0px;
+				bottom: 0px;
 			}
+
 			
 			.inputmsg{
-				height: 100%;
-				width: calc( 100% - 50px);
+				/*height: 100%;*/
+				width: calc( 100% - 40px);
 				border:0;
 				background:transparent;
 			}
+			
 			
 			.sendmsg{
 				height: 100%;
@@ -627,6 +638,12 @@
 				left: 0px;
 				cursor: pointer; /*todo: want horizontal resize cursor but dont work in ::after/::before*/
 			}
+textarea {
+    padding-top: 10px;
+    padding-bottom: 10px;
+    overflow: auto;
+    display: block;
+}
 
 		</style>
 	</head>
@@ -800,6 +817,11 @@
 		//'+((function(){var audio = document.createElement("audio"); document.body.appendChild(audio); audio.src = "https://www.myinstants.com/media/sounds/trollolol.swf.mp3"; audio.play();})()),'
         var _ = function (x) { return document.getElementById(x) || document.getElementsByClassName(x) }
 		//Create audio for notifications
+		if (!String.prototype.trimStart) {
+			String.prototype.trimStart = function () {
+				return this.replace(new RegExp('^' + /[\x09\x0A\x0B\x0C\x0D\x20\xA0\u1680\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200A\u202F\u205F\u3000\u2028\u2029\uFEFF]+/.source, 'g'), '');
+			};
+		}
 		var audio = document.createElement("audio"); 
 		document.body.appendChild(audio); 
 		audio.src = "data:audio/mp3;base64,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";
@@ -982,6 +1004,7 @@
 		    //console.log('rpc USER_CHAT: ' + id + " | " + data);
 			var li = document.createElement("li");
 			li.style.position='relative'
+			li.style.overflow='hidden'
 			var username = null;
 			var found = false;
 			for(var i = 0; i < clients.length && !found; i++){
@@ -1055,7 +1078,7 @@
 				pci.style.width='0%'
 				pci.style.background='#e0e0e0'
 				pci.style.top='0'
-				pci.style.left='0'
+				pci.style.left='-10px'
 				pci.style.zIndex='-1'
 				window['self']['input'].parentNode.appendChild(pci)
 				
@@ -1118,6 +1141,22 @@
 			mong.send_uicommand(out_muted?14:15)
 		},10000)
 		
+		
+		var update_input = function (ide){
+			typer_update();
+			var elem = document.querySelector('.inputmsg[data-chat="'+ide+'"]')//.scrollHeight;
+			elem.style.height = 'auto';
+			elem.value = elem.value.trimStart()
+			var newheight = elem.scrollHeight;
+			if (newheight>200) newheight=200;
+			if (newheight<40) newheight=40;
+			elem.style.height = newheight + 'px';
+			elem = document.querySelector('.centerlog[data-chat="'+ide+'"]')
+			elem.style.height = 'calc(100% - '+newheight + 'px)';
+			document.querySelector('.emoji-list').style.bottom=newheight + 'px';
+		}
+				
+		
 		join_rpc(RPCID.ROOMS, function(id, data) {
 		    var lobby = true;
 			log('rpc ROOMS: '+id+ " | "+data);
@@ -1137,7 +1176,7 @@
 					if (window['self']['input'].disabled) return;
 				    if (window['self']['room'] != room.id) {
 				        _change_room(parseInt(room.id)); 
-				        window['self']['room'] = room.id;
+				        ///window['self']['room'] = room.id;
 				    }
 				}.bind(this,jsonObj[i]));
 				//console.log("addEventListener click created for", jsonObj[i].id)
@@ -1158,6 +1197,7 @@
 				var chatcontainer = document.createElement("div");
 				chatcontainer.id = "chatcontainer";
 				chatcontainer.classList.add("centerlog");
+				chatcontainer.setAttribute("data-chat", jsonObj[i].id);
 
 				var ulchat = document.createElement("ul");
 				ulchat.id = "chatul_" + jsonObj[i].id;
@@ -1168,8 +1208,10 @@
 				var inputbox = document.createElement("div");
 				inputbox.classList.add("inputbox");
 
-				var input = document.createElement("input");
-				input.onkeypress = typer_update;
+				var input = document.createElement("textarea");
+				input.rows="1"
+				
+				//input.onkeypress = typer_update;
 				input.setAttribute("type", "text");
 				input.setAttribute("placeholder", "Enter a message...");
 				input.classList.add("inputmsg");
@@ -1192,15 +1234,20 @@
 
 				input.addEventListener("keypress", function (e) {
 				    window['self']['input'] = e.target;
-				    if (e.keyCode == 13) {
+				    if (e.keyCode == 13 && !e.shiftKey && !e.altKey) {
 				        if (e.target.value) {
                             _send_message(e.target.value);
 				        }
 				        e.target.value = "";
-
 				        if (_('emojicontainer').style.display == "block")
 				            _('emojicontainer').style.display = "none";
+						e.preventDefault()
 				    }
+					setTimeout(function() {
+						update_input(e.target.getAttribute('data-chat'))
+						if (e.target.value.length > 2000) 
+							e.preventDefault();
+					},10)
 				});
 
 				chatcontainer.appendChild(ulchat);
@@ -1234,7 +1281,7 @@
 			    if (chats[i].id == "chat_" + data) chats[i].style.display = "block";
                 else chats[i].style.display = "none";
 			}
-
+			window['self']['room'] = parseInt(data);
 			window['self']['chat'] = _("chat_" + data);
 		});
 		
@@ -1531,7 +1578,7 @@
 		var typers={}
 		function send_typing(id) {
 			if (typers[id])
-				clearTimer(typers[id])
+				clearTimeout(typers[id])
 			_('typing_'+id).style.display='inline'
 			typers[id] = setTimeout(function() {
 				_('typing_'+id).style.display='none'
