@@ -268,6 +268,26 @@ void mm_choosecolor (DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pE
 	}
 }
 
+void mm_choosefont(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pExcepInfo, UINT* puArgErr) {
+	pVarResult->vt = VT_NULL;
+	if (pDispParams->cArgs != 1 || pDispParams->rgvarg[0].vt != VT_I4) return;
+	CHOOSEFONT cc;
+	COLORREF rgbColors = 123;
+	ZeroMemory(&cc, sizeof(cc));
+	cc.lStructSize = sizeof(cc);
+	cc.hwndOwner = g_webWindow->hWndWebWindow;
+	cc.rgbColors = rgbColors;
+	//cc.lpCustColors = (LPDWORD)acrCustClr;
+	//cc.rgbResult = pDispParams->rgvarg[0].intVal;
+	//todo: it seems we need a subclass for extended color set...
+	cc.Flags = CC_FULLOPEN | CC_RGBINIT | CC_ANYCOLOR;
+	if (ChooseFont(&cc) == TRUE) {
+		pVarResult->vt = VT_I4;
+		//pVarResult->intVal = cc.rgbResult;
+		//todo: json stringified output?
+	}
+}
+
 int rnd_num(int nMin, int nMax) {
 	return rand() % ((nMax + 1) - nMin) + nMin;
 }
@@ -307,6 +327,7 @@ void BindJSMethods() {
 	g_jsObject->AddMethod(L"send_vu", mm_send_vu);
 	g_jsObject->AddMethod(L"shellexecute", mm_shellexecute);
 	g_jsObject->AddMethod(L"choosecolor", mm_choosecolor);
+	g_jsObject->AddMethod(L"choosefont", mm_choosefont);
 	g_jsObject->AddMethod(L"set_taskbar", mm_set_taskbar);
 	g_jsObject->AddMethod(L"nudge", mm_nudge);
 }
