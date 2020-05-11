@@ -376,6 +376,7 @@
 				overflow-y: auto;
 				border-bottom: 1px solid grey;
                 padding: 10px;
+				background:rgba(0,0,0,0.02);
 			}
 			
 			.centerlog ul{
@@ -384,8 +385,21 @@
 				list-style: none;
 			}
             
+			.centerlog ul li > span {
+				display:inline-block;
+				position: relative;
+				border: 1px solid #ccc;
+				background: rgba(0, 0, 0, 0.02);
+				padding: 5px;
+				word-break: break-all;
+				border-radius: 5px;
+				max-width:95%;
+				max-height:600px;
+				overflow:auto;
+			}
+
             .centerlog ul li{
-              margin-bottom: 5px;
+              margin-bottom: 2px;
             }
             
             .chatinput{
@@ -638,13 +652,21 @@
 				left: 0px;
 				cursor: pointer; /*todo: want horizontal resize cursor but dont work in ::after/::before*/
 			}
-textarea {
-    padding-top: 10px;
-    padding-bottom: 10px;
-    overflow: auto;
-    display: block;
-}
-
+			textarea {
+				padding-top: 10px;
+				padding-bottom: 10px;
+				overflow: auto;
+				display: block;
+			}
+			.timemark {
+				color:#888;
+				font-size:10px;
+			}
+			pre{
+				margin:0;
+				font-size:13px;
+				white-space: pre-wrap;
+			}
 		</style>
 	</head>
     <body>
@@ -999,10 +1021,14 @@ textarea {
 			}
 		});
 		
+		var last_chat_sent_id = -1;
+		var task_last_chat = null
 		join_rpc(RPCID.USER_CHAT, function (id, data) {
+			if (task_last_chat!=null)clearTimeout(task_last_chat)
 		    log('rpc USER_CHAT: ' + id + " | " + data);
 		    //console.log('rpc USER_CHAT: ' + id + " | " + data);
 			var li = document.createElement("li");
+			var span = document.createElement("span");
 			li.style.position='relative'
 			li.style.overflow='hidden'
 			var username = null;
@@ -1018,20 +1044,25 @@ textarea {
 			var parsed_msg = twemoji.parse(linkifyHtml(DOMPurify.sanitize(data)))
 			var cur_date = new Date().toLocaleTimeString();
 			if (cur_date.indexOf(' ')>-1) cur_date = cur_date.split(' ')[0].trim()
-			li.innerHTML = "<small class='usrchatname'><b>" + twemoji.parse(username) + "</b> (" + cur_date + ")</small><br/>" + parsed_msg;
+			var the_name = "<small class='usrchatname'><b>" + twemoji.parse(username) + "</b> <span class='timemark'>" + cur_date + "</span></small>"
+			if (last_chat_sent_id == id) the_name = ""
+			span.innerHTML = the_name+"<pre>" + parsed_msg+"</pre>";
 			var currentchat = document.getElementById("chatul_" + window['self']['room']);
 			
 			if (id != window['self'].id) {
 			    if (_is_iconic()) audio.play();
-			} else
-			    li.style.textAlign = 'right';
+				span.style.cssFloat = 'left';
+			} else {
+			    span.style.cssFloat = 'right';
+				span.style.background = 'rgba(0, 0, 0, 0.05)'
+			}
 				
 			if (typers[id]) {
 				clearTimeout(typers[id])
 				_('typing_'+id).style.display='none'
 				delete typers[id]
 			}
-			
+			li.appendChild(span)
 			currentchat.appendChild(li);
 			var chatcontainer = window['self']['chat'].firstChild;
 			var isScrolledToBottom = chatcontainer.scrollHeight - chatcontainer.clientHeight <= chatcontainer.scrollTop + 1;
@@ -1039,12 +1070,13 @@ textarea {
 			    chatcontainer.scrollTop = chatcontainer.scrollHeight - chatcontainer.clientHeight;
 			chatcontainer.scrollTop = chatcontainer.scrollHeight + 200;
 
-
+			last_chat_sent_id = id
+			task_last_chat = setTimeout(function(){last_chat_sent_id=-1;},10000)
 		});
 		
-		join_rpc(RPCID.OPUS_DATA, function(id, data) {
-			log('rpc OPUS_DATA: '+id+ " | "+data);
-		});
+		//join_rpc(RPCID.OPUS_DATA, function(id, data) {
+		//	log('rpc OPUS_DATA: '+id+ " | "+data);
+		//});
 		
 		var pci;
 		
@@ -1116,7 +1148,6 @@ textarea {
 				_('talk_'+id).classList.remove('fa-circle-thin')
 				_('talk_'+id).classList.add('fa-circle')
 			}
-			
 			if (id>0 && data==12) { //in muted
 				_('tiain_'+id).style.display='inherit'
 			}
@@ -1129,10 +1160,10 @@ textarea {
 			if (id>0 && data==15) { //out muted
 				_('tiout_'+id).style.display='none'
 			}
-			
-			if (id>0 && data==20) { //out muted
+			if (id>0 && data==20) { //typing
 				send_typing(id)
 			}
+			
 		});
 		
 		//HEARTBEAT
@@ -1144,7 +1175,7 @@ textarea {
 		
 		var update_input = function (ide){
 			typer_update();
-			var elem = document.querySelector('.inputmsg[data-chat="'+ide+'"]')//.scrollHeight;
+			var elem = document.querySelector('.inputmsg[data-chat="'+ide+'"]')
 			elem.style.height = 'auto';
 			elem.value = elem.value.trimStart()
 			var newheight = elem.scrollHeight;
@@ -1264,6 +1295,7 @@ textarea {
 		join_rpc(RPCID.CHANGE_ROOM, function(id, data){
 		    //console.log('rpc CHANGE_ROOM '+id+ " | "+data);
 		    //mong.say("Usuario ha avandonado la sala");
+			last_chat_sent_id=-1;
 			var user = _("user_"+id);		
 			var newusr = null;	
 			if(typeof user !== 'undefined'){
