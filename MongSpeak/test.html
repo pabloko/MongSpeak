@@ -1530,18 +1530,16 @@
 			form.style.display = "flex";
 			app.style.display = "none";
 			//Reset data
-			delete window['self'];
+			window['self'] = {};
 			clients = [];
 			user.innerText = "";
 			leftlist.innerHTML = "";
-            //Clean rooms
-			rooms = [];
             //clean chats
-			var chats = _("chat");
-			//console.log(chats);
-			for (var i = 0; i < chats.length; i++) {
-			    chats[i].parentNode.removeChild(chats[i]);
+			for (var i = 0; i < rooms.length; i++) {
+			    _("chat_" + rooms[i].id).parentNode.removeChild(_("chat_" + rooms[i].id));
 			}
+		    //Clean rooms
+			rooms = [];
 		}
 		
 		//Disconnect
@@ -1642,13 +1640,13 @@
 		var nibbletyping=false;
 		var typers={}
 		function send_typing(id) {
-			if (typers[id])
-				clearTimeout(typers[id])
-			_('typing_'+id).style.display='inline'
-			typers[id] = setTimeout(function() {
-				_('typing_'+id).style.display='none'
-				delete typers[id]
-			},2000)
+		    if (typers[id])
+		        clearTimeout(typers[id])
+		    _('typing_' + id).style.display = 'inline';
+			typers[id] = setTimeout(function () {
+			    _('typing_' + id).style.display = 'none';
+			    delete typers[id]
+			}, 2000);
 		}
 		
 		function typer_update() {
