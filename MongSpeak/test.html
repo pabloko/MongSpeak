@@ -1051,12 +1051,12 @@
 				}
 
 
-			if (window['self']['connected'] == true) {
+			if (window['self']['connected'] == true && id == window['self'].room) {
 			    audiouserjoin.play();
 			    var user_join = document.createElement("li");
 			    user_join.style.width = "100%";
 			    user_join.style.textAlign = "center";
-			    user_join.innerHTML = "User " + twemoji.parse(data) + " has joined the room";
+			    user_join.innerHTML = "<span style='font-size: 10px;'>User " + twemoji.parse(data) + " has joined the room</span>";
 
 			    _("chatul_" + window['self'].room).appendChild(user_join);
 			}
@@ -1076,13 +1076,15 @@
 						user_listed = _("user_"+id);
 						if (user_listed) {
 
-						    audiouserleft.play();
-						    var user_left = document.createElement("li");
-						    user_left.style.width = "100%";
-						    user_left.style.textAlign = "center";
-						    user_left.innerHTML = "User " + twemoji.parse(clients[i].data) + " has left the room";
+						    if (id == window['self'].room) {
+						        audiouserleft.play();
+						        var user_left = document.createElement("li");
+						        user_left.style.width = "100%";
+						        user_left.style.textAlign = "center";
+						        user_left.innerHTML = "<span style='font-size: 10px;'>User " + twemoji.parse(clients[i].data) + " has left the room</span>";
 
-						    _("chatul_" + window['self'].room).appendChild(user_left);
+						        _("chatul_" + window['self'].room).appendChild(user_left);
+						    }
 							user_listed.parentNode.removeChild(user_listed);
 							clients.splice(i, 1);
 						}
@@ -1723,6 +1725,10 @@
 		        if (document.activeElement.tagName == "IFRAME") return true;
 		    }
 		    return false;
+		}
+
+		function WindowActiveChanged(isiconic, wparam) {
+		    console.log("WindowActiveChanged", isiconic, wparam);
 		}
 		
 		document.addEventListener('click', function (event) {
