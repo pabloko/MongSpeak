@@ -1124,7 +1124,7 @@
 			
 			var parsed_msg = twemoji.parse(marked(linkifyHtml(DOMPurify.sanitize(escapeHtml(data)))))/*.replace(/\n/g, "<br/>")*/
 			var cur_date = new Date().toLocaleTimeString();
-			//if (cur_date.indexOf(' ')>-1) cur_date = cur_date.split(' ')[0].trim()
+			if (cur_date.indexOf(' ')>-1) cur_date = cur_date.split(' ')[0].trim()
 			var the_name = "<small class='usrchatname'><b>" + twemoji.parse(username) + "</b> <span class='timemark'>" + cur_date + "</span></small>"
 			if (last_chat_sent_id == id) the_name = ""
 			span.innerHTML = the_name+"" + parsed_msg+"";
@@ -1331,7 +1331,7 @@
 
 				var input = document.createElement("textarea");
 				input.rows="1"
-				input.maxLength = "2000"
+				input.maxLength = "5000"
 				//input.onkeypress = typer_update;
 				input.setAttribute("type", "text");
 				input.setAttribute("placeholder", "Enter a message...");
@@ -1363,8 +1363,8 @@
 							no_spam_pls = false;
 						}, 1000)
 						var vl = e.target.value
-						if ((vl.match(/	/g) || []).length > 2) vl = "<code>"+vl+"</code>"
-				        if (e.target.value && e.target.value.length <= 2000) {
+						//if ((vl.match(/	/g) || []).length > 2) vl = "<code>"+vl+"</code>"
+				        if (e.target.value && e.target.value.length <= 5000) {
                             _send_message(vl);
 				        }
 				        e.target.value = "";
