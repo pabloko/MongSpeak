@@ -13,6 +13,7 @@
 				box-sizing: border-box;
 				font-family:'Open Sans';
 				outline: 0;
+				margin:0;
 			}
 
             html, body {
@@ -688,7 +689,7 @@
 				bottom:40px;
 			}
 			code {
-				font-size: 11px;
+				font-size: 12px;
 				font-family: courier;
 				color: #555;
 				line-height: 9px;
@@ -819,6 +820,8 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/2.0.8/purify.min.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/linkifyjs@2.1.9/dist/linkify.min.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/linkifyjs@2.1.9/dist/linkify-html.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
 	<script>
 		if (!window['mong']) window['mong']=window;
 		linkify.options.defaults.target = null;
@@ -1047,6 +1050,16 @@
 			}
 		});
 		
+		function escapeHtml(unsafe) {
+			return unsafe
+				 .replace(/&/g, "&amp;")
+				 .replace(/</g, "&lt;")
+				 .replace(/>/g, "&gt;")
+				 .replace(/"/g, "&quot;")
+				 .replace(/'/g, "&#039;")
+				 .replace(/\n/g, "<br/>");
+		}
+		
 		var last_chat_sent_id = -1;
 		var task_last_chat = null
 		join_rpc(RPCID.USER_CHAT, function (id, data) {
@@ -1067,12 +1080,12 @@
 				}
 			}
 			
-			var parsed_msg = twemoji.parse(linkifyHtml(DOMPurify.sanitize(data)))
+			var parsed_msg = twemoji.parse(marked(linkifyHtml(DOMPurify.sanitize(escapeHtml(data)))))
 			var cur_date = new Date().toLocaleTimeString();
 			if (cur_date.indexOf(' ')>-1) cur_date = cur_date.split(' ')[0].trim()
 			var the_name = "<small class='usrchatname'><b>" + twemoji.parse(username) + "</b> <span class='timemark'>" + cur_date + "</span></small>"
 			if (last_chat_sent_id == id) the_name = ""
-			span.innerHTML = the_name+"<pre>" + parsed_msg+"</pre>";
+			span.innerHTML = the_name+"" + parsed_msg+"";
 			var currentchat = document.getElementById("chatul_" + window['self']['room']);
 			
 			if (id != window['self'].id) {

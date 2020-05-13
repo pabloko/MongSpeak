@@ -26,7 +26,7 @@ void NotifyStatus(int status, wstring status_text) {
 	g_webWindow->webForm->QueueCallToEvent(RPCID::UI_COMMAND, status, (wchar_t*)status_text.c_str());
 }
 
-size_t FileUploadCb(void *ptr, size_t size, size_t nmemb, void *stream) {
+size_t FileUploadCb(void *ptr, size_t size, size_t nmemb, /*void**/ upload_metadata_t* stream) {
 	if (nmemb == 0 || nmemb > MAX_PATH) return nmemb;
 	vector<uint8_t> pv;
 	char szFileUploaded[MAX_PATH];
@@ -37,8 +37,8 @@ size_t FileUploadCb(void *ptr, size_t size, size_t nmemb, void *stream) {
 	for (; iFileNameStart < strlen(szFileUploaded); iFileNameStart++) 
 		if (szFileUploaded[iFileNameStart] == '_') break;
 	char* szFileUploadedName = &szFileUploaded[iFileNameStart + 1];
-	if (g_network != NULL && strcmp(szFileUploadedName, (char*)stream) == 0) {
-		sprintf(szMessage, "<i class=\"fa fa-cloud-download\"></i> <b>%s</b><br>http://%s/file/%s", szFileUploadedName, &g_network->GetServerURL()[5], szFileUploaded);
+	if (g_network != NULL && strcmp(szFileUploadedName, _com_util::ConvertBSTRToString(stream->filename)) == 0) {
+		sprintf(szMessage, "**%s** *(%.1fMb)*\nhttp://%s/file/%s", szFileUploadedName, stream->size / 1000000, &g_network->GetServerURL()[5], szFileUploaded);
 		char* ret = (char*)_com_util::ConvertStringToBSTR(szMessage);
 		pv.assign(&ret[0], &ret[strlen(szMessage) * sizeof(wchar_t)]);
 		g_network->Send(RPCID::USER_CHAT, &pv);
@@ -131,7 +131,7 @@ DWORD WINAPI FileUpload(void* szFile) {
 		curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
 		curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
 		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, FileUploadCb);
-		curl_easy_setopt(curl, CURLOPT_WRITEDATA, &szFileName[iStrStartPos + 1]);
+		curl_easy_setopt(curl, CURLOPT_WRITEDATA, meta /*&szFileName[iStrStartPos + 1]*/);
 		curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 		NotifyStatus(-9,wstring_format(L"Uploading: %s", meta->filename));
 		Sleep(100);
