@@ -72,7 +72,17 @@ size_t  FileReadCb(void*  _Buffer, size_t _ElementSize, size_t _ElementCount, up
 	return tosend;
 }
 
+static HANDLE hUploadThread = NULL;
 static BOOL bPreventSimultaneousUpload = FALSE;
+
+void CancelUploadIfAny() {
+	if (bPreventSimultaneousUpload && hUploadThread != NULL) {
+		TerminateThread(hUploadThread,0);
+		NotifyStatus(-11, wstring(L"Upload cancelled"));
+		bPreventSimultaneousUpload = FALSE;
+		hUploadThread = NULL;
+	}
+}
 
 DWORD WINAPI FileUpload(void* szFile) {
 	if (bPreventSimultaneousUpload) return ERROR_DS_BUSY;
@@ -151,5 +161,5 @@ void mm_drop_handler(HDROP drop) {
 	DragQueryFile(drop, 0, szFile, MAX_PATH);
 	if (wcsstr(szFile, L"\\INetCache\\") != NULL) 
 		return;
-	CreateThread(NULL, NULL, FileUpload, _com_util::ConvertBSTRToString(szFile), NULL, NULL);
+	hUploadThread = CreateThread(NULL, NULL, FileUpload, _com_util::ConvertBSTRToString(szFile), NULL, NULL);
 }

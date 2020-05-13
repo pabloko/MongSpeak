@@ -1,6 +1,3 @@
-// MongSpeak.cpp: define el punto de entrada de la aplicación.
-//
-
 #include "stdafx.h"
 #include "MongSpeak.h"
 #define MAPWIDTH  600
@@ -86,14 +83,19 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	g_Taskbar = NULL;
 	ReleaseIUnknown g_Taskbar_release(g_Taskbar);
 	SetTimer(g_webWindow->hWndWebWindow, 1, 10, 0);
+
 	while (GetMessage(&msg, nullptr, 0, 0)) {
 		if (msg.message == taskbarButtonCreatedMessageId && g_Taskbar == NULL)
-			hr = CoCreateInstance(CLSID_TaskbarList, NULL, CLSCTX_INPROC_SERVER, IID_ITaskbarList3, (void**)&g_Taskbar);
+			CoCreateInstance(CLSID_TaskbarList, NULL, CLSCTX_INPROC_SERVER, IID_ITaskbarList3, (void**)&g_Taskbar);
 		g_webWindow->webForm->DequeueCallToEvent();
 		while (g_webWindow->webForm != nullptr && g_jsStack.size() > 0) {
 			g_webWindow->webForm->RunJSFunctionW(g_jsStack.at(0).c_str());
 			g_jsStack.erase(g_jsStack.begin(), g_jsStack.begin() + 1);
 		}
+		if (msg.message == WM_ACTIVATE)
+			g_webWindow->webForm->RunJSFunctionW(wstring_format(L"WindowActiveChanged(%d, %d);", IsIconic(g_webWindow->hWndWebWindow), msg.wParam).c_str());
+		if (msg.message == WM_KEYDOWN && msg.wParam == VK_ESCAPE)
+			CancelUploadIfAny();
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
 	}
