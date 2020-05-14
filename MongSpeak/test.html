@@ -922,6 +922,7 @@
 
 		window['self'] = {};
 		var preferences = null;
+		var roomchange = true;
         
 		setTimeout(function(){
 			log("getting devices");
@@ -1298,7 +1299,7 @@
 		join_rpc(RPCID.ROOMS, function(id, data) {
 		    var lobby = true;
 		    console.log('rpc ROOMS: ' + id + " | " + data);
-			var jsonObj = JSON.parse(data.toString("utf16"));
+			var jsonObj = JSON.parse(data);
 			//console.log(jsonObj)
 			for(var i = 0; i < jsonObj.length; i++){
 				//console.log(jsonObj[i])
@@ -1314,7 +1315,7 @@
 				roomtitle.addEventListener("click", function(room){
 				    //alert("change_room("+self.id+", "+room.id+")");
 					if (window['self']['input'].disabled) return;
-				    if (window['self']['room'] != room.id) {
+					if (window['self']['room'] != room.id && roomchange) {
 				        _change_room(parseInt(room.id)); 
 				        ///window['self']['room'] = room.id;
 				    }
@@ -1425,6 +1426,13 @@
 				room.appendChild(user);
 			}
 			if (window['self'].id != id) return;
+			else {
+                //Change room shitty spam protection..
+			    roomchange = false;
+			    setTimeout(function () {
+			        roomchange = true;
+			    }, 1000);
+			}
 			var chats = _("chat");
 			//console.log(chats);
 			for (var i = 0; i < chats.length; i++) {
