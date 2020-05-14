@@ -53,6 +53,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	g_webWindow->webForm->SetPasteAcceleratorHandler(mm_getclipboardimage);
 	g_webWindow->SetDropFileHandler(mm_drop_handler);
+	g_webWindow->SetMessageFilter(mm_messageFilter);
+
 	HMODULE hmodule = GetModuleHandle(NULL);
 	HRSRC hrsrc = FindResource(hmodule, MAKEINTRESOURCE(IDR_HTML1), RT_RCDATA);
 	if (!hrsrc) return FALSE;
@@ -88,8 +90,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		if (msg.message == taskbarButtonCreatedMessageId && g_Taskbar == NULL)
 			CoCreateInstance(CLSID_TaskbarList, NULL, CLSCTX_INPROC_SERVER, IID_ITaskbarList3, (void**)&g_Taskbar);
 		g_webWindow->webForm->DequeueCallToEvent();
-		if (msg.message == WM_ACTIVATE)
-			g_webWindow->webForm->RunJSFunctionW(wstring_format(L"WindowActiveChanged(%d, %d);", IsIconic(g_webWindow->hWndWebWindow), msg.wParam).c_str());
 		if (msg.message == WM_KEYDOWN && msg.wParam == VK_ESCAPE)
 			CancelUploadIfAny();
 		TranslateMessage(&msg);

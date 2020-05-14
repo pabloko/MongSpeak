@@ -14,6 +14,7 @@ private:
 	WebformDispatchHandler *webformDispatchHandler;
 	void* m_ondropfiles = NULL;
 	BOOL bActiveWindow = FALSE;
+	void* m_custproc = NULL;
 public:
 	HWND hWndWebWindow;
 	WebWindow(WebformDispatchHandler *wdh);
@@ -21,6 +22,9 @@ public:
 	void Create(HINSTANCE hInstance, UINT x, UINT y, UINT width, UINT height, bool showScrollbars);
 	void SetDropFileHandler(void* f) {
 		m_ondropfiles = f;
+	};
+	void SetMessageFilter(void* f) {
+		m_custproc = f;
 	};
 	BOOL GetWindowIsActive() {
 		return bActiveWindow;

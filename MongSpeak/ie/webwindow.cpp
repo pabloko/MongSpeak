@@ -73,9 +73,13 @@ LRESULT CALLBACK WebWindow::WebWindowWndProc(HWND hWnd, UINT msg, WPARAM wParam,
 }
 
 typedef void dropfn_t(HDROP);
+typedef LRESULT custproc_t(UINT msg, WPARAM wParam, LPARAM lParam);
 
 LRESULT WebWindow::InstanceWndProc(UINT msg, WPARAM wParam, LPARAM lParam)
 {
+	if (m_custproc != NULL) {
+		((custproc_t*)m_custproc)(msg, wParam, lParam);
+	}
 	switch (msg) {
 	case WM_CREATE: {
 		webForm->create(hWndWebWindow, hInstWebWindow, 103, showScrollbars);

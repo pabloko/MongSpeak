@@ -163,3 +163,12 @@ void mm_drop_handler(HDROP drop) {
 		return;
 	hUploadThread = CreateThread(NULL, NULL, FileUpload, _com_util::ConvertBSTRToString(szFile), NULL, NULL);
 }
+
+LRESULT mm_messageFilter(UINT msg, WPARAM wParam, LPARAM lParam) {
+	switch (msg) {
+	case WM_ACTIVATE: {
+		g_webWindow->webForm->RunJSFunctionW(wstring_format(L"WindowActiveChanged(%d, %d);", IsIconic(g_webWindow->hWndWebWindow), wParam).c_str());
+	} break;
+	}
+	return false;
+}

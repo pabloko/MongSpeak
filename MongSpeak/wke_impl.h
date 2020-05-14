@@ -5,6 +5,7 @@
 typedef void t_invoke_t(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pExcepInfo, UINT* puArgErr);
 typedef BOOL t_pastefile_t();
 typedef void t_dropfn_t(HDROP);
+typedef LRESULT custproc_t(UINT msg, WPARAM wParam, LPARAM lParam);
 wchar_t gPath[MAX_PATH];
 static WNDPROC        orig_wndproc;
 static HWND          orig_wnd;
@@ -13,6 +14,9 @@ class WebForm {
 public:
 	static LRESULT CALLBACK wnd_proc(HWND wnd, UINT umsg, WPARAM wparam, LPARAM lparam) {
 		extern WebForm* g_webWindow;
+		if (g_webWindow->m_custproc != NULL) {
+			((custproc_t*)g_webWindow->m_custproc)(umsg, wparam, lparam);
+		}
 		if (umsg == WM_DROPFILES) { 
 			if (g_webWindow->m_dropfile_handler_ != NULL)
 				((t_dropfn_t*)g_webWindow->m_dropfile_handler_)((HDROP)wparam);
@@ -47,6 +51,9 @@ public:
 	}
 	static LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		extern WebForm* g_webWindow;
+		if (g_webWindow->m_custproc != NULL) {
+			((custproc_t*)g_webWindow->m_custproc)(msg, wParam, lParam);
+		}
 		switch (msg) {
 		case WM_CREATE: {
 			DragAcceptFiles(hwnd, TRUE);
@@ -252,6 +259,10 @@ public:
 	void* m_dropfile_handler_;
 	BOOL bActiveWindow;
 	wkeWebView m_webview;
+	void* m_custproc = NULL;
+	void SetMessageFilter(void* f) {
+		m_custproc = f;
+	};
 private:
 	std::deque<short> vec_rpc_id;
 	std::deque<short> vec_pkt_id;
