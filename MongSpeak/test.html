@@ -1171,7 +1171,7 @@
 		var pci;
 		
 		join_rpc(RPCID.UI_COMMAND, function(id, data) {
-		    console.log('rpc UI_COMMAND: ' + id + " | " + data);
+		    //console.log('rpc UI_COMMAND: ' + id + " | " + data);
 			if (id == -2) _("upnet").innerHTML=(data/1000).toFixed(2)
 			if (id == -1) _("downnet").innerHTML=(data/1000).toFixed(2)
 			if (id == -3) _("lvlvol").value = data
@@ -1752,6 +1752,13 @@
 
 		function WindowActiveChanged(isiconic, wparam) {
 		    console.log("WindowActiveChanged", isiconic, wparam);
+		    if (isiconic == 0 && wparam == 1) {
+		        var chatcontainer = window['self']['chat'].firstChild;
+		        var isScrolledToBottom = chatcontainer.scrollHeight - chatcontainer.clientHeight <= chatcontainer.scrollTop + 1;
+		        if (isScrolledToBottom)
+		            chatcontainer.scrollTop = chatcontainer.scrollHeight - chatcontainer.clientHeight;
+		        chatcontainer.scrollTop = chatcontainer.scrollHeight + 200;
+		    }
 		}
 		
 		document.addEventListener('click', function (event) {
