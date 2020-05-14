@@ -1,6 +1,8 @@
 #pragma once
 #define USING_MSHTML
 //#define USING_MINIBLINK
+#define USING_SPEEXDSP
+//#define USING_FVAD
 #pragma comment(linker,"/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 #include "targetver.h"
 #define _CRT_SECURE_NO_WARNINGS
@@ -56,8 +58,14 @@
 #include "vendor\libcurl\windows-Win32-v140\include\curl\curl.h"
 #pragma comment( lib, "advapi32.lib" )
 #pragma comment( lib, "avrt.lib" )
+#ifdef USING_SPEEXDSP
 #pragma comment( lib, "vendor/speexdsp/libspeexdsp.lib" )
 #include "vendor/speexdsp/speex_preprocess.h"
+#endif
+#ifdef USING_FVAD
+#pragma comment( lib, "vendor/libfvad/fvad.lib" )
+#include "vendor/libfvad/fvad.h"
+#endif
 #pragma comment( lib, "vendor/opus/opus.lib" )
 #pragma comment( lib, "vendor/opusenc/opusenc.lib" )
 #include "vendor/opus/opus.h"
