@@ -226,6 +226,12 @@ void mm_send_uicommand(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* 
 		rpc_write_short(&pv, pDispParams->rgvarg[0].intVal);
 		g_network->Send(RPCID::UI_COMMAND, &pv);
 	}
+	if (pDispParams->cArgs == 1 && pDispParams->rgvarg[0].vt == VT_BSTR) {
+		vector<uint8_t> pv;
+		int len = wcslen(pDispParams->rgvarg[0].bstrVal) * sizeof(wchar_t);
+		char* cmd = (char*)pDispParams->rgvarg[0].bstrVal;
+		g_network->Send(RPCID::UI_COMMAND, cmd, len);
+	}
 }
 
 void mm_is_iconic(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pExcepInfo, UINT* puArgErr) {

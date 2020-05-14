@@ -47,8 +47,14 @@ public:
 		srand(time(0));
 		while (hTask) {
 			//connect from this thread
-			if (gWS == NULL && szServerUrl != NULL)
+			if (gWS == NULL && szServerUrl != NULL) {
+				g_jsStack.push_back(wstring_format(L"onEvent(%d, %d, %d);", RPCID::UI_COMMAND, -20, 1));
 				gWS = WebSocket::from_url(szServerUrl);
+				if (gWS == NULL && szServerUrl != NULL) {
+					szServerUrl = NULL;
+					g_jsStack.push_back(wstring_format(L"onEvent(%d, %d, %d);", RPCID::UI_COMMAND, -20, 3));
+				}
+			}
 
 			if (bRequestDisconnect) {
 				bRequestDisconnect = FALSE;
@@ -70,6 +76,7 @@ public:
 					string ident(&hwProfileInfo.szHwProfileGuid[1]);
 					Send(RPCID::USER_IDENT, &ident);
 					SetWindowTextA(g_webWindow->hWndWebWindow, string_format("MongSpeak | %s", &szServerUrl[5]).c_str());
+					g_jsStack.push_back(wstring_format(L"onEvent(%d, %d, %d);", RPCID::UI_COMMAND, -20, 2));
 				}
 				bConnected = TRUE;
 				try {
@@ -90,8 +97,7 @@ public:
 				if (lHeartBeatTick + 1000 < GetTickCount()) {
 					lHeartBeatTick = GetTickCount();
 					//todo: add hb packet
-					g_jsStack.push_back(wstring_format(L"onEvent(%d, %d, %d);", RPCID::UI_COMMAND, -1, nBytesReaded));
-					g_jsStack.push_back(wstring_format(L"onEvent(%d, %d, %d);", RPCID::UI_COMMAND, -2, nBytesWritten));
+					g_jsStack.push_back(wstring_format(L"onEvent(%d, %d, %d); onEvent(%d, %d, %d);", RPCID::UI_COMMAND, -1, nBytesReaded, RPCID::UI_COMMAND, -2, nBytesWritten));
 					nBytesReaded = 0; nBytesWritten = 0;
 				}
 			}
@@ -101,7 +107,7 @@ public:
 					Disconnect();
 					bConnected = FALSE;
 					SetWindowTextA(g_webWindow->hWndWebWindow, "MongSpeak");
-					g_jsStack.push_back(wstring_format(L"onEvent(%d, %d, '');", RPCID::USER_LEAVE, mID));
+					g_jsStack.push_back(wstring_format(L"onEvent(%d, %d, 0); onEvent(%d, %d, %d);", RPCID::USER_LEAVE, mID, RPCID::UI_COMMAND, -20, 3));
 				}
 				//todo: not connected
 			}

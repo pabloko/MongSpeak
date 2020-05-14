@@ -698,6 +698,12 @@
             .usrmsg:hover{
                 content: 'd';
             }
+			
+			.roomicon {
+				float: right;
+				padding: 3px;
+				color: #888;
+			}
 
 		</style>
 	</head>
@@ -1223,6 +1229,18 @@
 					pci.parentNode.removeChild(pci);
 				},2000)
 			}
+			
+			if (id == -20) { //ws event
+				if (data==1) {//connecting
+					formfields.style.display='none'
+				}
+				if (data==2) {//connected
+				
+				}
+				if (data==3) {//disconnected
+					formfields.style.display='block'
+				}
+			}
 			if (id>0 && data==11) {
 				_('talk_'+id).classList.remove('fa-circle')
 				_('talk_'+id).classList.add('fa-circle-thin')
@@ -1285,7 +1303,9 @@
 				var li = document.createElement("li");
 				var roomtitle = document.createElement("div");
 				li.id = "room_" + jsonObj[i].id;
-				roomtitle.innerText = jsonObj[i].name;
+				var roomname = jsonObj[i].name
+				if (jsonObj[i]['pass']!="") roomname = "<i class='roomicon fa fa-lock'></i>" + roomname
+				roomtitle.innerHTML =  roomname;
 				roomtitle.classList.add("roomtitle");
 				roomtitle.classList.add("pad");
 				roomtitle.addEventListener("click", function(room){
@@ -1384,7 +1404,7 @@
 				inputbox.appendChild(emoji);
 				center.appendChild(divchat);
 			}
-			
+			update_input("0",true);
 		});
 		
 		join_rpc(RPCID.CHANGE_ROOM, function(id, data){
