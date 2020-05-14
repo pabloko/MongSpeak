@@ -1,7 +1,6 @@
 #pragma once
 extern CAudioSessionMixer* g_mix;
 extern HW_PROFILE_INFOA hwProfileInfo;
-extern vector<wstring> g_jsStack;
 extern WebWindow* g_webWindow;
 
 using namespace easywsclient;
@@ -36,10 +35,6 @@ public:
 	}
 	DWORD NetworkLoop() {
 		Sleep(1000);
-		//HANDLE timer;
-		//LARGE_INTEGER ft;
-		//ft.QuadPart = -(10 * (__int64)10000);
-		//timer = CreateWaitableTimer(NULL, TRUE, NULL);
 		INT rc; WSADATA wsaData;
 		rc = WSAStartup(MAKEWORD(2, 2), &wsaData);
 		if (rc) 
@@ -48,11 +43,11 @@ public:
 		while (hTask) {
 			//connect from this thread
 			if (gWS == NULL && szServerUrl != NULL) {
-				g_jsStack.push_back(wstring_format(L"onEvent(%d, %d, %d);", RPCID::UI_COMMAND, -20, 1));
+				g_webWindow->webForm->QueueCallToEvent(RPCID::UI_COMMAND, -20, 1);
 				gWS = WebSocket::from_url(szServerUrl);
 				if (gWS == NULL && szServerUrl != NULL) {
 					szServerUrl = NULL;
-					g_jsStack.push_back(wstring_format(L"onEvent(%d, %d, %d);", RPCID::UI_COMMAND, -20, 3));
+					g_webWindow->webForm->QueueCallToEvent(RPCID::UI_COMMAND, -20, 3);
 				}
 			}
 
@@ -62,10 +57,7 @@ public:
 					if (Status() > WebSocket::CLOSED)
 						gWS->close();
 					gWS = NULL;
-					/*if (szServerUrl)
-						delete[] szServerUrl;*/
 					szServerUrl = NULL;
-					//bConnected = FALSE;
 					mID = NULL;
 				}
 			}
@@ -76,7 +68,7 @@ public:
 					string ident(&hwProfileInfo.szHwProfileGuid[1]);
 					Send(RPCID::USER_IDENT, &ident);
 					SetWindowTextA(g_webWindow->hWndWebWindow, string_format("MongSpeak | %s", &szServerUrl[5]).c_str());
-					g_jsStack.push_back(wstring_format(L"onEvent(%d, %d, %d);", RPCID::UI_COMMAND, -20, 2));
+					g_webWindow->webForm->QueueCallToEvent(RPCID::UI_COMMAND, -20, 2);
 				}
 				bConnected = TRUE;
 				try {
@@ -96,8 +88,8 @@ public:
 				//HEARTBEAT
 				if (lHeartBeatTick + 1000 < GetTickCount()) {
 					lHeartBeatTick = GetTickCount();
-					//todo: add hb packet
-					g_jsStack.push_back(wstring_format(L"onEvent(%d, %d, %d); onEvent(%d, %d, %d);", RPCID::UI_COMMAND, -1, nBytesReaded, RPCID::UI_COMMAND, -2, nBytesWritten));
+					g_webWindow->webForm->QueueCallToEvent(RPCID::UI_COMMAND, -1, nBytesReaded);
+					g_webWindow->webForm->QueueCallToEvent(RPCID::UI_COMMAND, -2, nBytesWritten);
 					nBytesReaded = 0; nBytesWritten = 0;
 				}
 			}
@@ -107,15 +99,13 @@ public:
 					Disconnect();
 					bConnected = FALSE;
 					SetWindowTextA(g_webWindow->hWndWebWindow, "MongSpeak");
-					g_jsStack.push_back(wstring_format(L"onEvent(%d, %d, 0); onEvent(%d, %d, %d);", RPCID::USER_LEAVE, mID, RPCID::UI_COMMAND, -20, 3));
+					g_webWindow->webForm->QueueCallToEvent(RPCID::USER_LEAVE, mID, (short)0);
+					g_webWindow->webForm->QueueCallToEvent(RPCID::UI_COMMAND, -20, 3);
 				}
 				//todo: not connected
 			}
 			Sleep(1); 
-			//SetWaitableTimer(timer, &ft, 0, NULL, NULL, 0);
-			//WaitForSingleObject(timer, INFINITE);
 		}
-		//CloseHandle(timer);
 		WSACleanup();
 		return S_OK;
 	}
@@ -139,14 +129,14 @@ public:
 			if (g_network->mID == sessid)
 				g_mix->ClearSessions();
 			rpc_read_short((vector<uint8_t>*)&message, &room, 3);
-			g_jsStack.push_back(wstring_format(L"onEvent(%d, %d, %d);", RPCID::CHANGE_ROOM, sessid, room));
+			g_webWindow->webForm->QueueCallToEvent(RPCID::CHANGE_ROOM, sessid, room);
 			return;
 		} break;
 		case RPCID::UI_COMMAND: {
 			if (message.size() == 5) {
 				SHORT cmd = 0;
 				rpc_read_short((vector<uint8_t>*)&message, &cmd, 3);
-				g_jsStack.push_back(wstring_format(L"onEvent(%d, %d, %d);", RPCID::UI_COMMAND, sessid, cmd));
+				g_webWindow->webForm->QueueCallToEvent(RPCID::UI_COMMAND, sessid, cmd);
 				return;
 			}
 		} break;

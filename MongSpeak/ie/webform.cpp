@@ -765,51 +765,72 @@ void WebForm::SinkScriptErrorEvents(IDispatch* pperr) {
 }
 
 HRESULT WebForm::DequeueCallToEvent() {
-	
-	IHTMLDocument2 *doc = GetDoc();
-	if (doc == NULL) 
-		return NULL;
-	IHTMLWindow2 *win = NULL;
-	doc->get_parentWindow(&win);
-	doc->Release();
-	if (win == NULL) 
-		return NULL;
-	IDispatchEx *winEx;
-	win->QueryInterface(&winEx);
-	win->Release();
-	if (winEx == NULL) 
-		return NULL;
+	HRESULT hr = S_OK;
+	if (m_dispex == NULL) {
+		IHTMLDocument2 *doc = GetDoc();
+		if (doc == NULL)
+			return NULL;
+		IHTMLWindow2 *win = NULL;
+		doc->get_parentWindow(&win);
+		doc->Release();
+		if (win == NULL)
+			return NULL;
+
+		win->QueryInterface(&m_dispex);
+		win->Release();
+		if (m_dispex == NULL)
+			return NULL;
+	}
 	while (vec_rpc_id.size() > 0) {
-		DISPID dispid;
-		BSTR idname = SysAllocString(L"onEvent");
-		HRESULT hr = winEx->GetDispID(idname, fdexNameEnsure, &dispid);
-		SysFreeString(idname);
-		if (FAILED(hr))
-			continue;
+		//DISPID dispid;
+		if (m_dispid == NULL) {
+			BSTR idname = SysAllocString(L"onEvent");
+			hr = m_dispex->GetDispID(idname, fdexNameEnsure, &m_dispid);
+			SysFreeString(idname);
+			if (FAILED(hr))
+				return NULL;
+		}
 		DISPID namedArgs[] = { DISPID_PROPERTYPUT,DISPID_PROPERTYPUT,DISPID_PROPERTYPUT };
 		DISPPARAMS params;
-		BSTR custObj = SysAllocString(vec_message[0].c_str());
+		BSTR custObj = NULL; 
+
+		bool is_str = vec_msgtype.front();
+		vec_msgtype.pop_front();
+
+		if (is_str)
+			custObj = SysAllocString(vec_message.front().c_str());
 		params.rgvarg = new VARIANT[3];
-		params.rgvarg[0].bstrVal = custObj;
-		params.rgvarg[0].vt = VT_BSTR;
-		params.rgvarg[1].intVal = vec_pkt_id[0];
+		if (is_str) {
+			params.rgvarg[0].bstrVal = custObj;
+			params.rgvarg[0].vt = VT_BSTR;
+		} else {
+			params.rgvarg[0].intVal = vec_data.front();
+			params.rgvarg[0].vt = VT_I4;
+		}
+		params.rgvarg[1].intVal = vec_pkt_id.front();
 		params.rgvarg[1].vt = VT_I4;
-		params.rgvarg[2].intVal = vec_rpc_id[0];
+		params.rgvarg[2].intVal = vec_rpc_id.front();
 		params.rgvarg[2].vt = VT_I4;
 		params.rgdispidNamedArgs = namedArgs;
 		params.cArgs = 3;
 		params.cNamedArgs = 3;
-		hr = winEx->InvokeEx(dispid, LOCALE_USER_DEFAULT, DISPATCH_METHOD, &params, NULL, NULL, NULL);
-		//SysFreeString(custObj);
-		//delete[] params.rgvarg;
+		hr = m_dispex->InvokeEx(m_dispid, LOCALE_USER_DEFAULT, DISPATCH_METHOD, &params, NULL, NULL, NULL);
+		
+		VariantClear(params.rgvarg);
 
-		vec_rpc_id.erase(vec_rpc_id.begin());
+		vec_rpc_id.pop_front();
+		vec_pkt_id.pop_front();
+		if (is_str)
+			vec_message.pop_front();
+		else
+			vec_data.pop_front();
+		/*vec_rpc_id.erase(vec_rpc_id.begin());
 		vec_pkt_id.erase(vec_pkt_id.begin());
-		vec_message.erase(vec_message.begin());
+		vec_message.erase(vec_message.begin());*/
 		if (FAILED(hr)) 
 			continue;
 	}
-	winEx->Release();
+	//winEx->Release();
 	return S_OK;
 }
 
@@ -817,5 +838,14 @@ HRESULT WebForm::QueueCallToEvent(short rpcid, short id, wchar_t* str) {
 	vec_rpc_id.push_back(rpcid);
 	vec_pkt_id.push_back(id);
 	vec_message.push_back(std::wstring(str));
+	vec_msgtype.push_back(true);
+	return S_OK;
+}
+
+HRESULT WebForm::QueueCallToEvent(short rpcid, short id, short str) {
+	vec_rpc_id.push_back(rpcid);
+	vec_pkt_id.push_back(id);
+	vec_data.push_back(str);
+	vec_msgtype.push_back(false);
 	return S_OK;
 }

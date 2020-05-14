@@ -1,7 +1,6 @@
 #pragma once
 
 extern CNetwork* g_network;
-extern vector<wstring> g_jsStack;
 extern ITaskbarList3* g_Taskbar;
 extern BOOL bPreventSimultaneousUpload;
 extern void set_taskbar_state();
@@ -87,8 +86,8 @@ public:
 				fTol = log2(max(fVuSumMax, -fVuSumMin)) * 6.02f;
 				if (fTol < -40.0f) fTol = -40.0f;
 				fTol += 40.0f; fTol = (fTol * 100.0f) / 40.0f;
-				if (bSendVu) 
-					g_jsStack.push_back(wstring_format(L"onEvent(%d, %d, %3.0f);", RPCID::UI_COMMAND, -3, fTol));
+				if (bSendVu)
+					g_webWindow->webForm->QueueCallToEvent(RPCID::UI_COMMAND, -3, (short)fTol);
 				fVuSumMax = 0.0f; fVuSumMin = 0.0f; lVuCount = 0;
 			}
 			if (iInputMethod < 0 && iInputMethod > -200) {

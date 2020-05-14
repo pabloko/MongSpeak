@@ -200,16 +200,27 @@ public:
 		if (m_webview == NULL) return E_ABORT;
 		//if (vec_rpc_id.size() > 0) {
 		while (vec_rpc_id.size() > 0) {
+			bool is_str = vec_msgtype.front();
+			vec_msgtype.pop_front();
 			jsExecState es = wkeGlobalExec(m_webview);
 			jsValue* args = new jsValue[3];
-			args[0] = jsInt(vec_rpc_id.at(0));
-			args[1] = jsInt(vec_pkt_id.at(0));
-			args[2] = jsStringW(es, vec_message.at(0).c_str());
+			args[0] = jsInt(vec_rpc_id.front());
+			args[1] = jsInt(vec_pkt_id.front());
+			if (is_str)
+				args[2] = jsStringW(es, vec_message.front().c_str());
+			else
+				args[2] = jsInt(vec_data.front());
 			jsCall(es, jsGetGlobal(es, "onEvent"), NULL, args, 3);
 			delete[] args;
-			vec_rpc_id.erase(vec_rpc_id.begin());
+			/*vec_rpc_id.erase(vec_rpc_id.begin());
 			vec_pkt_id.erase(vec_pkt_id.begin());
-			vec_message.erase(vec_message.begin());
+			vec_message.erase(vec_message.begin());*/
+			vec_rpc_id.pop_front();
+			vec_pkt_id.pop_front();
+			if (is_str)
+				vec_message.pop_front();
+			else
+				vec_data.pop_front();
 		}
 		return S_OK;
 	} 
@@ -218,6 +229,15 @@ public:
 		vec_rpc_id.push_back(rpcid);
 		vec_pkt_id.push_back(id);
 		vec_message.push_back(std::wstring(str));
+		vec_msgtype.push_back(true);
+		return S_OK;
+	}
+
+	int QueueCallToEvent(short rpcid, short id, short str) {
+		vec_rpc_id.push_back(rpcid);
+		vec_pkt_id.push_back(id);
+		vec_data.push_back(str);
+		vec_msgtype.push_back(false);
 		return S_OK;
 	}
 
@@ -233,9 +253,11 @@ public:
 	BOOL bActiveWindow;
 	wkeWebView m_webview;
 private:
-	std::vector<short> vec_rpc_id;
-	std::vector<short> vec_pkt_id;
-	std::vector<std::wstring> vec_message;
+	std::deque<short> vec_rpc_id;
+	std::deque<short> vec_pkt_id;
+	std::deque<std::wstring> vec_message;
+	std::deque<short> vec_data;
+	std::deque<bool> vec_msgtype;
 	//std::map<std::wstring, void*> m_pScriptCommands;
 };
 

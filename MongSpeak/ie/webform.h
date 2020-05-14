@@ -13,6 +13,7 @@
 #include "tdochostshowui.h"
 #include "tdispatch.h"
 #include <vector>
+#include <deque>
 
 class WebformDispatchHandler;
 
@@ -43,9 +44,13 @@ private:
 
 	WebformDispatchHandler *dispatchHandler;
 
-	std::vector<short> vec_rpc_id;
-	std::vector<short> vec_pkt_id;
-	std::vector<std::wstring> vec_message;
+	std::deque<short> vec_rpc_id;
+	std::deque<short> vec_pkt_id;
+	std::deque<std::wstring> vec_message;
+	std::deque<short> vec_data;
+	std::deque<bool> vec_msgtype;
+	IDispatchEx* m_dispex;
+	DISPID m_dispid;
 
 	void* m_onpastefiles = NULL;
 public:
@@ -67,6 +72,7 @@ public:
 	void RunJSFunctionW(std::wstring cmd);
 	void AddCustomObject(IDispatch *custObj, std::string name);
 	HRESULT QueueCallToEvent(short rpcid, short id, wchar_t* str);
+	HRESULT QueueCallToEvent(short rpcid, short id, short str);
 	HRESULT DequeueCallToEvent();
 	void SetPasteAcceleratorHandler(void* f) {
 		m_onpastefiles = f;

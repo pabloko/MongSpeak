@@ -765,6 +765,7 @@
         </div>
         <div id="form">
 			<div class="mong-logo logoheader"></div>
+			<img id="loadinggif" style="width: 120px; margin-top: -90px; opacity: 0.5; display:none;" src="https://www.upaep.mx/modules/mod_login_ws_id/tmpl/default/images/load.gif" />
             <div id="formfields">
                 <i id="formsettings" class="settings fa fa-cog" style="cursor:pointer;color:#fff;"></i>
                 <label>Username:</label>
@@ -1233,12 +1234,14 @@
 			if (id == -20) { //ws event
 				if (data==1) {//connecting
 					formfields.style.display='none'
+					loadinggif.style.display='inherit'
 				}
 				if (data==2) {//connected
-				
+					loadinggif.style.display='none'
 				}
 				if (data==3) {//disconnected
 					formfields.style.display='block'
+					loadinggif.style.display='none'
 				}
 			}
 			if (id>0 && data==11) {

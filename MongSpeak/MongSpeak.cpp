@@ -88,10 +88,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		if (msg.message == taskbarButtonCreatedMessageId && g_Taskbar == NULL)
 			CoCreateInstance(CLSID_TaskbarList, NULL, CLSCTX_INPROC_SERVER, IID_ITaskbarList3, (void**)&g_Taskbar);
 		g_webWindow->webForm->DequeueCallToEvent();
-		while (g_webWindow->webForm != nullptr && g_jsStack.size() > 0) {
-			g_webWindow->webForm->RunJSFunctionW(g_jsStack.at(0).c_str());
-			g_jsStack.erase(g_jsStack.begin(), g_jsStack.begin() + 1);
-		}
 		if (msg.message == WM_ACTIVATE)
 			g_webWindow->webForm->RunJSFunctionW(wstring_format(L"WindowActiveChanged(%d, %d);", IsIconic(g_webWindow->hWndWebWindow), msg.wParam).c_str());
 		if (msg.message == WM_KEYDOWN && msg.wParam == VK_ESCAPE)

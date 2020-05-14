@@ -13,6 +13,7 @@
 #include <stdlib.h>
 #include <malloc.h>
 #include <memory.h>
+#include <deque>
 #include <tchar.h>
 #include "stdio.h"
 #include <windows.h>
