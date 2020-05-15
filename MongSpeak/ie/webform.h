@@ -25,6 +25,13 @@ class WebformDispatchHandler;
 // This notification is sent via WM_COMMAND when you have called WebformGo(hWebF, url).
 // It indicates that the page has finished loading.
 
+class CMessageQueue {
+public:
+	std::wstring msg;
+	short data, rpcid, msgid;
+	bool type;
+};
+
 #pragma warning(push)
 #pragma warning(disable:4584)
 class WebForm : public IUnknown, TOleClientSite, TDispatch, TDocHostShowUI, TDocHostUIHandler, TOleInPlaceSite, TOleInPlaceFrame {
@@ -44,11 +51,8 @@ private:
 
 	WebformDispatchHandler *dispatchHandler;
 
-	std::deque<short> vec_rpc_id;
-	std::deque<short> vec_pkt_id;
-	std::deque<std::wstring> vec_message;
-	std::deque<short> vec_data;
-	std::deque<bool> vec_msgtype;
+	std::deque<CMessageQueue*> vec_messages;
+
 	IDispatchEx* m_dispex;
 	DISPID m_dispid;
 

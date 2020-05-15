@@ -640,7 +640,6 @@ HRESULT STDMETHODCALLTYPE WebForm::Invoke(DISPID dispIdMember, REFIID riid,
 				SysFreeString(idname);
 				if (!FAILED(hr)) {
 					DISPPARAMS params;
-					BSTR custObj = SysAllocString(vec_message[0].c_str());
 					params.cArgs = 0;
 					params.cNamedArgs = 0;
 					VARIANT var_result;
@@ -781,8 +780,8 @@ HRESULT WebForm::DequeueCallToEvent() {
 		if (m_dispex == NULL)
 			return NULL;
 	}
-	while (vec_rpc_id.size() > 0) {
-		//DISPID dispid;
+	while (vec_messages.size() > 0) {
+		
 		if (m_dispid == NULL) {
 			BSTR idname = SysAllocString(L"onEvent");
 			hr = m_dispex->GetDispID(idname, fdexNameEnsure, &m_dispid);
@@ -790,62 +789,65 @@ HRESULT WebForm::DequeueCallToEvent() {
 			if (FAILED(hr))
 				return NULL;
 		}
+
+		CMessageQueue* q = vec_messages.front();
+		if (q == nullptr) continue;
+
 		DISPID namedArgs[] = { DISPID_PROPERTYPUT,DISPID_PROPERTYPUT,DISPID_PROPERTYPUT };
 		DISPPARAMS params;
-		BSTR custObj = NULL; 
+		BSTR custObj = NULL;
 
-		bool is_str = vec_msgtype.front();
-		vec_msgtype.pop_front();
+		bool is_str = q->type;
 
 		if (is_str)
-			custObj = SysAllocString(vec_message.front().c_str());
+			custObj = SysAllocString(q->msg.c_str());
 		params.rgvarg = new VARIANT[3];
 		if (is_str) {
 			params.rgvarg[0].bstrVal = custObj;
 			params.rgvarg[0].vt = VT_BSTR;
-		} else {
-			params.rgvarg[0].intVal = vec_data.front();
+		}
+		else {
+			params.rgvarg[0].intVal = q->data;
 			params.rgvarg[0].vt = VT_I4;
 		}
-		params.rgvarg[1].intVal = vec_pkt_id.front();
+		params.rgvarg[1].intVal = q->msgid;
 		params.rgvarg[1].vt = VT_I4;
-		params.rgvarg[2].intVal = vec_rpc_id.front();
+		params.rgvarg[2].intVal = q->rpcid;
 		params.rgvarg[2].vt = VT_I4;
 		params.rgdispidNamedArgs = namedArgs;
 		params.cArgs = 3;
 		params.cNamedArgs = 3;
 		hr = m_dispex->InvokeEx(m_dispid, LOCALE_USER_DEFAULT, DISPATCH_METHOD, &params, NULL, NULL, NULL);
-		
+
 		VariantClear(params.rgvarg);
 
-		vec_rpc_id.pop_front();
-		vec_pkt_id.pop_front();
-		if (is_str)
-			vec_message.pop_front();
-		else
-			vec_data.pop_front();
-		/*vec_rpc_id.erase(vec_rpc_id.begin());
-		vec_pkt_id.erase(vec_pkt_id.begin());
-		vec_message.erase(vec_message.begin());*/
-		if (FAILED(hr)) 
+		delete q;
+		vec_messages.pop_front();
+		if (FAILED(hr))
 			continue;
 	}
-	//winEx->Release();
 	return S_OK;
 }
 
+
 HRESULT WebForm::QueueCallToEvent(short rpcid, short id, wchar_t* str) {
-	vec_rpc_id.push_back(rpcid);
-	vec_pkt_id.push_back(id);
-	vec_message.push_back(std::wstring(str));
-	vec_msgtype.push_back(true);
+	if (this == nullptr) return E_FAIL;
+	CMessageQueue* q = new CMessageQueue();
+	q->rpcid = rpcid;
+	q->type = true;
+	q->msg = str;
+	q->msgid = id;
+	vec_messages.push_back(q);
 	return S_OK;
 }
 
 HRESULT WebForm::QueueCallToEvent(short rpcid, short id, short str) {
-	vec_rpc_id.push_back(rpcid);
-	vec_pkt_id.push_back(id);
-	vec_data.push_back(str);
-	vec_msgtype.push_back(false);
+	if (this == nullptr) return E_FAIL;
+	CMessageQueue* q = new CMessageQueue();
+	q->rpcid = rpcid;
+	q->type = false;
+	q->data = str;
+	q->msgid = id;
+	vec_messages.push_back(q);
 	return S_OK;
 }

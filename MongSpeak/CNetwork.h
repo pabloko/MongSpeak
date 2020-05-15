@@ -79,9 +79,9 @@ public:
 					}
 				//TX
 					while (pVecBuffer.size() > 0) {
-						nBytesWritten += pVecBuffer.at(0).length();
-						gWS->sendBinary((const std::string&)pVecBuffer.at(0));
-						pVecBuffer.erase(pVecBuffer.begin(), pVecBuffer.begin() + 1);
+						nBytesWritten += pVecBuffer.front().length();
+						gWS->sendBinary((const std::string&)pVecBuffer.front());
+						pVecBuffer.pop_front();
 					}
 				}
 				catch (...) {}
@@ -192,7 +192,7 @@ private:
 	WORD mID;
 	WORD mRoom;
 	WebSocket* gWS;
-	vector<string> pVecBuffer;
+	deque<string> pVecBuffer;
 	LONG lHeartBeatTick;
 	BOOL bRequestDisconnect;
 	char* szServerUrl;
