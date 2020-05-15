@@ -720,6 +720,7 @@
                 width:55px;
                 height:55px;
                 display:inline;
+                margin: 5px;
             }
 
 		</style>
@@ -950,7 +951,7 @@
 		    console.log(e, el.value)
 		    if (e.charCode != 13) return;
 		    var text = encodeURIComponent(el.value.trim());
-		    document.getElementById("gifresults").innerHTML = '<img style="width: 70px; margin: 0 auto; opacity: 0.5;" src="https://www.upaep.mx/modules/mod_login_ws_id/tmpl/default/images/load.gif" />';
+		    document.getElementById("gifresults").innerHTML = '<div style="width: 100%; height: 100%; display:flex; justify-content:center;"><img style="width: 70px; margin-top: 50px; opacity: 0.5;" src="https://www.upaep.mx/modules/mod_login_ws_id/tmpl/default/images/load.gif" /></div>';
 		    if (text != '') {
 		        //ajax
 		        var xhttp = new XMLHttpRequest();
@@ -1052,7 +1053,7 @@
 
 		    //mong.say("Usuario conectado");
 		    //console.log('rpc USER_JOIN: ' + id + " | " + data);
-			clients.push({id: id, data: data});
+			clients.push({id: id, data: data, room: 0});
 			var lobby = document.getElementById("room_0");
 			var li = document.createElement("li");
 			var span = document.createElement("span");
@@ -1115,7 +1116,7 @@
 			    user_join.style.textAlign = "center";
 			    user_join.innerHTML = "<span style='font-size: 10px;'>User " + twemoji.parse(data) + " has joined the room</span>";
 
-			    if(id == window['self'].room)
+			    if(window['self'].room == 0)
 			        _("chatul_" + window['self'].room).appendChild(user_join);
 			}
 			window['self']['connected'] = true;
@@ -1132,17 +1133,7 @@
 						found = true;
 						var user_listed = null;
 						user_listed = _("user_"+id);
-						if (user_listed) {
-
-						    audiouserleft.play();
-						    var user_left = document.createElement("li");
-						    user_left.style.width = "100%";
-						    user_left.style.textAlign = "center";
-						    user_left.innerHTML = "<span style='font-size: 10px;'>User " + twemoji.parse(clients[i].data) + " has left the room</span>";
-
-						    if (id == window['self'].room)
-						        _("chatul_" + window['self'].room).appendChild(user_left);
-						    
+						if (user_listed) {						    
 							user_listed.parentNode.removeChild(user_listed);
 							clients.splice(i, 1);
 						}
@@ -1436,10 +1427,14 @@
 				        _('emojipickwindow').style.display = 'none'
 				        _('gifsearchwindow').style.display = 'inherit'
 				        _('emojichange').src = "https://cdn0.iconfinder.com/data/icons/dicticons-files-folders/32/file_image_gif-2-512.png"
+				        _('emojichange').style.width = "25px";
+				        _('emojichange').style.height = "25px";
 				    } else {
 				        _('emojipickwindow').style.display = 'inherit'
 				        _('gifsearchwindow').style.display = 'none'
-				        _('emojichange').src = "https://img.icons8.com/android/24/000000/happy.png"				        
+				        _('emojichange').src = "https://img.icons8.com/android/24/000000/happy.png"
+				        _('emojichange').style.width = "18px";
+				        _('emojichange').style.height = "18px";
 				    }
 				    if (_('emojicontainer').style.display == "none" || _('emojicontainer').style.display == "")
 				        _('emojicontainer').style.display = "block";
@@ -1494,7 +1489,25 @@
 			}
 			var room = _("room_"+data);
 			if(typeof room !== 'undefined' && newusr != null){
-				room.appendChild(user);
+			    room.appendChild(user);
+
+			    var found = false;
+			    for (var i = 0; i < clients.length && !found; i++) {
+			        if (clients[i].id == id) {
+			            found = true;
+			            var user_join = document.createElement("li");
+			            user_join.style.width = "100%";
+			            user_join.style.textAlign = "center";
+			            user_join.innerHTML = "<span style='font-size: 10px;'>User " + twemoji.parse(clients[i].data) + " has joined the room</span>";
+			            clients[i].room = data;
+			            if (data == window['self'].room)
+			                _("chatul_" + window['self'].room).appendChild(user_join);
+
+                        //todo left room
+			        }
+			    }
+
+			    
 			}
 			if (window['self'].id != id) return;
 			else {
