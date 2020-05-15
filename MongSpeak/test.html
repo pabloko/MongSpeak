@@ -1255,6 +1255,15 @@
 				pci.style.zIndex='-1'
 				window['self']['input'].parentNode.appendChild(pci)
 				
+			} 
+			if (id==-19) {//window activation changed
+				if (data==0) {
+					var chatcontainer = window['self']['chat'].firstChild;
+					var isScrolledToBottom = chatcontainer.scrollHeight - chatcontainer.clientHeight <= chatcontainer.scrollTop + 1;
+					if (isScrolledToBottom)
+						chatcontainer.scrollTop = chatcontainer.scrollHeight - chatcontainer.clientHeight;
+					chatcontainer.scrollTop = chatcontainer.scrollHeight + 200;
+				}
 			}
 			if (id == -10) { //file is higher than limit
 				window['self']['input'].value = data;
@@ -1832,7 +1841,7 @@
 		    return false;
 		}
 
-		function WindowActiveChanged(isiconic, wparam) {
+		/*function WindowActiveChanged(isiconic, wparam) {
 		    console.log("WindowActiveChanged", isiconic, wparam);
 		    if (isiconic == 0 && wparam == 1) {
 		        var chatcontainer = window['self']['chat'].firstChild;
@@ -1841,7 +1850,7 @@
 		            chatcontainer.scrollTop = chatcontainer.scrollHeight - chatcontainer.clientHeight;
 		        chatcontainer.scrollTop = chatcontainer.scrollHeight + 200;
 		    }
-		}
+		}*/
 		
 		document.addEventListener('click', function (event) {
 			var dest = "";
