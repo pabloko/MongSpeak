@@ -802,6 +802,7 @@ HRESULT WebForm::DequeueCallToEvent() {
 		if (is_str)
 			custObj = SysAllocString(q->msg.c_str());
 		params.rgvarg = new VARIANT[3];
+		VariantInit(params.rgvarg);
 		if (is_str) {
 			params.rgvarg[0].bstrVal = custObj;
 			params.rgvarg[0].vt = VT_BSTR;
@@ -818,13 +819,16 @@ HRESULT WebForm::DequeueCallToEvent() {
 		params.cArgs = 3;
 		params.cNamedArgs = 3;
 		hr = m_dispex->InvokeEx(m_dispid, LOCALE_USER_DEFAULT, DISPATCH_METHOD, &params, NULL, NULL, NULL);
-
-		VariantClear(params.rgvarg);
-
-		delete q;
+		
+		if (q!=nullptr) 
+			delete q;
 		vec_messages.pop_front();
+
 		if (FAILED(hr))
 			continue;
+		if (params.rgvarg)
+			VariantClear(params.rgvarg);
+		
 	}
 	return S_OK;
 }
