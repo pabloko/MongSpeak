@@ -950,6 +950,7 @@
 		    console.log(e, el.value)
 		    if (e.charCode != 13) return;
 		    var text = encodeURIComponent(el.value.trim());
+		    document.getElementById("gifresults").innerHTML = '<img style="width: 70px; margin: 0 auto; opacity: 0.5;" src="https://www.upaep.mx/modules/mod_login_ws_id/tmpl/default/images/load.gif" />';
 		    if (text != '') {
 		        //ajax
 		        var xhttp = new XMLHttpRequest();
@@ -958,13 +959,16 @@
 		                var data = JSON.parse(this.responseText)
 		                var code = "";
                         console.log(data)
-		                data.data.forEach(function(gif){
-		                    code += "<img src=\"" + gif.images.original.url + "\" onclick='_send_message(\"" + gif.images.original.url + "\")' class='somegif' />"
+                        data.results.forEach(function (res) {
+                            res.media.forEach(function (gif) {
+                                code += "<img src=\"" + gif.tinygif.url + "\" onclick='_send_message(\"" + gif.tinygif.url + "\")' class='somegif' />"
+                            })
 		                })
 		                document.getElementById("gifresults").innerHTML = code;
 		            }
 		        };
-		        xhttp.open("GET", "https://api.giphy.com/v1/gifs/search?q="+text+"&limit=20&rating=r&offset=0&api_key=dc6zaTOxFJmzC", true);
+		        xhttp.open("GET", "https://api.tenor.com/v1/search?q=" + text + "&key=LIVDSRZULELA&limit=20", true);
+		        //xhttp.open("GET", "https://api.giphy.com/v1/gifs/search?q="+text+"&limit=20&rating=r&offset=0&api_key=dc6zaTOxFJmzC", true);
 		        xhttp.send();
 		    }
 		}
@@ -1414,7 +1418,7 @@
 
 				var emoji = document.createElement("div");
 				emoji.classList.add("emojimenu");
-				emoji.innerHTML = '<img src="https://img.icons8.com/android/24/000000/happy.png" style="width:18px; height:18px; opacity:.8;" />' //"&#x1F600;";//nop
+				emoji.innerHTML = '<img id="emojichange" src="https://img.icons8.com/android/24/000000/happy.png" style="width:18px; height:18px; opacity:.8;" />' //"&#x1F600;";//nop
 				//emoji.innerHTML = twemoji.parse(emoji.innerText)
                 
 				/*emoji.onclick = function () {
@@ -1431,9 +1435,11 @@
 				    if (new Date().getTime() - press_time > 500) {
 				        _('emojipickwindow').style.display = 'none'
 				        _('gifsearchwindow').style.display = 'inherit'
+				        _('emojichange').src = "https://cdn0.iconfinder.com/data/icons/dicticons-files-folders/32/file_image_gif-2-512.png"
 				    } else {
 				        _('emojipickwindow').style.display = 'inherit'
 				        _('gifsearchwindow').style.display = 'none'
+				        _('emojichange').src = "https://img.icons8.com/android/24/000000/happy.png"				        
 				    }
 				    if (_('emojicontainer').style.display == "none" || _('emojicontainer').style.display == "")
 				        _('emojicontainer').style.display = "block";
@@ -1625,6 +1631,7 @@
 		    setTimeout(function () {
 		        if (_('emojicontainer')['over'] == false) {
 		            _('emojicontainer').style.display = "none";
+		            _('emojichange').src = "https://img.icons8.com/android/24/000000/happy.png"
 		        }
 		    }, 500);
 		}
