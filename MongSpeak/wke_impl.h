@@ -10,6 +10,13 @@ wchar_t gPath[MAX_PATH];
 static WNDPROC        orig_wndproc;
 static HWND          orig_wnd;
 
+class CMessageQueue {
+public:
+	std::wstring msg;
+	short data, rpcid, msgid;
+	bool type;
+};
+
 class WebForm {
 public:
 	static LRESULT CALLBACK wnd_proc(HWND wnd, UINT umsg, WPARAM wparam, LPARAM lparam) {
@@ -206,45 +213,45 @@ public:
 	int DequeueCallToEvent() {
 		if (m_webview == NULL) return E_ABORT;
 		//if (vec_rpc_id.size() > 0) {
-		while (vec_rpc_id.size() > 0) {
-			bool is_str = vec_msgtype.front();
-			vec_msgtype.pop_front();
+		while (vec_messages.size() > 0) {
+			CMessageQueue* q = vec_messages.front();
+			if (q == nullptr) continue;
+			bool is_str = q->type;
 			jsExecState es = wkeGlobalExec(m_webview);
 			jsValue* args = new jsValue[3];
-			args[0] = jsInt(vec_rpc_id.front());
-			args[1] = jsInt(vec_pkt_id.front());
+			args[0] = jsInt(q->rpcid);
+			args[1] = jsInt(q->msgid);
 			if (is_str)
-				args[2] = jsStringW(es, vec_message.front().c_str());
+				args[2] = jsStringW(es, q->msg.c_str());
 			else
-				args[2] = jsInt(vec_data.front());
+				args[2] = jsInt(q->data);
 			jsCall(es, jsGetGlobal(es, "onEvent"), NULL, args, 3);
 			delete[] args;
-			/*vec_rpc_id.erase(vec_rpc_id.begin());
-			vec_pkt_id.erase(vec_pkt_id.begin());
-			vec_message.erase(vec_message.begin());*/
-			vec_rpc_id.pop_front();
-			vec_pkt_id.pop_front();
-			if (is_str)
-				vec_message.pop_front();
-			else
-				vec_data.pop_front();
+			delete q;
+			vec_messages.pop_front();
 		}
 		return S_OK;
 	} 
 	
 	int QueueCallToEvent(short rpcid, short id, wchar_t* str) {
-		vec_rpc_id.push_back(rpcid);
-		vec_pkt_id.push_back(id);
-		vec_message.push_back(std::wstring(str));
-		vec_msgtype.push_back(true);
+		if (this == nullptr) return E_FAIL;
+		CMessageQueue* q = new CMessageQueue();
+		q->rpcid = rpcid;
+		q->type = true;
+		q->msg = str;
+		q->msgid = id;
+		vec_messages.push_back(q);
 		return S_OK;
 	}
 
 	int QueueCallToEvent(short rpcid, short id, short str) {
-		vec_rpc_id.push_back(rpcid);
-		vec_pkt_id.push_back(id);
-		vec_data.push_back(str);
-		vec_msgtype.push_back(false);
+		if (this == nullptr) return E_FAIL;
+		CMessageQueue* q = new CMessageQueue();
+		q->rpcid = rpcid;
+		q->type = false;
+		q->data = str;
+		q->msgid = id;
+		vec_messages.push_back(q);
 		return S_OK;
 	}
 
@@ -264,12 +271,7 @@ public:
 		m_custproc = f;
 	};
 private:
-	std::deque<short> vec_rpc_id;
-	std::deque<short> vec_pkt_id;
-	std::deque<std::wstring> vec_message;
-	std::deque<short> vec_data;
-	std::deque<bool> vec_msgtype;
-	//std::map<std::wstring, void*> m_pScriptCommands;
+	std::deque<CMessageQueue*> vec_messages;
 };
 
 typedef WebForm JSObject;
