@@ -257,23 +257,20 @@ join_rpc(RPCID.USER_JOIN,(d, ws)=>{
 	ws.send(message)
 	wss.clients.forEach((client) => {
 		if (client !== ws && client.readyState === 1) {
-			
 			if (client.name && client.id && client.room_id !== null) {
 				var pkthead2 = Buffer.alloc(3);
 				pkthead2.writeUInt8(RPCID.USER_JOIN,0)
 				pkthead2.writeUInt16LE(client.id,1)
 				ws.send(Buffer.concat([pkthead2,client.name]))
 				client.send(message)
-				
-				if (client.room_id != 0) {
-					var pktroom = Buffer.alloc(5);
-					pktroom.writeUInt8(RPCID.CHANGE_ROOM,0)
-					pktroom.writeUInt16LE(client.id,1)
-					pktroom.writeUInt16LE(client.room_id,3)
-					ws.send(pktroom)
-				}
 			}
-			
+		}
+		if (client.readyState === 1 && client.name && client.id && client.room_id !== null) {
+			var pktroom = Buffer.alloc(5);
+			pktroom.writeUInt8(RPCID.CHANGE_ROOM,0)
+			pktroom.writeUInt16LE(client.id,1)
+			pktroom.writeUInt16LE(client.room_id,3)
+			ws.send(pktroom)
 		}
 	});
 	

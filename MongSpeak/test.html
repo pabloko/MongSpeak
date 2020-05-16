@@ -1561,8 +1561,10 @@ join_rpc(RPCID.CHANGE_ROOM, function(id, data) {
                 clients[i].room = data;
             }
             if (id == window['self'].id && clients[i].id == id) {
+				document.querySelector('#room_'+clients[i].room+' .roomtitle').style.backgroundColor=''
                 window['self']['room'] = parseInt(data);
                 clients[i].room = data;
+				document.querySelector('#room_'+clients[i].room+' .roomtitle').style.backgroundColor='#f0f0f0'
             }
             /*if (roomcounts[clients[i].room] == null) 
             	roomcounts[clients[i].room]=0;*/
