@@ -28,7 +28,7 @@
         "name": "Room #3",
         "max": "30",
 		"pass":"",
-		"opts":{"nochat":false, "novoice":true},
+		"opts":{"nochat":false, "novoice":false},
 		"cust":""
     },
     {

@@ -309,6 +309,7 @@ join_rpc(RPCID.USER_CHAT,(d, ws)=>{
 	if (!ws['guid']) {ws.close(); return;}
 	if (d.length==0) return;
 	if (ws.dis_chat) return;
+	if (rooms[ws.room_id].opts.nochat) return;
 	var pkthead = Buffer.alloc(3);
 	pkthead.writeUInt8(RPCID.USER_CHAT,0)
 	pkthead.writeUInt16LE(ws.id,1)
@@ -339,6 +340,7 @@ join_rpc(RPCID.OPUS_DATA,(d, ws)=>{
 	if (!ws['guid']) {ws.close(); return;}
 	if (d.length==0) return;
 	if (ws.dis_voice) return;
+	if (rooms[ws.room_id].opts.novoice) return;
 	var pkthead = Buffer.alloc(3);
 	pkthead.writeUInt8(RPCID.OPUS_DATA,0)
 	pkthead.writeUInt16LE(ws.id,1)
