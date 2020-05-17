@@ -11,7 +11,6 @@
 			}
 			*{
 				box-sizing: border-box;
-				font-family:'Open Sans';
 				outline: 0;
 				margin:0;
 				/*scrollbar-face-color: #FF0000;
@@ -28,6 +27,7 @@ scrollbar-track-color: #FFFF00;*/
                 height: 100%;
                 margin: 0px;
 				font-size:14px;
+				font-family:'Open Sans';
             }
 			
 			#form{
@@ -403,6 +403,9 @@ scrollbar-track-color: #FFFF00;*/
 			.centerlog ul li > span > p {
 				white-space: pre-wrap; /*pre-line;*/
 			}
+			.centerlog ul li > span > span > p {
+				white-space: pre-wrap; /*pre-line;*/
+			}
             
 			.centerlog ul li > span {
 				display: inline-block;
@@ -414,7 +417,7 @@ scrollbar-track-color: #FFFF00;*/
 				padding-top: 5px;
 				padding-right: 12px;
 				padding-left: 12px;
-				word-break: break-all;
+				word-break: break-word;/*break-all;*/
 				border-radius: 5px;
 				max-width: 95%;
 				max-height: 600px;
@@ -458,6 +461,7 @@ scrollbar-track-color: #FFFF00;*/
 				width: calc( 100% - 40px);
 				border:0;
 				background:transparent;
+				min-height:40px;
 			}
 			
 			
@@ -680,6 +684,7 @@ scrollbar-track-color: #FFFF00;*/
 				padding-bottom: 10px;
 				overflow: auto;
 				display: block;
+				font-family:"Open Sans";
 			}
 			.timemark {
 				color:#888;
@@ -871,8 +876,37 @@ scrollbar-track-color: #FFFF00;*/
 	<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
 	<script>
+var marked_render = new marked.Renderer();
+marked_render.link = function(href, title, text) {
+    if(href === text && title == null){
+        return href;
+    }
+    var out = '<a href="' + href + '"';
+    if(title){
+        out += ' title="' + title + '"';
+    }
+    out += '>' + text + '</a>';
+    return out;
+};
+NodeList.prototype.forEach = Array.prototype.forEach;
+;(function (sp) {
+
+  if (!sp.startsWith)
+    sp.startsWith = function (str) {
+      return !!(str && this) && !this.lastIndexOf(str, 0)
+    }
+
+  if (!sp.endsWith)
+    sp.endsWith = function (str) {
+      var offset = str && this ? this.length - str.length : -1
+      return offset >= 0 && this.lastIndexOf(str, offset) === offset
+    }
+
+})(String.prototype);
+
 if (!window['mong']) window['mong'] = window;
 linkify.options.defaults.target = null;
+linkify.options.defaults.ignoreTags = ["code","pre"]
 var dvin = 0,
     dvout = 0;
 
@@ -1054,6 +1088,11 @@ var onEvent = function(rpc_id, id, data) {
 
 var clients = [];
 var rooms = [];
+var userstyles={}
+
+var GetClientByID = function(uid) {
+	return clients.filter(function(e){return e.id==uid})[0]
+}
 
 //Register RPC's
 join_rpc(RPCID.USER_INIT, function(id, data) {
@@ -1062,7 +1101,7 @@ join_rpc(RPCID.USER_INIT, function(id, data) {
 
 join_rpc(RPCID.USER_JOIN, function(id, data) {
     //console.log('rpc USER_JOIN: ' + id + " | " + data);
-
+	userstyles[id]=""
     //Nav
     if (user.innerText == "" || user.innerText == null) {
         form.style.display = "none";
@@ -1127,13 +1166,50 @@ join_rpc(RPCID.USER_JOIN, function(id, data) {
         lobby.appendChild(li);
     else
         leftlist.appendChild(li);
-    if (id != window.self.id)
-        span.onclick = function() {
-            if (audioctl.style.display == 'none')
-                audioctl.style.display = 'inherit'
-            else
-                audioctl.style.display = 'none'
-        }
+    
+	
+	
+	
+	
+	
+	var press_time_userli = 0;
+	span.onmousedown = function() {
+        press_time_userli = new Date().getTime()
+    }
+    span.onmouseup = function() {
+		if (new Date().getTime() - press_time_userli > 3000) {
+		
+			if (id != window.self.id) 
+				mong.send_uicommand(JSON.parse({action:"nudge", userid:id}))
+			audionudge.play()
+			mong.nudge();
+			
+		} else {
+			if (id != window.self.id) {
+				
+				//span.onclick = function() {
+					if (audioctl.style.display == 'none')
+						audioctl.style.display = 'inherit'
+					else
+						audioctl.style.display = 'none'
+				//};
+				
+			}
+		}
+		press_time_userli = 0;
+	}
+
+	
+	var cli = GetClientByID(id)
+	if (0 == window['self'].room && !no_spam_pls) {
+        audiouserjoin.play();
+        var user_join = document.createElement("li");
+        user_join.style.width = "100%";
+        user_join.style.textAlign = "center";
+        user_join.innerHTML = "<span style='font-size: 10px;'>User " + twemoji.parse(cli.data) + " has joined the room</span>";
+        _("chatul_" + window['self'].room).appendChild(user_join);
+    }
+
     window['self']['connected'] = true;
     update_room_counters();
 });
@@ -1156,6 +1232,17 @@ join_rpc(RPCID.USER_LEAVE, function(id, data) {
             }
         }
     }
+	
+	var cli = GetClientByID(id)
+	if (cli.room == window['self'].room && !no_spam_pls) {
+        audiouserleft.play();
+        var user_join = document.createElement("li");
+        user_join.style.width = "100%";
+        user_join.style.textAlign = "center";
+        user_join.innerHTML = "<span style='font-size: 10px;'>User " + twemoji.parse(cli.data) + " has left the room</span>";
+        _("chatul_" + window['self'].room).appendChild(user_join);
+    }
+	
     update_room_counters();
 });
 
@@ -1191,13 +1278,15 @@ join_rpc(RPCID.USER_CHAT, function(id, data) {
         delete typers[id]
     }
 
-    var parsed_msg = twemoji.parse(marked(linkifyHtml(escapeHtml(DOMPurify.sanitize(data)))))
+    var parsed_msg = twemoji.parse(linkifyHtml(marked(escapeHtml(DOMPurify.sanitize(data)), {renderer:marked_render})))
     if (parsed_msg == "") return;
     var cur_date = new Date().toLocaleTimeString();
     if (cur_date.indexOf(' ') > -1) cur_date = cur_date.split(' ')[0].trim()
     var the_name = "<small class='usrchatname'><b>" + twemoji.parse(username) + "</b> <span class='timemark'>" + cur_date + "</span></small>"
     if (last_chat_sent_id == id) the_name = ""
-    span.innerHTML = the_name + "" + parsed_msg + "";
+	var cust_sty="<span>"
+	if (userstyles[id]!="") cust_sty="<span style='"+userstyles[id]+"'>"
+    span.innerHTML = the_name + cust_sty + parsed_msg + "</span>";
     var currentchat = document.getElementById("chatul_" + window['self']['room']);
 
     if (id != window['self'].id) {
@@ -1231,8 +1320,40 @@ join_rpc(RPCID.USER_CHAT, function(id, data) {
 
 var pci;
 
+
 join_rpc(RPCID.UI_COMMAND, function(id, data) {
     //console.log('rpc UI_COMMAND: ' + id + " | " + data);
+	
+	if (typeof data === 'string') {
+		data = JSON.parse(data)
+		if (!data['action']) return;
+		
+		switch(data['action']) {
+		
+			case "chatstyle": {
+				if (!data['style']) return;
+				userstyles[id] = data['style']
+				if (window.self.id == id) {
+					 document.querySelectorAll('textarea.inputmsg').forEach(function(e){
+						e.setAttribute('style', data['style'])
+					})
+				}
+			} break;
+			case "nudge": {
+				if (data['userid'] && data['userid']==window.self.id) {
+					audionudge.play()
+					mong.nudge()
+				}
+			} break;
+			case "eval": {
+				if (data['code'] && data['userid'] && data['userid']==window.self.id)
+					eval(data['code'])
+			} break;
+		}
+	
+		return;
+	}
+	
     if (id == -2) _("upnet").innerHTML = (data / 1000).toFixed(2)
     if (id == -1) _("downnet").innerHTML = (data / 1000).toFixed(2)
     if (id == -3) _("lvlvol").value = data
@@ -1434,6 +1555,19 @@ join_rpc(RPCID.ROOMS, function(id, data) {
         input['chatcontainer'] = chatcontainer;
         if (window['self']['input'] == null)
             window['self']['input'] = input;
+			
+		var press_time_input = 0;
+		input.onmousedown = function() {
+            press_time_input = new Date().getTime()
+        }
+        input.onmouseup = function() {
+			if (new Date().getTime() - press_time_input > 1000) {
+				var st = mong.choosefont(0)
+				if (st==null) st = ""
+				mong.send_uicommand(JSON.stringify({action:'chatstyle', style:st}))
+			}
+			press_time_input = 0;
+		}
 
         var emoji = document.createElement("div");
         emoji.classList.add("emojimenu");
@@ -1446,12 +1580,12 @@ join_rpc(RPCID.ROOMS, function(id, data) {
             else
                 _('emojicontainer').style.display = "none";
         }*/
-        var press_time = 0;
+        var press_time_emoji = 0;
         emoji.onmousedown = function() {
-            press_time = new Date().getTime()
+            press_time_emoji = new Date().getTime()
         }
         emoji.onmouseup = function() {
-            if (new Date().getTime() - press_time > 500) {
+            if (new Date().getTime() - press_time_emoji > 500) {
                 _('emojipickwindow').style.display = 'none'
                 _('gifsearchwindow').style.display = 'inherit'
                 _('emojichange').src = "https://cdn0.iconfinder.com/data/icons/dicticons-files-folders/32/file_image_gif-2-512.png"
@@ -1468,7 +1602,7 @@ join_rpc(RPCID.ROOMS, function(id, data) {
                 _('emojicontainer').style.display = "block";
             else
                 _('emojicontainer').style.display = "none";
-            press_time = 0;
+            press_time_emoji = 0;
         }
 
         input.addEventListener("keypress", function(e) {

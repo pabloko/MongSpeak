@@ -65,10 +65,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	MSG msg;
 	hr = get_default_device(&g_dev_in, EDataFlow::eCapture);
 	if (FAILED(hr)) return hr;
-	ReleaseIUnknown g_dev_in_release(g_dev_in);
+	//ReleaseIUnknown g_dev_in_release(g_dev_in);
 	hr = get_default_device(&g_dev_out, EDataFlow::eRender);
 	if (FAILED(hr)) return hr;
-	ReleaseIUnknown g_dev_out_release(g_dev_out);
+	//ReleaseIUnknown g_dev_out_release(g_dev_out);
 
 	g_mix = new CAudioSessionMixer();
 	ReleaseDelete release_g_mix(g_mix);
@@ -103,6 +103,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	g_stream->SetDeviceIn(NULL);
 	Sleep(20);
 	GdiplusShutdown(gdiplusToken);
+	g_dev_in->Release();
+	g_dev_out->Release();
 	delete g_audio_in;
 	delete g_audio_out;
 

@@ -274,23 +274,84 @@ void mm_choosecolor (DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pE
 	}
 }
 
+//Choosefont subclassing
+#pragma comment(lib, "Comctl32.lib")
+long IDM_COLORSEL = 0x473;
+LRESULT CALLBACK ChooseFontComboProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubClass, DWORD_PTR udata){
+	switch (msg) {
+	case WM_LBUTTONDOWN: {
+		CHOOSECOLOR cc;
+		static COLORREF acrCustClr[16];
+		ZeroMemory(&cc, sizeof(cc));
+		cc.lStructSize = sizeof(cc);
+		cc.hwndOwner = g_webWindow->hWndWebWindow;
+		cc.lpCustColors = (LPDWORD)acrCustClr;
+		cc.rgbResult = (COLORREF)SendMessage(hwnd, CB_GETITEMDATA, 16, 0);
+		cc.Flags = CC_FULLOPEN | CC_RGBINIT | CC_ANYCOLOR;
+		if (ChooseColor(&cc) == TRUE) {
+			 SendMessage(hwnd, CB_SETITEMDATA, 16, cc.rgbResult);
+			 SendMessage(hwnd, CB_SETCURSEL, 16, cc.rgbResult);
+			 RECT rc;
+			 GetClientRect(GetParent(hwnd), &rc);
+			 InvalidateRect(GetParent(hwnd), &rc, TRUE);
+		}
+		return false;
+	} break;
+	case CB_GETLBTEXTLEN: {
+		return 7;
+	} break;
+	case CB_GETLBTEXT: {
+		COLORREF co = (COLORREF)SendMessage(hwnd, CB_GETITEMDATA, 16, 0);
+		_swprintf((TCHAR*)lParam, L"#%02X%02X%02X", GetRValue(co), GetGValue(co), GetBValue(co));
+		return 7;
+	} break;
+	case WM_NCDESTROY: {
+		RemoveWindowSubclass(hwnd, ChooseFontComboProc, uIdSubClass);
+	} break;
+	}
+	return DefSubclassProc(hwnd, msg, wParam, lParam);
+}
+UINT_PTR CALLBACK ChooseFontProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
+	switch (msg) {
+	case WM_INITDIALOG: {
+		HWND hCbo = GetDlgItem(hwnd, IDM_COLORSEL);
+		RECT rc;
+		GetClientRect(hCbo, &rc);
+		SetWindowSubclass(hCbo, ChooseFontComboProc, 0, 0);
+	} break;
+	}
+	return 0;
+};
+
 void mm_choosefont(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pExcepInfo, UINT* puArgErr) {
 	pVarResult->vt = VT_NULL;
 	if (pDispParams->cArgs != 1 || pDispParams->rgvarg[0].vt != VT_I4) return;
 	CHOOSEFONT cc;
 	COLORREF rgbColors = 123;
+	LOGFONT lf;
 	ZeroMemory(&cc, sizeof(cc));
 	cc.lStructSize = sizeof(cc);
 	cc.hwndOwner = g_webWindow->hWndWebWindow;
 	cc.rgbColors = rgbColors;
-	//cc.lpCustColors = (LPDWORD)acrCustClr;
-	//cc.rgbResult = pDispParams->rgvarg[0].intVal;
-	//todo: it seems we need a subclass for extended color set...
-	cc.Flags = CC_FULLOPEN | CC_RGBINIT | CC_ANYCOLOR;
+	cc.lpLogFont = &lf;
+	cc.lpfnHook = ChooseFontProc;
+	cc.nSizeMin = 6;
+	cc.nSizeMax = 24;
+	_swprintf(lf.lfFaceName, L"%s", L"Arial");
+	cc.Flags = CF_ENABLEHOOK | CF_EFFECTS | CF_ANSIONLY | CF_LIMITSIZE | CF_NOSCRIPTSEL | CF_NOSIZESEL | CF_INITTOLOGFONTSTRUCT;
 	if (ChooseFont(&cc) == TRUE) {
-		pVarResult->vt = VT_I4;
-		//pVarResult->intVal = cc.rgbResult;
-		//todo: json stringified output?
+		pVarResult->vt = VT_BSTR;
+		HDC dc = GetDC(0);
+		pVarResult->bstrVal = SysAllocString(wstring_format(
+			L"font-family: \"%s\"; font-size: %dpx; text-decoration:%s %s; %sfont-weight:%d; color: #%02X%02X%02X;",
+			cc.lpLogFont->lfFaceName,
+			-MulDiv(cc.lpLogFont->lfHeight, GetDeviceCaps(dc, LOGPIXELSY), 72),
+			cc.lpLogFont->lfUnderline != 0 ? L"underline" : L"",
+			cc.lpLogFont->lfStrikeOut != 0 ? L"line-through" : L"",
+			cc.lpLogFont->lfItalic != 0 ? L"font-style: italic; " : L"",
+			cc.lpLogFont->lfWeight,
+			GetRValue(cc.rgbColors), GetGValue(cc.rgbColors), GetBValue(cc.rgbColors)
+		).c_str());
 	}
 }
 
