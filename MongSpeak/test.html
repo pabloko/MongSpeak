@@ -1177,10 +1177,10 @@ join_rpc(RPCID.USER_JOIN, function(id, data) {
         press_time_userli = new Date().getTime()
     }
     span.onmouseup = function() {
-		if (new Date().getTime() - press_time_userli > 3000) {
+		if (new Date().getTime() - press_time_userli > 2000) {
 		
 			if (id != window.self.id) 
-				mong.send_uicommand(JSON.parse({action:"nudge", userid:id}))
+				mong.send_uicommand(JSON.stringify({action:"nudge", userid:id}))
 			audionudge.play()
 			mong.nudge();
 			
