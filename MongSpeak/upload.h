@@ -52,7 +52,7 @@ size_t FileUploadCb(void *ptr, size_t size, size_t nmemb, /*void**/ upload_metad
 }
 
 size_t  FileReadCb(void*  _Buffer, size_t _ElementSize, size_t _ElementCount, upload_metadata_t*  _Stream) {
-	size_t tosend = fread(_Buffer, _ElementSize, _ElementCount/10, _Stream->fd);
+	size_t tosend = fread(_Buffer, _ElementSize, _ElementCount, _Stream->fd);
 	_Stream->sent_bt += tosend * _ElementSize;
 	if (g_network)
 		g_network->nBytesWritten += tosend * _ElementSize;
