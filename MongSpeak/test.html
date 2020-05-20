@@ -4,6 +4,7 @@
 		<meta charset="UTF-8">
 		<meta http-equiv="X-UA-Compatible" content="IE=EDGE"/>
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/styles/vs.min.css" />
 		<link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css' />
 		<style>
 			.mong-logo {
@@ -874,6 +875,7 @@ scrollbar-track-color: #FFFF00;*/
 	<script src="https://cdn.jsdelivr.net/npm/linkifyjs@2.1.9/dist/linkify.min.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/linkifyjs@2.1.9/dist/linkify-html.min.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/highlight.min.js"></script>
 
 	<script>
 var marked_render = new marked.Renderer();
@@ -888,6 +890,45 @@ marked_render.link = function(href, title, text) {
     out += '>' + text + '</a>';
     return out;
 };
+function xhr_param(object) {
+    var encodedString = '';
+    for (var prop in object) {
+        if (object.hasOwnProperty(prop)) {
+            if (encodedString.length > 0) {
+                encodedString += '&';
+            }
+            encodedString += encodeURI(prop + '=' + object[prop]);
+        }
+    }
+    return encodedString;
+}
+marked.setOptions({
+  highlight: function(code, lang) {
+	
+	/*var xhr = new XMLHttpRequest();
+
+	xhr.open('POST', 'https://cors-anywhere.herokuapp.com/http://hilite.me/api');
+	xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+
+	xhr.onload = function() {
+		if (xhr.status === 200) {
+			return xhr.responseText;
+		}
+		else if (xhr.status !== 200) {
+			return code;
+		}
+	};
+	xhr.send(xhr_param({
+		code: code,
+		lexer: lang,
+		linenos: '',
+		style: 'default'
+	}));*/
+	var validLanguage = hljs.getLanguage(lang) ? lang : 'plaintext';
+    return hljs.highlight(validLanguage, code).value;
+  }
+});
+
 NodeList.prototype.forEach = Array.prototype.forEach;
 ;(function (sp) {
 

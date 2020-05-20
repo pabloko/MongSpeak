@@ -52,7 +52,7 @@ BOOL mm_getclipboardimage() {
 			encoderParameters.Parameter[0].Guid = EncoderQuality;
 			encoderParameters.Parameter[0].Type = EncoderParameterValueTypeLong;
 			encoderParameters.Parameter[0].NumberOfValues = 1;
-			ULONG quality = 75;
+			ULONG quality = 90;
 			encoderParameters.Parameter[0].Value = &quality;
 			wchar_t szTmpPath[MAX_PATH];
 			GetTempPath(MAX_PATH, szTmpPath);
