@@ -243,6 +243,7 @@
                 -ms-user-select: none;
                 cursor:default;
 				color:#e0e0e0;
+				font-weight:bold;
             }
 			
 			#nav ul{
@@ -494,8 +495,21 @@
 				background:transparent;
 				min-height:40px;
 				color:#ccc;
+				z-index:2;
+				position:relative;
 			}
 			
+			.inputmsg::placeholder {
+				color:#666;
+			}
+			
+			.inputmsg:-ms-input-placeholder { /* Internet Explorer 10-11 */
+			  color:#666;
+			}
+
+			.inputmsg::-ms-input-placeholder { /* Microsoft Edge */
+			  color:#666;
+			}
 			
 			.sendmsg{
 				height: 100%;
@@ -779,7 +793,7 @@
 			.volpc {
 				font-size: 9px;
 				text-align: center;
-				color: #ccc;
+				color: #888;
 				border-radius: 3px;
 				padding: 2px;
 				width: 32px;
@@ -1479,12 +1493,12 @@ join_rpc(RPCID.UI_COMMAND, function(id, data) {
 
         pci = document.createElement('div')
         pci.style.position = 'absolute'
-        pci.style.height = '40px'
+        pci.style.height = '240px'
         pci.style.width = '0%'
-        pci.style.background = '#e0e0e0'
+        pci.style.background = '#222'
         pci.style.top = '0'
         pci.style.left = '-10px'
-        pci.style.zIndex = '-1'
+        pci.style.zIndex = '1'
         window['self']['input'].parentNode.appendChild(pci)
 
     }
