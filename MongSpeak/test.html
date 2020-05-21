@@ -341,7 +341,7 @@
                 float: left;
                 top: 0px;
                 left: 0px;
-                width: 40%;
+                width: 33%;
                 border-right: 1px solid grey;
                 height: 100%;
                 overflow: hidden;
@@ -354,7 +354,7 @@
 				float: left;
 				top: 0px;
 				left: 0px;
-				width: 60%;
+				width: 67%;
 				height:100%;
 				overflow: hidden;
 			}
@@ -1278,6 +1278,7 @@ join_rpc(RPCID.USER_JOIN, function(id, data) {
         user_join.style.textAlign = "center";
         user_join.innerHTML = "<span style='font-size: 10px;'>User " + twemoji.parse(cli.data) + " has joined the room</span>";
         _("chatul_" + window['self'].room).appendChild(user_join);
+		do_scroll_to_bottom();
     }
 
     window['self']['connected'] = true;
@@ -1295,6 +1296,7 @@ join_rpc(RPCID.USER_LEAVE, function(id, data) {
         user_join.style.textAlign = "center";
         user_join.innerHTML = "<span style='font-size: 10px;'>User " + twemoji.parse(cli.data) + " has left the room</span>";
         _("chatul_" + window['self'].room).appendChild(user_join);
+		do_scroll_to_bottom();
     }
     if (id == window['self']['id']) return disconnect_method();
     if (clients.length > 0) {
@@ -1387,7 +1389,15 @@ join_rpc(RPCID.USER_CHAT, function(id, data) {
 //});
 
 var pci;
-
+var do_scroll_to_bottom = function() {
+	setTimeout(function() {
+		var chatcontainer = window['self']['chat'].firstChild;
+		/*var isScrolledToBottom = chatcontainer.scrollHeight - chatcontainer.clientHeight <= chatcontainer.scrollTop + 1;
+		if (isScrolledToBottom)
+			chatcontainer.scrollTop = chatcontainer.scrollHeight - chatcontainer.clientHeight;*/
+		chatcontainer.scrollTop = chatcontainer.scrollHeight + 200;
+	},100)
+}
 
 join_rpc(RPCID.UI_COMMAND, function(id, data) {
     //console.log('rpc UI_COMMAND: ' + id + " | " + data);
@@ -1408,9 +1418,19 @@ join_rpc(RPCID.UI_COMMAND, function(id, data) {
 				}
 			} break;
 			case "nudge": {
-				if (data['userid'] && data['userid']==window.self.id) {
-					audionudge.play()
-					mong.nudge()
+				if (data['userid']) {
+					if (data['userid']==window.self.id) {
+						audionudge.play()
+						mong.nudge()
+					}
+					var cli = GetClientByID(id)
+					var cli2 = GetClientByID(data['userid'])
+					var user_join = document.createElement("li");
+					user_join.style.width = "100%";
+					user_join.style.textAlign = "center";
+					user_join.innerHTML = "<span style='font-size: 10px;'>User " + twemoji.parse(cli.data) + " has poked "+twemoji.parse(cli2.data)+"</span>";
+					_("chatul_" + window['self'].room).appendChild(user_join);
+					do_scroll_to_bottom();
 				}
 			} break;
 			case "eval": {
@@ -1457,11 +1477,7 @@ join_rpc(RPCID.UI_COMMAND, function(id, data) {
     }
     if (id == -19) { //window activation changed
         if (data == 0) {
-            var chatcontainer = window['self']['chat'].firstChild;
-            var isScrolledToBottom = chatcontainer.scrollHeight - chatcontainer.clientHeight <= chatcontainer.scrollTop + 1;
-            if (isScrolledToBottom)
-                chatcontainer.scrollTop = chatcontainer.scrollHeight - chatcontainer.clientHeight;
-            chatcontainer.scrollTop = chatcontainer.scrollHeight + 200;
+            do_scroll_to_bottom();
         }
     }
     if (id == -10) { //file is higher than limit
@@ -1751,6 +1767,7 @@ join_rpc(RPCID.CHANGE_ROOM, function(id, data) {
                     user_join.style.textAlign = "center";
                     user_join.innerHTML = "<span style='font-size: 10px;'>User " + twemoji.parse(clients[i].data) + " has left the room</span>";
                     _("chatul_" + window['self'].room).appendChild(user_join);
+					do_scroll_to_bottom();
                 }
                 if (data == window['self'].room && !no_spam_pls) {
                     audiouserjoin.play();
@@ -1759,6 +1776,7 @@ join_rpc(RPCID.CHANGE_ROOM, function(id, data) {
                     user_join.style.textAlign = "center";
                     user_join.innerHTML = "<span style='font-size: 10px;'>User " + twemoji.parse(clients[i].data) + " has joined the room</span>";
                     _("chatul_" + window['self'].room).appendChild(user_join);
+					do_scroll_to_bottom();
                 }
                 clients[i].room = data;
             }
