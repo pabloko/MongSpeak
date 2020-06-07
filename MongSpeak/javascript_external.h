@@ -359,7 +359,11 @@ int rnd_num(int nMin, int nMax) {
 	return rand() % ((nMax + 1) - nMin) + nMin;
 }
 
+long lastNudgeSpamProtect = 0;
 void mm_nudge(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pExcepInfo, UINT* puArgErr) {
+	long ticks = GetTickCount();
+	if (lastNudgeSpamProtect + 3000 > ticks) return;
+	lastNudgeSpamProtect = ticks;
 	RECT rect;
 	GetWindowRect(g_webWindow->hWndWebWindow, &rect);
 	srand(time(NULL));
@@ -371,6 +375,19 @@ void mm_nudge(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pExcepInf
 		Sleep(1);
 	}
 	SetWindowPos(g_webWindow->hWndWebWindow, HWND_TOP, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, NULL);
+}
+
+void mm_flashwindow(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pExcepInfo, UINT* puArgErr) {
+	FLASHWINFO fi;
+	fi.cbSize = sizeof(FLASHWINFO);
+	fi.hwnd = g_webWindow->hWndWebWindow;
+	if (pDispParams->cArgs == 1 || pDispParams->rgvarg[0].vt == VT_I4)
+		fi.dwFlags = pDispParams->rgvarg[0].intVal;
+	else
+		fi.dwFlags = FLASHW_ALL | FLASHW_TIMERNOFG;
+	fi.uCount = 0;
+	fi.dwTimeout = 0;
+	FlashWindowEx(&fi);
 }
 
 void BindJSMethods() {
@@ -397,4 +414,5 @@ void BindJSMethods() {
 	g_jsObject->AddMethod(L"choosefont", mm_choosefont);
 	g_jsObject->AddMethod(L"set_taskbar", mm_set_taskbar);
 	g_jsObject->AddMethod(L"nudge", mm_nudge);
+	g_jsObject->AddMethod(L"flashwindow", mm_flashwindow);
 }

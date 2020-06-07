@@ -84,16 +84,14 @@ public:
 			if (!GetAsyncKeyState(iInputMethod)) 
 				return CompareInput(FALSE);
 		short* pData = (short*)data;
-		if (fVol != 1.0f) 
-			for (int i = 0; i < len * wf->nChannels; i+= wf->nChannels)
-				pData[i] = pData[i] * fVol;
+		for (int i = 0, c = 0; i < len * wf->nChannels; i += wf->nChannels, c++) {
+			fDeinterleaved[c] = pData[i] * fVol;
+			float vl = ((float)pData[i]) / (float)32768;
+			fVuSumMin = (vl < fVuSumMin ? vl : fVuSumMin);
+			fVuSumMax = (vl > fVuSumMax ? vl : fVuSumMax);
+		}
 		if ((iInputMethod < 0 && iInputMethod > -200) || bSendVu) {
 			lVuCount += len;
-			for (int i = 0; i < len * wf->nChannels; i += wf->nChannels) {
-				float vl = ((float)pData[i + 0]) / (float)32768; 
-				fVuSumMin = (vl < fVuSumMin ? vl : fVuSumMin);
-				fVuSumMax = (vl > fVuSumMax ? vl : fVuSumMax);
-			}
 			if (lVuCount > (wf->nSamplesPerSec / 60)) {
 				fTol = log2(max(fVuSumMax, -fVuSumMin)) * 6.02f;
 				if (fTol < -40.0f) fTol = -40.0f;
@@ -112,11 +110,6 @@ public:
 			if (!GetAsyncKeyState(iInputMethod)) 
 				return CompareInput(FALSE);
 		}
-		///CompareInput(TRUE);
-		int c = 0;
-		for (int i = 0; i < len * wf->nChannels; i += wf->nChannels) {
-			fDeinterleaved[c] = pData[i]; c++;
-		}
 #ifdef USING_SPEEXDSP
 		char* dein = (char*)fDeinterleaved;
 		pVecAudioBuffer.append(&dein[0], &dein[len * sizeof(short)]);
@@ -128,14 +121,6 @@ public:
 				pVecAudioBuffer.erase(pVecAudioBuffer.begin(), pVecAudioBuffer.begin() + (PREPROCESS_SAMPLES * sizeof(short)));
 				continue;
 			}
-			/*if (bIsInput == FALSE) {
-				float fader = 0.0f;
-				float fader_step = 1.0f / PREPROCESS_SAMPLES;
-				for (int cc = 0; cc < PREPROCESS_SAMPLES; cc++) {
-					if (fader < 1.0f) fader += fader_step;
-					fDeinterleaved[cc] = fDeinterleaved[cc] * fader;
-				}
-			}*/
 			CompareInput(TRUE);
 			int opus_bytes = opus_encode(pOpus, (short*)pVecAudioBuffer.data(), PREPROCESS_SAMPLES, szOpusBuffer, sizeof(szOpusBuffer));
 			pVecAudioBuffer.erase(pVecAudioBuffer.begin(), pVecAudioBuffer.begin() + (PREPROCESS_SAMPLES * sizeof(short)));
@@ -176,7 +161,7 @@ private:
 	DOUBLE fVuSumMax, fVuSumMin;
 	LONG lVuCount;
 	double fTol;
-	short fDeinterleaved[2024];
+	short fDeinterleaved[1024];
 #ifdef USING_SPEEXDSP
 	SpeexPreprocessState* pSpeexPreprocessor;
 	std::string pVecAudioBuffer;

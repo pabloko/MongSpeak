@@ -111,10 +111,10 @@ public:
 						ppData = (BYTE*)fResampled;
 						pAudioQueue->DoTask(szInputLen, (char*)ppData, pWaveFormat);
 						speex_resampler_process_interleaved_int(pResampler, (short*)ppData, &szInputLen, (short*)pData, &szResampledLen);
-					}
-					else 
+					} else {
 						if (pAudioQueue != nullptr)
 							pAudioQueue->DoTask(numAvailableFrames, (char*)ppData, pWaveFormat);
+					}
 				hr = pAudioRenderClient->ReleaseBuffer(numAvailableFrames, 0);
 				if (FAILED(hr)) return hr;
 			}
@@ -183,5 +183,5 @@ private:
 	HANDLE hThread = nullptr;
 	BOOL bNeedResample = FALSE;
 	CAudioQueue* pAudioQueue = nullptr;
-	UINT32 iDiscontinuities = 0, iRecoverDisc=0;
+	UINT32 iDiscontinuities = 0, iRecoverDisc = 0;
 };

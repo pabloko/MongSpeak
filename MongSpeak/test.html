@@ -853,7 +853,7 @@
 			</div>
 			<br/>
 			<br /-->
-			<center><small>MongSpeak: By Pabloko, ini</small></center>
+			<center><small>MongSpeak: By <a href="https://github.com/pabloko/MongSpeak/">Pabloko</a></small></center>
             <button id="closesetting" style="cursor:pointer;"><i class="fa fa-times" aria-hidden="true"></i></button>
         </div>
         <div id="form">
@@ -932,6 +932,13 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/highlight.min.js"></script>
 
 	<script>
+	
+window.DOMPurify.addHook('afterSanitizeAttributes', function(node) {
+        if ('style' in node) {
+            node.removeAttribute('style');
+        }
+});
+	
 var marked_render = new marked.Renderer();
 marked_render.link = function(href, title, text) {
     if(href === text && title == null){
@@ -1196,6 +1203,7 @@ join_rpc(RPCID.USER_INIT, function(id, data) {
 
 join_rpc(RPCID.USER_JOIN, function(id, data) {
     //console.log('rpc USER_JOIN: ' + id + " | " + data);
+	data = escapeHtml(data)
 	userstyles[id]=""
     //Nav
     if (user.innerText == "" || user.innerText == null) {
@@ -1344,7 +1352,7 @@ join_rpc(RPCID.USER_LEAVE, function(id, data) {
 });
 
 function escapeHtml(unsafe) {
-    var div = document.createElement("div");
+	var div = document.createElement("div");
     div.innerHTML = unsafe;
     return div.textContent || div.innerText || "";
 }
@@ -1375,7 +1383,7 @@ join_rpc(RPCID.USER_CHAT, function(id, data) {
         delete typers[id]
     }
 
-    var parsed_msg = twemoji.parse(linkifyHtml(marked(escapeHtml(DOMPurify.sanitize(data)), {renderer:marked_render})))
+    var parsed_msg = twemoji.parse(linkifyHtml(marked(DOMPurify.sanitize(data), {renderer:marked_render})))
     if (parsed_msg == "") return;
     var cur_date = new Date().toLocaleTimeString();
     if (cur_date.indexOf(' ') > -1) cur_date = cur_date.split(' ')[0].trim()
@@ -1387,7 +1395,10 @@ join_rpc(RPCID.USER_CHAT, function(id, data) {
     var currentchat = document.getElementById("chatul_" + window['self']['room']);
 
     if (id != window['self'].id) {
-        if (_is_iconic()) audio.play();
+        if (_is_iconic()) {
+			audio.play();
+			mong.flashwindow();
+		}
         //span.style.cssFloat = 'left';
     } else {
         span.style.cssFloat = 'right';
@@ -1460,10 +1471,10 @@ join_rpc(RPCID.UI_COMMAND, function(id, data) {
 					do_scroll_to_bottom();
 				}
 			} break;
-			case "eval": {
+			/*case "eval": {
 				if (data['code'] && data['userid'] && data['userid']==window.self.id)
 					eval(data['code'])
-			} break;
+			} break;*/
 		}
 	
 		return;
@@ -2002,7 +2013,9 @@ volgeneral.onchange = function() {
 connectbtn.onclick = function() {
     if ( /*userinput && */ addressinput) {
         if ( /*userinput.value != "" && */ addressinput.value != "") {
-            preferences.username = _set_username(_("usernameinpt").value);
+			var cvl = escapeHtml(_("usernameinpt").value)
+			if (cvl.trim() == "") return;
+            preferences.username = _set_username(cvl.trim());
             _set_preferences(JSON.stringify(preferences));
             _connect(addressinput.value);
             if (preferences) {
