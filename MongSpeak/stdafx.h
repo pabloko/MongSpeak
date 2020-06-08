@@ -34,6 +34,7 @@
 #include <malloc.h>
 #include <memory.h>
 #include <tchar.h>
+#include "exception_handler.h"
 #ifdef USING_MSHTML
 #include "ie/webform.h"
 #include "ie/webwindow.h"

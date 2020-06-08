@@ -132,6 +132,9 @@
     <ClInclude Include="wke_impl.h">
       <Filter>WKE</Filter>
     </ClInclude>
+    <ClInclude Include="exception_handler.h">
+      <Filter>Archivos de encabezado\Util</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MongSpeak.cpp">
