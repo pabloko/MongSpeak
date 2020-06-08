@@ -1,12 +1,15 @@
 #pragma once
 
+IMMDeviceEnumerator *pMMDeviceEnumerator = NULL; //static
+
 //Retrive the default output audio device
 HRESULT get_default_device(IMMDevice **ppMMDevice, EDataFlow pDevMode) {
 	HRESULT hr = S_OK;
-	IMMDeviceEnumerator *pMMDeviceEnumerator;
-	hr = CoCreateInstance(__uuidof(MMDeviceEnumerator), NULL, CLSCTX_ALL, __uuidof(IMMDeviceEnumerator), (void**)&pMMDeviceEnumerator);
-	if (FAILED(hr)) return hr;
-	ReleaseIUnknown release_pMMDeviceEnumerator(pMMDeviceEnumerator);
+	if (pMMDeviceEnumerator == NULL) {
+		hr = CoCreateInstance(__uuidof(MMDeviceEnumerator), NULL, CLSCTX_ALL, __uuidof(IMMDeviceEnumerator), (void**)&pMMDeviceEnumerator);
+		if (FAILED(hr)) return hr;
+	}
+	//ReleaseIUnknown release_pMMDeviceEnumerator(pMMDeviceEnumerator);
 	hr = pMMDeviceEnumerator->GetDefaultAudioEndpoint(pDevMode, eConsole, ppMMDevice);
 	if (FAILED(hr)) return hr;
 	return hr;
@@ -15,10 +18,12 @@ HRESULT get_default_device(IMMDevice **ppMMDevice, EDataFlow pDevMode) {
 //Retrive a list of audio output devices
 HRESULT list_devices(EDataFlow pDevMode, wstring* res) {
 	HRESULT hr = S_OK;
-	IMMDeviceEnumerator *pMMDeviceEnumerator;
-	hr = CoCreateInstance(__uuidof(MMDeviceEnumerator), NULL, CLSCTX_ALL, __uuidof(IMMDeviceEnumerator), (void**)&pMMDeviceEnumerator);
-	if (FAILED(hr)) return hr;
-	ReleaseIUnknown release_pMMDeviceEnumerator(pMMDeviceEnumerator);
+	//IMMDeviceEnumerator *pMMDeviceEnumerator;
+	if (pMMDeviceEnumerator == NULL) {
+		hr = CoCreateInstance(__uuidof(MMDeviceEnumerator), NULL, CLSCTX_ALL, __uuidof(IMMDeviceEnumerator), (void**)&pMMDeviceEnumerator);
+		if (FAILED(hr)) return hr;
+	}
+	//ReleaseIUnknown release_pMMDeviceEnumerator(pMMDeviceEnumerator);
 	IMMDeviceCollection *pMMDeviceCollection;
 	hr = pMMDeviceEnumerator->EnumAudioEndpoints(pDevMode, DEVICE_STATE_ACTIVE, &pMMDeviceCollection);
 	if (FAILED(hr)) return hr;
@@ -52,10 +57,12 @@ HRESULT list_devices(EDataFlow pDevMode, wstring* res) {
 HRESULT get_specific_device(UINT32 iDevice, IMMDevice **ppMMDevice, EDataFlow pDevMode) {
 	HRESULT hr = S_OK;
 	*ppMMDevice = NULL;
-	IMMDeviceEnumerator *pMMDeviceEnumerator;
-	hr = CoCreateInstance(__uuidof(MMDeviceEnumerator), NULL, CLSCTX_ALL, __uuidof(IMMDeviceEnumerator), (void**)&pMMDeviceEnumerator);
-	if (FAILED(hr)) return hr;
-	ReleaseIUnknown release_pMMDeviceEnumerator(pMMDeviceEnumerator);
+	//IMMDeviceEnumerator *pMMDeviceEnumerator;
+	if (pMMDeviceEnumerator == NULL) {
+		hr = CoCreateInstance(__uuidof(MMDeviceEnumerator), NULL, CLSCTX_ALL, __uuidof(IMMDeviceEnumerator), (void**)&pMMDeviceEnumerator);
+		if (FAILED(hr)) return hr;
+	}
+	//ReleaseIUnknown release_pMMDeviceEnumerator(pMMDeviceEnumerator);
 	IMMDeviceCollection *pMMDeviceCollection;
 	hr = pMMDeviceEnumerator->EnumAudioEndpoints(pDevMode, DEVICE_STATE_ACTIVE, &pMMDeviceCollection);
 	if (FAILED(hr)) return hr;
