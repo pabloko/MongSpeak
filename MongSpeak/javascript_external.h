@@ -360,10 +360,7 @@ int rnd_num(int nMin, int nMax) {
 }
 
 long lastNudgeSpamProtect = 0;
-void mm_nudge(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pExcepInfo, UINT* puArgErr) {
-	long ticks = GetTickCount();
-	if (lastNudgeSpamProtect + 3000 > ticks) return;
-	lastNudgeSpamProtect = ticks;
+DWORD WINAPI NudgeThread(void*) {
 	RECT rect;
 	GetWindowRect(g_webWindow->hWndWebWindow, &rect);
 	srand(time(NULL));
@@ -375,6 +372,13 @@ void mm_nudge(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pExcepInf
 		Sleep(1);
 	}
 	SetWindowPos(g_webWindow->hWndWebWindow, HWND_TOP, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, NULL);
+	return 0;
+}
+void mm_nudge(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pExcepInfo, UINT* puArgErr) {
+	long ticks = GetTickCount();
+	if (lastNudgeSpamProtect + 3000 > ticks) return;
+	lastNudgeSpamProtect = ticks;
+	CreateThread(NULL, NULL, NudgeThread, NULL, NULL, NULL);
 }
 
 void mm_flashwindow(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pExcepInfo, UINT* puArgErr) {
