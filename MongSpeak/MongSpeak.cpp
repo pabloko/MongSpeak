@@ -19,9 +19,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	HRESULT hr = S_OK;
 	///ConsoleDebugger dbg;	
 	SetProcessDPIAware();
-	if (GetCurrentHwProfileA(&hwProfileInfo) != NULL)
-		hwProfileInfo.szHwProfileGuid[strlen(&hwProfileInfo.szHwProfileGuid[1])] = '\0';
-	else return -666;
+	GenerateHWID();
 	hr = CoInitialize(nullptr);
 	if (FAILED(hr)) return hr;
 	CoUninitializeCleanup release_CoInitialize;

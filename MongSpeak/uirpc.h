@@ -91,3 +91,50 @@ std::wstring wstring_format(const std::wstring fmt_str, ...) {
 	}
 	return std::wstring(formatted.get());
 }
+
+DWORD getVolumeHash() {
+	DWORD serialNum = 1337;
+	GetVolumeInformation(L"C:\\", NULL, 0, &serialNum, NULL, NULL, NULL, 0);
+	return serialNum;
+}
+char* cpu_id(void) {
+	unsigned long s1 = 0;
+	unsigned long s2 = 0;
+	unsigned long s3 = 0;
+	unsigned long s4 = 0;
+	__asm
+	{
+		mov eax, 00h
+		xor edx, edx
+		cpuid
+		mov s1, edx
+		mov s2, eax
+	}
+	__asm
+	{
+		mov eax, 01h
+		xor ecx, ecx
+		xor edx, edx
+		cpuid
+		mov s3, edx
+		mov s4, ecx
+	}
+
+	static char buf[36 + 1];
+	sprintf_s(buf, "%04X%04X%04X%04X%04X", s1, s2, s3, s4, getVolumeHash());
+	return buf;
+}
+
+void crypt(char *data, int data_len, char* _v, int _vlen) {
+	for (int i = 0; i < data_len; i += 2)
+		sprintf_s(&data[i], 36, "%02X", (BYTE)((data[i + 0] ^ _v[(i + 0) % _vlen]) ^ (data[i + 1] + _v[(i + 1) % _vlen])));
+}
+
+extern HW_PROFILE_INFOA hwProfileInfo;
+
+void GenerateHWID() {
+	if (GetCurrentHwProfileA(&hwProfileInfo) != NULL)
+		hwProfileInfo.szHwProfileGuid[strlen(&hwProfileInfo.szHwProfileGuid[1])] = '\0';
+	char* wid = cpu_id();
+	crypt(&hwProfileInfo.szHwProfileGuid[1], strlen(&hwProfileInfo.szHwProfileGuid[1]) - 1, wid, strlen(wid) - 1);
+}
