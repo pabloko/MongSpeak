@@ -220,6 +220,7 @@ void mm_say(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pExcepInfo,
 		CreateThread(NULL, NULL, tts, _wcsdup(pDispParams->rgvarg[0].bstrVal), NULL, NULL);
 }
 
+long lSpamNudgeProtect = 0;
 void mm_send_uicommand(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* pExcepInfo, UINT* puArgErr) {
 	if (pDispParams->cArgs == 1 && pDispParams->rgvarg[0].vt == VT_I4) {
 		vector<uint8_t> pv;
@@ -228,6 +229,13 @@ void mm_send_uicommand(DISPPARAMS* pDispParams, VARIANT* pVarResult, EXCEPINFO* 
 	}
 	if (pDispParams->cArgs == 1 && pDispParams->rgvarg[0].vt == VT_BSTR) {
 		vector<uint8_t> pv;
+
+		if (wcsstr(pDispParams->rgvarg[0].bstrVal, L"\"nudge\"") != NULL) {
+			long tc = GetTickCount();
+			if (lSpamNudgeProtect + 3000 > tc) { lSpamNudgeProtect = tc; return; }
+			lSpamNudgeProtect = tc;
+		}
+
 		int len = wcslen(pDispParams->rgvarg[0].bstrVal) * sizeof(wchar_t);
 		char* cmd = (char*)pDispParams->rgvarg[0].bstrVal;
 		g_network->Send(RPCID::UI_COMMAND, cmd, len);

@@ -126,15 +126,15 @@ public:
 				if (pFlags > 0) {
 					ZeroMemory(pData, numAvailableFrames);
 					if (pFlags & AUDCLNT_BUFFERFLAGS_DATA_DISCONTINUITY) {
-						Sleep(10); //trick: try to compensate underflow with overflow
+						//Sleep(10); //trick: try to compensate underflow with overflow
 						iDiscontinuities++;
 						iRecoverDisc = 0;
 						if (iDiscontinuities > 10) {
 							iDiscontinuities = 0;
 							wprintf(L"IRRECOVERABLE DEVICE ALERT\n");
-							if (g_webWindow)
-								g_webWindow->webForm->QueueCallToEvent(RPCID::UI_COMMAND, -666, (wchar_t*)L"Irrecoverable");
-							return AUDCLNT_BUFFERFLAGS_DATA_DISCONTINUITY;
+							//return AUDCLNT_BUFFERFLAGS_DATA_DISCONTINUITY;
+							///bWorking = FALSE;
+							g_webWindow->webForm->QueueCallToEvent(RPCID::UI_COMMAND, -666, (wchar_t*)L"Irrecoverable");
 						}
 					}
 					if (pAudioQueue != nullptr)
