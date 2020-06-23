@@ -17,7 +17,7 @@ public:
 		pSpeexPreprocessor = speex_preprocess_state_init(PREPROCESS_SAMPLES, DEFAULT_SAMPLERATE); 
 		i = 98;
 		speex_preprocess_ctl(pSpeexPreprocessor, SPEEX_PREPROCESS_SET_PROB_START, &i);
-		f = 0.3f;
+		f = 0.9f;
 		speex_preprocess_ctl(pSpeexPreprocessor, SPEEX_PREPROCESS_SET_PROB_CONTINUE, &f);
 		i = 1;
 		speex_preprocess_ctl(pSpeexPreprocessor, SPEEX_PREPROCESS_SET_DENOISE, &i); 
@@ -25,6 +25,20 @@ public:
 		speex_preprocess_ctl(pSpeexPreprocessor, SPEEX_PREPROCESS_SET_VAD, &i); 
 		i = 1;
 		speex_preprocess_ctl(pSpeexPreprocessor, SPEEX_PREPROCESS_SET_AGC, &i); 
+		i = 0x7fff;
+		speex_preprocess_ctl(pSpeexPreprocessor, SPEEX_PREPROCESS_SET_AGC_TARGET, &i);
+		i = -40;
+		speex_preprocess_ctl(pSpeexPreprocessor, SPEEX_PREPROCESS_SET_NOISE_SUPPRESS, &i);
+		i = 1;
+		speex_preprocess_ctl(pSpeexPreprocessor, SPEEX_PREPROCESS_SET_DEREVERB, &i);
+		i = -40;
+		speex_preprocess_ctl(pSpeexPreprocessor, SPEEX_PREPROCESS_SET_AGC_DECREMENT, &i);
+		i = 12;
+		speex_preprocess_ctl(pSpeexPreprocessor, SPEEX_PREPROCESS_SET_AGC_INCREMENT, &i);
+		f = 0.4;
+		speex_preprocess_ctl(pSpeexPreprocessor, SPEEX_PREPROCESS_SET_DEREVERB_LEVEL, &i);
+		f = 0.3;
+		speex_preprocess_ctl(pSpeexPreprocessor, SPEEX_PREPROCESS_SET_DEREVERB_DECAY, &i);
 #endif
 #ifdef USING_FVAD
 		pVad = fvad_new();
