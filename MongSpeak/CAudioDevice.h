@@ -1,10 +1,15 @@
 #pragma once
-extern WebWindow* g_webWindow;
+extern WebWindow*				g_webWindow;
+static GUID g_audio_id =		GUID_NULL;
+#define REFTIMES_PER_SEC		10000000
+#define REFTIMES_PER_MILLISEC	10000
 
 class CAudioDevice {
 public:
 	CAudioDevice(IMMDevice* mDev, EDataFlow mMode) : pDevice(mDev), pDeviceDirection(mMode) {
-		hThread = CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)CAudioDevice::AudioThread, (void*)this, NULL, NULL);
+		if (g_audio_id == GUID_NULL) 
+			CoCreateGuid(&g_audio_id);
+		hThread = CreateThread(NULL, NULL, AudioThread, this, NULL, NULL);
 	}
 	~CAudioDevice() {
 		bWorking = FALSE;
@@ -34,28 +39,26 @@ public:
 		hr = pAudioClient->GetMixFormat(&pWaveFormat);
 		if (FAILED(hr)) return hr;
 		CoTaskMemFreeRelease release_pWaveFormat(pWaveFormat);
-		
 		switch (pWaveFormat->wFormatTag) {
-		case WAVE_FORMAT_IEEE_FLOAT: {
-			pWaveFormat->wFormatTag = WAVE_FORMAT_PCM;
-			pWaveFormat->wBitsPerSample = 16;
-			pWaveFormat->nBlockAlign = pWaveFormat->nChannels * pWaveFormat->wBitsPerSample / 8;
-			pWaveFormat->nAvgBytesPerSec = pWaveFormat->nBlockAlign * pWaveFormat->nSamplesPerSec;
-		}break;
-		case WAVE_FORMAT_EXTENSIBLE: {
-		PWAVEFORMATEXTENSIBLE pEx = reinterpret_cast<PWAVEFORMATEXTENSIBLE>(pWaveFormat);
-		if (IsEqualGUID(KSDATAFORMAT_SUBTYPE_IEEE_FLOAT, pEx->SubFormat)) {
-			pEx->SubFormat = KSDATAFORMAT_SUBTYPE_PCM;
-			pEx->Samples.wValidBitsPerSample = 16;
-			pWaveFormat->wBitsPerSample = 16;
-			pWaveFormat->nBlockAlign = pWaveFormat->nChannels * pWaveFormat->wBitsPerSample / 8;
-			pWaveFormat->nAvgBytesPerSec = pWaveFormat->nBlockAlign * pWaveFormat->nSamplesPerSec;
-		} else return -16;
-		}  break;
-		
-		default: {
-			return -16;
-		} break;
+			case WAVE_FORMAT_IEEE_FLOAT: {
+				pWaveFormat->wFormatTag = WAVE_FORMAT_PCM;
+				pWaveFormat->wBitsPerSample = 16;
+				pWaveFormat->nBlockAlign = pWaveFormat->nChannels * pWaveFormat->wBitsPerSample / 8;
+				pWaveFormat->nAvgBytesPerSec = pWaveFormat->nBlockAlign * pWaveFormat->nSamplesPerSec;
+			} break;
+			case WAVE_FORMAT_EXTENSIBLE: {
+				PWAVEFORMATEXTENSIBLE pEx = reinterpret_cast<PWAVEFORMATEXTENSIBLE>(pWaveFormat);
+				if (IsEqualGUID(KSDATAFORMAT_SUBTYPE_IEEE_FLOAT, pEx->SubFormat)) {
+					pEx->SubFormat = KSDATAFORMAT_SUBTYPE_PCM;
+					pEx->Samples.wValidBitsPerSample = 16;
+					pWaveFormat->wBitsPerSample = 16;
+					pWaveFormat->nBlockAlign = pWaveFormat->nChannels * pWaveFormat->wBitsPerSample / 8;
+					pWaveFormat->nAvgBytesPerSec = pWaveFormat->nBlockAlign * pWaveFormat->nSamplesPerSec;
+				} else return -16;
+			}  break;
+			default: {
+				return -16;
+			} break;
 		}
 		nBlockAlign = pWaveFormat->nBlockAlign;
 		hEvent = CreateEvent(nullptr, false, false, nullptr);
@@ -64,10 +67,10 @@ public:
 		if (pWaveFormat->nSamplesPerSec != DEFAULT_SAMPLERATE)
 			bNeedResample = TRUE;
 		short fResampled[9048];
-		DWORD dwFlags = AUDCLNT_STREAMFLAGS_EVENTCALLBACK;
+		DWORD dwFlags = AUDCLNT_STREAMFLAGS_EVENTCALLBACK | AUDCLNT_STREAMFLAGS_NOPERSIST;
 		/*if (pDeviceMode == EDataFlow::eRender && pDeviceDirection == EDataFlow::eCapture)
 		dwFlags |= AUDCLNT_STREAMFLAGS_LOOPBACK;*/
-		hr = pAudioClient->Initialize(AUDCLNT_SHAREMODE_SHARED, dwFlags, hMinimumDevicePeriod, 0, pWaveFormat, nullptr);
+		hr = pAudioClient->Initialize(AUDCLNT_SHAREMODE_SHARED, dwFlags, hMinimumDevicePeriod, 0, pWaveFormat, &g_audio_id);
 		if (FAILED(hr)) return hr;
 		hr = pAudioClient->SetEventHandle(hEvent);
 		if (FAILED(hr)) return hr;
@@ -92,17 +95,18 @@ public:
 		ReleaseSpeexResampler release_pResampler(pResampler);
 		while (bWorking) {
 			BYTE* pData;
-			WaitForSingleObject(hEvent, INFINITE);
-			UINT32 NumPaddingFrames = 0;
-			if ((DWORD)pAudioClient == 0xDDDDDDDD) 
-				return 666;
-			hr = pAudioClient->GetCurrentPadding(&NumPaddingFrames);
-			if (FAILED(hr)) return hr;
-			UINT32 numAvailableFrames = hNumBufferFrames - NumPaddingFrames;
+			WaitForSingleObject(hEvent, (hDefaultDevicePeriod / 1000));
+
 			if (pDeviceDirection == EDataFlow::eRender) {
+
+				UINT32 NumPaddingFrames = 0;
+				hr = pAudioClient->GetCurrentPadding(&NumPaddingFrames);
+				if (FAILED(hr)) return hr;
+				UINT32 numAvailableFrames = hNumBufferFrames - NumPaddingFrames;
+
 				if (numAvailableFrames == 0) continue;
 				hr = pAudioRenderClient->GetBuffer(numAvailableFrames, &pData);
-				if (FAILED(hr)) return hr;
+				if (hr==AUDCLNT_E_DEVICE_INVALIDATED || hr == AUDCLNT_E_SERVICE_NOT_RUNNING) return hr;
 				BYTE* ppData = pData;
 				if (pAudioQueue != nullptr)
 					if (bNeedResample) {
@@ -116,55 +120,54 @@ public:
 							pAudioQueue->DoTask(numAvailableFrames, (char*)ppData, pWaveFormat);
 					}
 				hr = pAudioRenderClient->ReleaseBuffer(numAvailableFrames, 0);
-				if (FAILED(hr)) return hr;
+				if (hr == AUDCLNT_E_DEVICE_INVALIDATED || hr == AUDCLNT_E_SERVICE_NOT_RUNNING) return hr;
 			}
+
 			if (pDeviceDirection == EDataFlow::eCapture) {
-				DWORD pFlags = NULL;
-				hr = pAudioCaptureClient->GetBuffer(&pData, &numAvailableFrames, &pFlags, NULL, NULL);
-				if (FAILED(hr)) return hr;
-				//wprintf(L"iac flags %d\n", pFlags);
-				if (pFlags > 0) {
-					ZeroMemory(pData, numAvailableFrames);
-					if (pFlags & AUDCLNT_BUFFERFLAGS_DATA_DISCONTINUITY) {
-						//Sleep(10); //trick: try to compensate underflow with overflow
-						iDiscontinuities++;
-						iRecoverDisc = 0;
-						if (iDiscontinuities > 10) {
-							iDiscontinuities = 0;
-							wprintf(L"IRRECOVERABLE DEVICE ALERT\n");
-							//return AUDCLNT_BUFFERFLAGS_DATA_DISCONTINUITY;
-							///bWorking = FALSE;
-							g_webWindow->webForm->QueueCallToEvent(RPCID::UI_COMMAND, -666, (wchar_t*)L"Irrecoverable");
+
+				UINT32 packetSize = 0;
+				pAudioCaptureClient->GetNextPacketSize(&packetSize);
+				while (packetSize != 0) {
+					UINT32 numAvailableFrames = 0;
+					DWORD pFlags = NULL;
+					hr = pAudioCaptureClient->GetBuffer(&pData, &numAvailableFrames, &pFlags, NULL, NULL);
+					if (hr == AUDCLNT_E_DEVICE_INVALIDATED || hr == AUDCLNT_E_SERVICE_NOT_RUNNING) return hr;
+					if (pFlags != 0) {
+						ZeroMemory(pData, numAvailableFrames);
+						/*if (pFlags & AUDCLNT_BUFFERFLAGS_DATA_DISCONTINUITY) {
+							iDiscontinuities++;
+							iRecoverDisc = 0;
+							if (iDiscontinuities == 10) {
+								g_webWindow->webForm->QueueCallToEvent(RPCID::UI_COMMAND, -666, (wchar_t*)L"Irrecoverable");
+								bWorking = FALSE;
+							}
 						}
+						if (pAudioQueue != nullptr) pAudioQueue->DoTask(0, NULL, pWaveFormat);*/
+					} else {
+						/*iRecoverDisc++;
+						if (iRecoverDisc > 10)
+							iDiscontinuities = 0, iRecoverDisc = 0;*/
+						BYTE* ppData = pData;
+						UINT32 resampled_numAvailableFrames = numAvailableFrames;
+						if (bNeedResample) {
+							UINT32 szResampledLen = numAvailableFrames,
+								szInputLen = numAvailableFrames;
+							speex_resampler_process_interleaved_int(pResampler, (short*)pData, &szInputLen, fResampled, &szResampledLen);
+							ppData = (BYTE*)fResampled;
+							resampled_numAvailableFrames = szResampledLen;
+						}
+						if (pAudioQueue != nullptr) pAudioQueue->DoTask(resampled_numAvailableFrames, (char*)ppData, pWaveFormat);
 					}
-					if (pAudioQueue != nullptr)
-						pAudioQueue->DoTask(0, NULL, pWaveFormat);
-				} else {
-					iRecoverDisc++;
-					if (iRecoverDisc > 10)
-						iDiscontinuities = 0, iRecoverDisc = 0;
-					BYTE* ppData = pData;
-					UINT32 resampled_numAvailableFrames = numAvailableFrames;
-					if (bNeedResample) {
-						UINT32 szResampledLen = numAvailableFrames,
-							szInputLen = numAvailableFrames;
-						speex_resampler_process_interleaved_int(pResampler, (short*)pData, &szInputLen, fResampled, &szResampledLen);
-						ppData = (BYTE*)fResampled;
-						resampled_numAvailableFrames = szResampledLen;
-					}
-					if (pAudioQueue != nullptr)
-						pAudioQueue->DoTask(resampled_numAvailableFrames, (char*)ppData, pWaveFormat);
+					hr = pAudioCaptureClient->ReleaseBuffer(numAvailableFrames);
+					if (hr == AUDCLNT_E_DEVICE_INVALIDATED || hr == AUDCLNT_E_SERVICE_NOT_RUNNING) return hr;
+					pAudioCaptureClient->GetNextPacketSize(&packetSize);
 				}
-				hr = pAudioCaptureClient->ReleaseBuffer(numAvailableFrames);
-				if (FAILED(hr)) return hr;
 			}
 		}
-		bWorking = FALSE;
 		return hr;
 	}
-	static DWORD AudioThread(void* pParam) {
+	static DWORD WINAPI AudioThread(void* pParam) {
 		DWORD hr = ((CAudioDevice*)pParam)->AudioProcess();
-		((CAudioDevice*)pParam)->bWorking = FALSE;
 		return hr;
 	}
 private:
